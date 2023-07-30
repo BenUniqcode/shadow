@@ -94,14 +94,14 @@ function updateStatus() {
   // Handle left/right movement
   if (isOn[LEFT]) {
     // Left
-    sliderPos -= scrollSpeed; 
+    sliderPos -= (scrollSpeed * (1 + 10 * isOn[GREEN])); 
     if (sliderPos < 0) {
       sliderPos = 0; // Don't go past the left edge
     }
     window.scroll(sliderPos,0);
   } else if (isOn[RIGHT]) {
     // Right
-    sliderPos += scrollSpeed; 
+    sliderPos += (scrollSpeed * (1 + 10 * isOn[GREEN])); 
     var maxScroll = document.body.scrollWidth - document.body.clientWidth;
     if (sliderPos > maxScroll) {
       sliderPos = maxScroll; // Don't go past the right edge
