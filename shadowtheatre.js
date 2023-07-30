@@ -16,14 +16,17 @@ const LEFT = 2;
 const RIGHT = 3;
 const UP = 4;
 const DOWN = 5;
+const SCROLLSPEED_MIN = 1;
+const SCROLLSPEED_MAX = 100;
+
 var isOn = {}; // Map of button input number to true/false
 var autoScroll = 0;
+var scrollSpeed = 5;
+var sliderPos = 0;
 
 var haveEvents = 'GamepadEvent' in window;
 var haveWebkitEvents = 'WebKitGamepadEvent' in window;
 var controller;
-var sliderPos = 0;
-var scrollSpeed = 5;
 
 var elDbg = document.getElementById("debug");
 
@@ -100,10 +103,24 @@ function updateStatus() {
   if (isOn[RED]) {
     autoScroll = 0;
   }
-  dbgbutt += "AutoScroll: " + autoScroll;
+  dbgbutt += "ScrollSpeed: " + scrollSpeed;
+  dbgbutt += "<br>AutoScroll: " + autoScroll;
 
   // Output the debug messages
   dbg(dbgbutt);
+
+  // Handle up/down to change scroll speed
+  if (isOn[UP]) {
+    scrollSpeed++;
+    if (scrollSpeed > SCROLLSPEED_MAX) {
+      scrollSpeed = SCROLLSPEED_MAX;
+    }
+  } else if (isOn[DOWN]) {
+    scrollSpeed--;
+    if (scrollSpeed < SCROLLSPEED_MIN) {
+      scrollSpeed = SCROLLSPEED_MIN;
+    }
+  }
 
   // Handle left/right movement
   if (isOn[LEFT] || autoScroll == LEFT) {
@@ -111,6 +128,7 @@ function updateStatus() {
     sliderPos -= scrollSpeed;
     if (sliderPos < 0) {
       sliderPos = 0; // Don't go past the left edge
+      autoScroll = 0; // Switch off autoscroll at the edge
     }
     window.scroll(sliderPos,0);
   } else if (isOn[RIGHT] || autoScroll == RIGHT) {
@@ -119,6 +137,7 @@ function updateStatus() {
     var maxScroll = document.body.scrollWidth - document.body.clientWidth;
     if (sliderPos > maxScroll) {
       sliderPos = maxScroll; // Don't go past the right edge
+      autoScroll = 0; // Switch off autoscroll at the edge
     }
     window.scroll(sliderPos,0);
   }
