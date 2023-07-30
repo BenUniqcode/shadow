@@ -15,72 +15,93 @@ var controller;
 var sliderPos = 0;
 var scrollSpeed = 5;
 
-var rAF = window.mozRequestAnimationFrame ||
-  window.webkitRequestAnimationFrame ||
+var elDbg = document.getElementById("debug");
+
+var dbg = function(str) {
+	elDbg.innerHTML = str;
+};
+
+var rAF = /*window.mozRequestAnimationFrame ||
+  window.webkitRequestAnimationFrame || */
   window.requestAnimationFrame;
 
 function connecthandler(e) {
+  console.log("Connected");
+  console.log(e.gamepad);
   controller = e.gamepad;
   document.getElementById("startmsg").classList.add("hide");
   rAF(updateStatus);
 }
 
 function disconnecthandler(e) {
+  console.log("Disconnected");
   controller = null;
   document.getElementById("startmsg").classList.remove("hide");
 }
 
 function updateStatus() {
-  if (controller) {
-    console.log("updateStatus");
-    // There are 2 buttons. For our purposes pressing either (or both of them) does the same thing.
-    var pressed = false, touched = false;
-    for (var i=0; i<2; i++) {
-      var val = controller.buttons[i];
-      pressed |= val == 1.0;
-      if (typeof(val) == "object") {
-        pressed |= val.pressed;
-        if ('touched' in val) {
-          touched |= val.touched;
-        }
-      }
-    }
-    if (pressed || touched) {
-      console.log('Button Press');
-      document.getElementById("buttonPressed").classList.remove("hide");
-    } else {
-      console.log('Button Release');
-      document.getElementById("buttonPressed").classList.add("hide");
-    }
+  const gamepads = navigator.getGamepads();
+  controller = gamepads[0];
 
-    // console.log('Axis 1: ' + controller.axes[1] + ' / Axis 2: ' + controller.axes[2]);
-    // We are using a simple microswitch joystick - there's no intermediate analogue values, each switch is either on or off.
-    // Axis 1 is horizontal. Left is -1, Right is +1
-    // Axis 2 is vertical. Up is -1, Down is +1
-    // When the joystick returns to centre on an axis, the reading is close to, but not equal to, zero. In fact it's always -0.0039215686274509665
-    // I don't know why. But clearly we need to trim the precision.
-    var axis1 = controller.axes[1].toFixed(1);
-    var axis2 = controller.axes[2].toFixed(1);
-    console.log('Axis 1: ' + axis1 + ' / Axis 2: ' + axis2);
-    // Handle left/right movement
-    if (axis1 < -0.5) {
-	    // Left
-	    console.log("Left");
-	    sliderPos -= scrollSpeed; 
-	    if (sliderPos < 0) {
-		    sliderPos = 0; // Don't go past the left edge
-	    }
-	    window.scroll(sliderPos,0);
-    } else if (axis1 > 0.5) {
-	    // Right
-	    console.log("Right");
-	    sliderPos += scrollSpeed; 
-	    var maxScroll = document.body.scrollWidth - document.body.clientWidth;
-	    if (sliderPos > maxScroll) {
-		    sliderPos = maxScroll; // Don't go past the right edge
-	    }
-	    window.scroll(sliderPos,0);
+  if (! controller) {
+    dbg("No controller");
+    rAF(updateStatus);
+    return;
+  }
+  var dbgbutt = "";
+  var anyPressed = false, anyTouched = false; // Is any button pressed/touched
+  for (var i = 0; i < controller.buttons.length; i++) {
+    var isPressed = false, isTouched = false; // Is this button pressed/touched
+    var val = controller.buttons[i];
+    if (typeof(val) == "object") {
+      isPressed = val.pressed;
+      if ('touched' in val) {
+        isTouched |= val.touched;
+      }
+    } else {
+      isPressed = val == 1.0;
     }
+    dbgbutt += "<br>" + i + ": " + val + " " + (isPressed ? "pressed " : "") + (isTouched ? "touched" : "");
+    anyPressed |= isPressed;
+    anyTouched |= isTouched;
+  }
+  if (anyPressed || anyTouched) {
+    document.getElementById("buttonPressed").classList.remove("hide");
+  } else {
+    document.getElementById("buttonPressed").classList.add("hide");
+  }
+
+  // console.log('Axis 1: ' + controller.axes[1] + ' / Axis 2: ' + controller.axes[2]);
+  // We are using a simple microswitch joystick - there's no intermediate analogue values, each switch is either on or off.
+  // Axis 1 is horizontal. Left is -1, Right is +1
+  // Axis 2 is vertical. Up is -1, Down is +1
+  // When the joystick returns to centre on an axis, the reading is close to, but not equal to, zero. In fact it's always -0.0039215686274509665
+  // I don't know why. But clearly we need to trim the precision.
+  var axis1 = controller.axes[1].toFixed(1);
+  var axis2 = controller.axes[2].toFixed(1);
+  var dbgaxes = "";
+  for (var i = 0; i < controller.axes.length; i++) {
+    dbgaxes += "<br>" + i + ": " + controller.axes[i];
+  }
+  dbg('Axes: ' + dbgaxes + '<br>Buttons: ' + dbgbutt + '<br>Timestamp: ' + Date.now());
+  // Handle left/right movement
+  if (axis1 < -0.5) {
+    // Left
+    console.log("Left");
+    sliderPos -= scrollSpeed; 
+    if (sliderPos < 0) {
+      sliderPos = 0; // Don't go past the left edge
+    }
+    window.scroll(sliderPos,0);
+  } else if (axis1 > 0.5) {
+    // Right
+    console.log("Right");
+    sliderPos += scrollSpeed; 
+    var maxScroll = document.body.scrollWidth - document.body.clientWidth;
+    if (sliderPos > maxScroll) {
+      sliderPos = maxScroll; // Don't go past the right edge
+    }
+    window.scroll(sliderPos,0);
   }
   rAF(updateStatus);
 }
@@ -93,11 +114,17 @@ function scangamepads() {
 }
 
 if (haveEvents) {
+  console.log("Adding events");
   window.addEventListener("gamepadconnected", connecthandler);
   window.addEventListener("gamepaddisconnected", disconnecthandler);
 } else if (haveWebkitEvents) {
+  console.log("Adding WebKit events");
   window.addEventListener("webkitgamepadconnected", connecthandler);
   window.addEventListener("webkitgamepaddisconnected", disconnecthandler);
 } else {
+  console.log("Scanning for gamepads");
   setInterval(scangamepads, 500);
 }
+
+dbg("Loaded");
+

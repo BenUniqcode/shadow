@@ -2,7 +2,6 @@
 <html>
   <head>
     <title>Shadow Theatre</title>
-    <script src="shadowtheatre.js"></script>
     <style type="text/css">
       body {
 	      margin-top: 0;
@@ -23,20 +22,31 @@
 	      display: none;
       }
       #startmsg {
-	      position: absolute;
+	      position: fixed;
 	      top: 10px;
-	      left: 20px;
+	      left: calc(50% - 30px);
 	      font-size: 20px;
       }
       #buttonPressed {
-	      position: absolute;
+	      position: fixed;
 	      top: 10px;
 	      right: 20px;
 	      font-size: 20px;
       }
+      #debug {
+	      position: fixed;
+	      top: 10px;
+	      left: 5px;
+	      width: 300px;
+	      height: 200px;
+	      border: 1px dotted red;
+      }
     </style>
   </head>
   <body>
+    <div id="debug">
+	    Script not running
+    </div>
     <div id="startmsg">
 	    Press START
     </div>
@@ -60,5 +70,8 @@
       <img src="images/Shadow 14.png">
       <img src="images/Shadow 15.png">
     </div>
+
+    <script src="shadowtheatre.js"></script>
+
   </body>
 </html>
