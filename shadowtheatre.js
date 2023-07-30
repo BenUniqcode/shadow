@@ -9,6 +9,15 @@
  *
  * You should have received a copy of the CC0 Public Domain Dedication along with this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
+// Meaning of button input numbers (i.e. which thing is plugged into which input on the controller PCB)
+const RED = 0;
+const GREEN = 1;
+const LEFT = 2;
+const RIGHT = 3;
+const UP = 4;
+const DOWN = 5;
+var isOn = {}; // Map of button input number to true/false
+
 var haveEvents = 'GamepadEvent' in window;
 var haveWebkitEvents = 'WebKitGamepadEvent' in window;
 var controller;
@@ -40,6 +49,7 @@ function disconnecthandler(e) {
 }
 
 function updateStatus() {
+  console.log("updateStatus");
   const gamepads = navigator.getGamepads();
   controller = gamepads[0];
 
@@ -48,8 +58,12 @@ function updateStatus() {
     rAF(updateStatus);
     return;
   }
+  // Due to inconsistencies in the way different browsers report axes, 
+  // plus the fact they are analogue numbers when our joystick is a simple on/off microswitch for each direction
+  // we use button inputs for the joystick instead of axes.
+  // The first two buttons (0 and 1) are the actual buttons. The next four are the L, R, U, D.
   var dbgbutt = "";
-  var anyPressed = false, anyTouched = false; // Is any button pressed/touched
+  var anyButtonOn = false; // Are either of the actual buttons being pressed?
   for (var i = 0; i < controller.buttons.length; i++) {
     var isPressed = false, isTouched = false; // Is this button pressed/touched
     var val = controller.buttons[i];
@@ -61,41 +75,32 @@ function updateStatus() {
     } else {
       isPressed = val == 1.0;
     }
-    dbgbutt += "<br>" + i + ": " + val + " " + (isPressed ? "pressed " : "") + (isTouched ? "touched" : "");
-    anyPressed |= isPressed;
-    anyTouched |= isTouched;
+    dbgbutt += i + ": " + val + " " + (isPressed ? "pressed " : "") + (isTouched ? "touched" : "") + "<br>";
+    isOn[i] = isPressed | isTouched;
+    // If it's an actual button, update whether anyButton
+    if (i == RED || i == GREEN) {
+      anyButtonOn |= isOn[i];
+    }
   }
-  if (anyPressed || anyTouched) {
+  if (anyButtonOn) {
     document.getElementById("buttonPressed").classList.remove("hide");
   } else {
     document.getElementById("buttonPressed").classList.add("hide");
   }
 
-  // console.log('Axis 1: ' + controller.axes[1] + ' / Axis 2: ' + controller.axes[2]);
-  // We are using a simple microswitch joystick - there's no intermediate analogue values, each switch is either on or off.
-  // Axis 1 is horizontal. Left is -1, Right is +1
-  // Axis 2 is vertical. Up is -1, Down is +1
-  // When the joystick returns to centre on an axis, the reading is close to, but not equal to, zero. In fact it's always -0.0039215686274509665
-  // I don't know why. But clearly we need to trim the precision.
-  var axis1 = controller.axes[1].toFixed(1);
-  var axis2 = controller.axes[2].toFixed(1);
-  var dbgaxes = "";
-  for (var i = 0; i < controller.axes.length; i++) {
-    dbgaxes += "<br>" + i + ": " + controller.axes[i];
-  }
-  dbg('Axes: ' + dbgaxes + '<br>Buttons: ' + dbgbutt + '<br>Timestamp: ' + Date.now());
+  // Output the debug messages
+  dbg(dbgbutt);
+
   // Handle left/right movement
-  if (axis1 < -0.5) {
+  if (isOn[LEFT]) {
     // Left
-    console.log("Left");
     sliderPos -= scrollSpeed; 
     if (sliderPos < 0) {
       sliderPos = 0; // Don't go past the left edge
     }
     window.scroll(sliderPos,0);
-  } else if (axis1 > 0.5) {
+  } else if (isOn[RIGHT]) {
     // Right
-    console.log("Right");
     sliderPos += scrollSpeed; 
     var maxScroll = document.body.scrollWidth - document.body.clientWidth;
     if (sliderPos > maxScroll) {
