@@ -17,6 +17,7 @@ const RIGHT = 3;
 const UP = 4;
 const DOWN = 5;
 var isOn = {}; // Map of button input number to true/false
+var autoScroll = 0;
 
 var haveEvents = 'GamepadEvent' in window;
 var haveWebkitEvents = 'WebKitGamepadEvent' in window;
@@ -75,7 +76,7 @@ function updateStatus() {
     } else {
       isPressed = val == 1.0;
     }
-    dbgbutt += i + ": " + val + " " + (isPressed ? "pressed " : "") + (isTouched ? "touched" : "") + "<br>";
+    dbgbutt += i + ": " + (isPressed ? "pressed " : "") + (isTouched ? "touched" : "") + "<br>";
     isOn[i] = isPressed | isTouched;
     // If it's an actual button, update whether anyButton
     if (i == RED || i == GREEN) {
@@ -88,20 +89,33 @@ function updateStatus() {
     document.getElementById("buttonPressed").classList.add("hide");
   }
 
+  // Handle autoscroll buttons
+  if (isOn[GREEN]) {
+    if (isOn[LEFT]) {
+      autoScroll = LEFT;
+    } else if (isOn[RIGHT]) {
+      autoScroll = RIGHT;
+    }
+  }
+  if (isOn[RED]) {
+    autoScroll = 0;
+  }
+  dbgbutt += "AutoScroll: " + autoScroll;
+
   // Output the debug messages
   dbg(dbgbutt);
 
   // Handle left/right movement
-  if (isOn[LEFT]) {
+  if (isOn[LEFT] || autoScroll == LEFT) {
     // Left
-    sliderPos -= (scrollSpeed * (1 + 10 * isOn[GREEN])); 
+    sliderPos -= scrollSpeed;
     if (sliderPos < 0) {
       sliderPos = 0; // Don't go past the left edge
     }
     window.scroll(sliderPos,0);
-  } else if (isOn[RIGHT]) {
+  } else if (isOn[RIGHT] || autoScroll == RIGHT) {
     // Right
-    sliderPos += (scrollSpeed * (1 + 10 * isOn[GREEN])); 
+    sliderPos += scrollSpeed;
     var maxScroll = document.body.scrollWidth - document.body.clientWidth;
     if (sliderPos > maxScroll) {
       sliderPos = maxScroll; // Don't go past the right edge
