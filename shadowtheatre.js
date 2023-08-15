@@ -18,32 +18,40 @@ const UP = 4;
 const DOWN = 5;
 const SCROLLSPEED_MIN = 1;
 const SCROLLSPEED_MAX = 100;
+const KEYMAP = { // Keyboard control mapping to joystick equivalents
+  ArrowUp: UP,
+  ArrowDown: DOWN,
+  ArrowLeft: LEFT,
+  ArrowRight: RIGHT,
+  Digit1: RED,
+  Digit2: GREEN,
+};
 
 var isOn = {}; // Map of button input number to true/false
 var autoScroll = 0;
-var scrollSpeed = 5;
+var scrollSpeed = 4;
 var sliderPos = 0;
+var scrollSpeedLimiter = false; // Is set to true when the scroll speed changes, which blocks further changes for a while, to reduce the speed at which it was changing
 
 var haveEvents = 'GamepadEvent' in window;
 var haveWebkitEvents = 'WebKitGamepadEvent' in window;
 var controller;
 
+var dbgout = "";
 var elDbg = document.getElementById("debug");
 
 var dbg = function(str) {
-	elDbg.innerHTML = str;
+	//elDbg.innerHTML = str;
 };
 
-var rAF = /*window.mozRequestAnimationFrame ||
-  window.webkitRequestAnimationFrame || */
-  window.requestAnimationFrame;
+var rAF = window.requestAnimationFrame;
 
 function connecthandler(e) {
   console.log("Connected");
   console.log(e.gamepad);
   controller = e.gamepad;
   document.getElementById("startmsg").classList.add("hide");
-  rAF(updateStatus);
+  rAF(readGamepad);
 }
 
 function disconnecthandler(e) {
@@ -52,21 +60,21 @@ function disconnecthandler(e) {
   document.getElementById("startmsg").classList.remove("hide");
 }
 
-function updateStatus() {
-  console.log("updateStatus");
+function readGamepad() {
+  console.log("readGamepad");
   const gamepads = navigator.getGamepads();
   controller = gamepads[0];
 
-  if (! controller) {
+  if (! controller || ! controller.buttons.length) {
     dbg("No controller");
-    rAF(updateStatus);
     return;
   }
+  console.log("Found gamepad with ${controller.buttons.length} buttons");
+
   // Due to inconsistencies in the way different browsers report axes, 
   // plus the fact they are analogue numbers when our joystick is a simple on/off microswitch for each direction
   // we use button inputs for the joystick instead of axes.
   // The first two buttons (0 and 1) are the actual buttons. The next four are the L, R, U, D.
-  var dbgbutt = "";
   var anyButtonOn = false; // Are either of the actual buttons being pressed?
   for (var i = 0; i < controller.buttons.length; i++) {
     var isPressed = false, isTouched = false; // Is this button pressed/touched
@@ -79,51 +87,75 @@ function updateStatus() {
     } else {
       isPressed = val == 1.0;
     }
-    dbgbutt += i + ": " + (isPressed ? "pressed " : "") + (isTouched ? "touched" : "") + "<br>";
+    dbgout += i + ": " + (isPressed ? "pressed " : "") + (isTouched ? "touched" : "") + "<br>";
     isOn[i] = isPressed | isTouched;
     // If it's an actual button, update whether anyButton
     if (i == RED || i == GREEN) {
       anyButtonOn |= isOn[i];
     }
   }
-  if (anyButtonOn) {
-    document.getElementById("buttonPressed").classList.remove("hide");
-  } else {
-    document.getElementById("buttonPressed").classList.add("hide");
-  }
 
-  // Handle autoscroll buttons
-  if (isOn[GREEN]) {
-    if (isOn[LEFT]) {
-      autoScroll = LEFT;
-    } else if (isOn[RIGHT]) {
-      autoScroll = RIGHT;
-    }
-  }
-  if (isOn[RED]) {
-    autoScroll = 0;
-  }
-  dbgbutt += "ScrollSpeed: " + scrollSpeed;
-  dbgbutt += "<br>AutoScroll: " + autoScroll;
+  processActions(false);
+  rAF(readGamepad);
+}
 
-  // Output the debug messages
-  dbg(dbgbutt);
+function keydown(e) {
+  e.preventDefault();
+  if (e.repeat) {
+    return;
+  }
+  console.log(e.code);
+  if (e.code in KEYMAP) {
+    isOn[KEYMAP[e.code]] = true;
+  }
+  rAF(processActions);
+}
+
+function keyup(e) {
+  e.preventDefault();
+  if (e.repeat) {
+    return;
+  }
+  console.log(e.code);
+  if (e.code in KEYMAP) {
+    isOn[KEYMAP[e.code]] = false;
+  }
+  rAF(processActions);
+}
+
+function processActions(raf=true) {  
 
   // Handle up/down to change scroll speed
-  if (isOn[UP]) {
+  if (isOn[UP] && !scrollSpeedLimiter) {
     scrollSpeed++;
     if (scrollSpeed > SCROLLSPEED_MAX) {
       scrollSpeed = SCROLLSPEED_MAX;
     }
-  } else if (isOn[DOWN]) {
+    // Limit how fast the scroll speed changes
+    scrollSpeedLimiter = true;
+    setTimeout(function() {
+      scrollSpeedLimiter = false;
+    }, 100);
+  } else if (isOn[DOWN] && !scrollSpeedLimiter) {
     scrollSpeed--;
     if (scrollSpeed < SCROLLSPEED_MIN) {
       scrollSpeed = SCROLLSPEED_MIN;
     }
+    // Limit how fast the scroll speed changes
+    scrollSpeedLimiter = true;
+    setTimeout(function() {
+      scrollSpeedLimiter = false;
+    }, 100);
   }
 
+  dbgout += "<br>ScrollSpeed: " + scrollSpeed;
+  dbgout += "<br>AutoScroll: " + autoScroll;
+
+  // Output the debug messages
+  dbg(dbgout);
+
   // Handle left/right movement
-  if (isOn[LEFT] || autoScroll == LEFT) {
+  if (isOn[LEFT] || isOn[RED] || autoScroll == LEFT) {
     // Left
     sliderPos -= scrollSpeed;
     if (sliderPos < 0) {
@@ -131,7 +163,7 @@ function updateStatus() {
       autoScroll = 0; // Switch off autoscroll at the edge
     }
     window.scroll(sliderPos,0);
-  } else if (isOn[RIGHT] || autoScroll == RIGHT) {
+  } else if (isOn[RIGHT] || isOn[GREEN] || autoScroll == RIGHT) {
     // Right
     sliderPos += scrollSpeed;
     var maxScroll = document.body.scrollWidth - document.body.clientWidth;
@@ -141,7 +173,13 @@ function updateStatus() {
     }
     window.scroll(sliderPos,0);
   }
-  rAF(updateStatus);
+  // If using only keyboard control, we need to loop this function, but 
+  // not immediately or it's much faster than joystick control
+  if (raf) {
+    setTimeout(function() {
+      rAF(processActions);
+    }, 100); // It loops too fast otherwise
+  }
 }
 
 function scangamepads() {
@@ -163,6 +201,15 @@ if (haveEvents) {
   console.log("Scanning for gamepads");
   setInterval(scangamepads, 500);
 }
+
+// Also allow keyboard control. Left and right cursors would work anyway but
+// at a completely different speed than the joystick, and we also want up
+// and down, and the two buttons (assigned to 1 and 2). Key events are only
+// generated by form input and textarea fields, so we need a hidden one and
+// it must have focus.
+window.addEventListener("keydown", keydown);
+window.addEventListener("keyup", keyup);
+document.getElementById("keyinput").focus();
 
 dbg("Loaded");
 

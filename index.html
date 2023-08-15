@@ -11,15 +11,21 @@
 	      padding: 0;
 	      margin: 0;
       }
+      #keyinput {
+        width: 1px;
+        height: 1px;
+        position: absolute;
+        left: -10px;
+        top: -10px;
+      }
       #slider {
 	display: flex;     
+	height: 760px; /* Scale images to aspect ratio of the shadow theatre screen */
+	padding-top: 160px; /* Position scaled images central on screen */
       }
       #slider > img {
-	xheight: 1300px; /* iMac */
-	height: 900px; /* 14" Macbook Pro */
       }
       #slider > img + img {
-        xmargin-left: -5px; /* Remove gaps - doesn't seem necessary with flexbox */
       }
       .hide {
 	      display: none;
@@ -46,31 +52,23 @@
     </style>
   </head>
   <body>
-    <div id="debug">
-	    Script not running
-    </div>
-    <div id="startmsg">
-	    Press START
-    </div>
-    <div id="buttonPressed" class="hide">
-	    Button!
-    </div>
+    <textarea id="keyinput"></textarea><!-- Offscreen; required for keyboard control -->
     <div id="slider">
-      <img src="images/Shadow 1.png">
-      <img src="images/Shadow 2.png">
-      <img src="images/Shadow 3.png">
-      <img src="images/Shadow 4a.png">
-      <img src="images/Shadow 5a.png">
-      <img src="images/Shadow 6.png">
-      <img src="images/Shadow 7.png">
-      <img src="images/Shadow 8.png">
-      <img src="images/Shadow 9.png">
-      <img src="images/Shadow 10.png">
-      <img src="images/Shadow 11.png">
-      <img src="images/Shadow 12.png">
-      <img src="images/Shadow 13.png">
-      <img src="images/Shadow 14.png">
-      <img src="images/Shadow 15.png">
+      <img src="images/Shadow 1 v2.0.png">
+      <img src="images/Shadow 2 v2.0.png">
+      <img src="images/Shadow 3 v2.0.png">
+      <img src="images/Shadow 4 v2.0.png">
+      <img src="images/Shadow 5 v2.0.png">
+      <img src="images/Shadow 6 v2.0.png">
+      <img src="images/Shadow 7 v2.1.png">
+      <img src="images/Shadow 8 v2.0.png">
+      <img src="images/Shadow 9 v2.0.png">
+      <img src="images/Shadow 10 v2.0.png">
+      <img src="images/Shadow 11 v2.0.png">
+      <img src="images/Shadow 12 v2.0.png">
+      <img src="images/Shadow 13 v2.0.png">
+      <img src="images/Shadow 14 v2.0.png">
+      <img src="images/Shadow 15 v2.0.png">
     </div>
 
     <script src="shadowtheatre.js"></script>
