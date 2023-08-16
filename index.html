@@ -4,6 +4,7 @@
     <title>Shadow Theatre</title>
     <style type="text/css">
       body {
+	      font-family: sans-serif;
 	      background-color: black;
 	      margin-top: 0;
 	      margin-bottom: 0;
@@ -49,10 +50,34 @@
 	      width: 300px;
 	      border: 1px dotted red;
       }
+      #hud {
+	      position: fixed;
+	      top: calc(50% - 25px);
+	      left: calc(50% - 200px);
+	      width: 400px;
+	      padding: 25px 40px;
+	      border: 2px solid #aaa;
+	      border-radius: 15px;
+	      background-color: #ddd;
+	      color: black;
+	      font-size: 40px;
+	      text-align: center;
+	      font-weight: bold;
+      }
+      #hud:not(.visible) {
+	      opacity: 0;
+	      transition: opacity 0.5s linear;
+      }
+      #hud.visible {
+	      opacity: 1;
+	      transition: opacity 0.1s linear;
+      }
     </style>
   </head>
   <body>
     <textarea id="keyinput"></textarea><!-- Offscreen; required for keyboard control -->
+    <div id="hud">
+    </div>
     <div id="slider">
       <img src="images/Shadow 1 v2.0.png">
       <img src="images/Shadow 2 v2.0.png">

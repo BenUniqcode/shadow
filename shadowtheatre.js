@@ -32,6 +32,7 @@ var autoScroll = 0;
 var scrollSpeed = 4;
 var sliderPos = 0;
 var scrollSpeedLimiter = false; // Is set to true when the scroll speed changes, which blocks further changes for a while, to reduce the speed at which it was changing
+var fader;
 
 var haveEvents = 'GamepadEvent' in window;
 var haveWebkitEvents = 'WebKitGamepadEvent' in window;
@@ -100,43 +101,42 @@ function readGamepad() {
 }
 
 function keydown(e) {
-  e.preventDefault();
-  if (e.repeat) {
-    return;
-  }
-  console.log(e.code);
   if (e.code in KEYMAP) {
+    e.preventDefault();
+    if (e.repeat) {
+      return;
+    }
     isOn[KEYMAP[e.code]] = true;
+    rAF(processActions);
   }
-  rAF(processActions);
 }
 
 function keyup(e) {
-  e.preventDefault();
   if (e.repeat) {
     return;
   }
-  console.log(e.code);
   if (e.code in KEYMAP) {
+    e.preventDefault();
+    if (e.repeat) {
+      return;
+    }
     isOn[KEYMAP[e.code]] = false;
+    rAF(processActions);
   }
-  rAF(processActions);
 }
 
 function processActions(raf=true) {  
 
   // Handle up/down to change scroll speed
+  var scrollSpeedChanged = false;
   if (isOn[UP] && !scrollSpeedLimiter) {
+    scrollSpeedChanged = true;
     scrollSpeed++;
     if (scrollSpeed > SCROLLSPEED_MAX) {
       scrollSpeed = SCROLLSPEED_MAX;
     }
-    // Limit how fast the scroll speed changes
-    scrollSpeedLimiter = true;
-    setTimeout(function() {
-      scrollSpeedLimiter = false;
-    }, 100);
   } else if (isOn[DOWN] && !scrollSpeedLimiter) {
+    scrollSpeedChanged = true;
     scrollSpeed--;
     if (scrollSpeed < SCROLLSPEED_MIN) {
       scrollSpeed = SCROLLSPEED_MIN;
@@ -146,6 +146,22 @@ function processActions(raf=true) {
     setTimeout(function() {
       scrollSpeedLimiter = false;
     }, 100);
+  }
+  if (scrollSpeedChanged) {
+    // Limit how fast the scroll speed changes
+    scrollSpeedLimiter = true;
+    setTimeout(function() {
+      scrollSpeedLimiter = false;
+    }, 100);
+    // Show the hud (if it's not already showing)
+    var hud = document.getElementById("hud");
+    hud.innerHTML = "Scroll Speed: " + scrollSpeed;
+    hud.classList.add("visible");
+    // Start fading the hud after a bit, first resetting the timer if already running
+    clearTimeout(fader);
+    fader = setTimeout(function() {
+  	hud.classList.remove("visible");
+    }, 700);
   }
 
   dbgout += "<br>ScrollSpeed: " + scrollSpeed;
@@ -178,7 +194,7 @@ function processActions(raf=true) {
   if (raf) {
     setTimeout(function() {
       rAF(processActions);
-    }, 100); // It loops too fast otherwise
+    }, 200); // It loops too fast otherwise
   }
 }
 
