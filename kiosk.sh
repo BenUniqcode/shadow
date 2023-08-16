@@ -19,10 +19,16 @@ xset s noblank
 ## Disable mouse cursor
 unclutter &
 
-"$CHROMIUM" --kiosk --disable-infobars --no-first-run --disable-java --disable-plugins \
+"$CHROMIUM" --kiosk --disable-infobars --no-first-run --disable-java \
+--window-size=1920,1080 \
+--window-position=0,0 \
+--noerrdialogs --disable-translate \
+--disable-session-storage --disable-plugins --disable-plugins-discovery --disable-sync \
 --enable-features=OverlayScrollbar,OverlayScrollbarFlashAfterAnyScrollUpdate,OverlayScrollbarFlashWhenMouseEnter \
---disk-cache-size=1048576 --disk-cache-dir=$CHROMIUM_TMPDIR \
+--disable-features=TranslateUI \
+--disk-cache-size=0 --disk-cache-dir=/dev/null \
 --safebrowsing-disable-auto-update \
 --user-data-dir=/tmp/chromium/ \
---app=$URL
+--incognito \
+--app="$URL"
 
