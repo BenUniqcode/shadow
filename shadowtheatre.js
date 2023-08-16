@@ -32,6 +32,7 @@ var autoScroll = 0;
 var scrollSpeed = 4;
 var sliderPos = 0;
 var scrollSpeedLimiter = false; // Is set to true when the scroll speed changes, which blocks further changes for a while, to reduce the speed at which it was changing
+var raftimer;
 var fader;
 
 var haveEvents = 'GamepadEvent' in window;
@@ -62,6 +63,7 @@ function disconnecthandler(e) {
 }
 
 function readGamepad() {
+  dbgout = "";
   console.log("readGamepad");
   const gamepads = navigator.getGamepads();
   controller = gamepads[0];
@@ -164,6 +166,7 @@ function processActions(raf=true) {
     }, 700);
   }
 
+  dbgout = "";
   dbgout += "<br>ScrollSpeed: " + scrollSpeed;
   dbgout += "<br>AutoScroll: " + autoScroll;
 
@@ -192,9 +195,10 @@ function processActions(raf=true) {
   // If using only keyboard control, we need to loop this function, but 
   // not immediately or it's much faster than joystick control
   if (raf) {
-    setTimeout(function() {
+    clearTimeout(raftimer);
+    raftimer = setTimeout(function() {
       rAF(processActions);
-    }, 200); // It loops too fast otherwise
+    }, 50); // It loops too fast otherwise
   }
 }
 
