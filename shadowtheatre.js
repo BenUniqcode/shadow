@@ -43,7 +43,7 @@ var dbgout = "";
 var elDbg = document.getElementById("debug");
 
 var dbg = function(str) {
-	//elDbg.innerHTML = str;
+	// elDbg.innerHTML = str;
 };
 
 var rAF = window.requestAnimationFrame;
@@ -52,14 +52,12 @@ function connecthandler(e) {
   console.log("Connected");
   console.log(e.gamepad);
   controller = e.gamepad;
-  document.getElementById("startmsg").classList.add("hide");
   rAF(readGamepad);
 }
 
 function disconnecthandler(e) {
   console.log("Disconnected");
   controller = null;
-  document.getElementById("startmsg").classList.remove("hide");
 }
 
 function readGamepad() {
