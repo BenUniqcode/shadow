@@ -167,13 +167,20 @@ function showHud(text, fadeTime) {
 
 // The Konami Code victory dance
 function partyTime() {
-	let anims = [{opacity: 0.5}];
+	let overlayAnims = [{opacity: 0.5}];
 	for (let i = 0; i < 100; i++) {
 		let randomColor = Math.floor(Math.random()*16777215).toString(16);
-		anims.push({backgroundColor: '#' + randomColor});
+		overlayAnims.push({backgroundColor: '#' + randomColor});
 	}
-	anims.push({opacity: 0});
-	elPartyOverlay.animate(anims, 10000);
+	overlayAnims.push({opacity: 0});
+	elPartyOverlay.animate(overlayAnims, 10000);
+	let imageAnims = [];
+	for (let i = 0; i < 50; i++) {
+		let randomSize = Math.random() * 0.1 + 0.95; // From 0.95 to 1.05
+		let randomOpacity = Math.random();
+		imageAnims.push({opacity: randomOpacity, transform: "scale(" + randomSize + ")"});
+	}
+	elSlider.animate(imageAnims, 10000);
 }
 
 
