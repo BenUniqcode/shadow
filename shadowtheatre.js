@@ -1,13 +1,9 @@
 /*
  * Shadow Theatre Joystick Controller
- * Written in 2023 by Ben Wheeler <ben@uniqcode.com>
- * based on
+ * Written 2023-2024 by Ben Wheeler <ben@uniqcode.com>
+ * with some hints from
  * Gamepad API Test
  * Written in 2013 by Ted Mielczarek <ted@mielczarek.org>
- *
- * To the extent possible under law, the author(s) have dedicated all copyright and related and neighboring rights to this software to the public domain worldwide. This software is distributed without any warranty.
- *
- * You should have received a copy of the CC0 Public Domain Dedication along with this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 // Meaning of button input numbers (i.e. which thing is plugged into which input on the controller PCB)
 const RED = 0;
@@ -27,6 +23,11 @@ const KEYMAP = { // Keyboard control mapping to joystick equivalents
   Digit2: GREEN,
 };
 
+const SCROLL_ANIMATION_OPTIONS = {
+	    duration: 200,
+	    fill: 'forwards', // Stay in the final position instead of springing back
+};
+
 var isOn = {}; // Map of button input number to true/false
 var autoScroll = 0;
 var scrollSpeed = 4;
@@ -41,9 +42,10 @@ var controller;
 
 var dbgout = "";
 var elDbg = document.getElementById("debug");
+var elSlider = document.getElementById("slider");
 
 var dbg = function(str) {
-	// elDbg.innerHTML = str;
+	elDbg.innerHTML = str;
 };
 
 var rAF = window.requestAnimationFrame;
@@ -168,9 +170,6 @@ function processActions(raf=true) {
   dbgout += "<br>ScrollSpeed: " + scrollSpeed;
   dbgout += "<br>AutoScroll: " + autoScroll;
 
-  // Output the debug messages
-  dbg(dbgout);
-
   // Handle left/right movement
   if (isOn[LEFT] || isOn[RED] || autoScroll == LEFT) {
     // Left
@@ -179,7 +178,9 @@ function processActions(raf=true) {
       sliderPos = 0; // Don't go past the left edge
       autoScroll = 0; // Switch off autoscroll at the edge
     }
-    window.scroll(sliderPos,0);
+    // window.scroll(sliderPos,0);
+    let keyframes = [ { "marginLeft": -sliderPos + "px" } ];
+    elSlider.animate(keyframes, SCROLL_ANIMATION_OPTIONS);
   } else if (isOn[RIGHT] || isOn[GREEN] || autoScroll == RIGHT) {
     // Right
     sliderPos += scrollSpeed;
@@ -188,8 +189,15 @@ function processActions(raf=true) {
       sliderPos = maxScroll; // Don't go past the right edge
       autoScroll = 0; // Switch off autoscroll at the edge
     }
-    window.scroll(sliderPos,0);
+    // window.scroll({left: sliderPos, behaviour: "smooth"});
+    let keyframes = [ { "marginLeft": -sliderPos + "px"} ];
+    elSlider.animate(keyframes, SCROLL_ANIMATION_OPTIONS);
   }
+  dbgout += "<br>sliderPos: " + sliderPos;
+
+  // Output the debug messages
+  dbg(dbgout);
+
   // If using only keyboard control, we need to loop this function, but 
   // not immediately or it's much faster than joystick control
   if (raf) {
