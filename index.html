@@ -63,6 +63,7 @@
       }
       #partyOverlay {
 	      opacity: 0;
+	      background-color: black;
 	      position: absolute;
 	      top: 0;
 	      left: 0;
@@ -72,7 +73,7 @@
     </style>
   </head>
   <body>
-    <div id="partyOverlay"></div>
+    <div id="partyOverlay"><canvas id="canv"></canvas></div>
     <div id="debug"></div>
     <textarea id="keyinput"></textarea><!-- Offscreen; required for keyboard control -->
     <div id="hud">

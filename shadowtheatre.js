@@ -58,6 +58,18 @@ var dbg = function(str) {
 
 var rAF = window.requestAnimationFrame;
 
+// Matrix init
+// from https://dev.to/gnsp/making-the-matrix-effect-in-javascript-din
+const canvas = document.getElementById('canv');
+const ctx = canvas.getContext('2d');
+const cw = canvas.width = document.body.offsetWidth;
+const ch = canvas.height = document.body.offsetHeight;
+const cols = Math.floor(cw / 20) + 1;
+const ypos = Array(cols).fill(0);
+ctx.fillStyle = '#000';
+ctx.fillRect(0, 0, cw, ch);
+
+
 function connecthandler(e) {
   console.log("Connected");
   console.log(e.gamepad);
@@ -166,21 +178,42 @@ function showHud(text, fadeTime) {
 }
 
 // The Konami Code victory dance
-function partyTime() {
-	let overlayAnims = [{opacity: 0.5}];
-	for (let i = 0; i < 100; i++) {
+function matrixLoop () {
+  ctx.fillStyle = '#0001';
+  ctx.fillRect(0, 0, cw, ch);
+  
+  ctx.fillStyle = '#0f0';
+  ctx.font = '15pt monospace';
+  
+  ypos.forEach((y, ind) => {
+    const text = String.fromCharCode(Math.random() * 128);
+    const x = ind * 20;
+    ctx.fillText(text, x, y);
+    if (y > 100 + Math.random() * 10000) ypos[ind] = 0;
+    else ypos[ind] = y + 20;
+  });
+}
+
+
+function party() {
+	let partyTime = 12000;
+	let colorAnims = [];
+	for (let i = 0; i < 50; i++) {
 		let randomColor = Math.floor(Math.random()*16777215).toString(16);
-		overlayAnims.push({backgroundColor: '#' + randomColor});
+		colorAnims.push({backgroundColor: '#' + randomColor});
 	}
-	overlayAnims.push({opacity: 0});
-	elPartyOverlay.animate(overlayAnims, 10000);
+	colorAnims.push({backgroundColor: "black"});
 	let imageAnims = [];
 	for (let i = 0; i < 50; i++) {
-		let randomSize = Math.random() * 0.1 + 0.95; // From 0.95 to 1.05
-		let randomOpacity = Math.random();
+		let randomSize = Math.random() * 0.02 + 0.99; // From 0.99 to 1.01
+		let randomOpacity = Math.random() * 0.25 + 0.25; // From 0.25 to 0.5
 		imageAnims.push({opacity: randomOpacity, transform: "scale(" + randomSize + ")"});
 	}
-	elSlider.animate(imageAnims, 10000);
+	imageAnims.push({transform: "scale(1)", opacity: 0.5}, {opacity: 0.75}, {opacity: 1});
+	// No forwards fill on these as we want them to return to the starting condition. Which we ensure anyway because we want to animate to the end
+	// instead of suddenly snapping back.
+	document.body.animate(colorAnims, {duration: partyTime});
+	elSlider.animate(imageAnims, {duration: partyTime});
 }
 
 
@@ -192,9 +225,21 @@ function processActions(raf=true) {
 	  if (isOn[KONAMI_CODE[konamiPos]]) {
 	  	console.log("Konami Pos is " + konamiPos);
 	  	if (konamiPos == 9) {
-		  	// Finished
-		  	showHud("PARTY TIME!", 2000);
-			partyTime();
+		  	// Got the code!
+			let matrixTime = 15000;
+			let matrixFadeTime = 3000;
+			elPartyOverlay.animate([{backgroundColor: "black",opacity: 0}, {backgroundColor: "black", opacity: 1.0}, {opacity: 0.5}, {backgroundColor: "white"}], {duration: matrixTime, fill: 'forwards'});
+			canvas.animate([{opacity: 0}, {opacity: 1}], {duration: matrixFadeTime, fill: 'forwards'});
+			let matrixHandle = setInterval(matrixLoop, 50);
+			setTimeout(function() {
+				canvas.animate([{opacity: 1}, {opacity: 0}], {duration: matrixFadeTime, fill: 'forwards'});
+			}, matrixTime);
+			setTimeout(function() {
+				clearInterval(matrixHandle);
+			}, matrixTime + matrixFadeTime);
+			setTimeout(function() {
+				party();
+			}, 10000);
 			console.log("Resetting Konami Pos after success");
 		  	konamiPos = 0;
 	  	} else {
@@ -305,5 +350,8 @@ window.addEventListener("keydown", keydown);
 window.addEventListener("keyup", keyup);
 document.getElementById("keyinput").focus();
 
+
+
 dbg("Loaded");
+
 
