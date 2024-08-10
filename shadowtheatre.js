@@ -30,6 +30,18 @@ const SCROLL_ANIMATION_OPTIONS = {
 	    fill: 'forwards', // Stay in the final position instead of springing back
 };
 
+// These are the horizontal positions on the base level from where we can go up (1) or down (-1) a level, or both (0).
+// If our position is within a certain distance of such a place, the arrow will appear and going up/down is allowed.
+const TRANSITION_POINTS = [
+	[1300, -1],
+	[6325, 0],
+	[12800, 1],
+	[15600, -1],
+	[17200, 1],
+];
+// scrollPos must be within +/- this amount of the specific point to allow transitioning
+const TRANSITION_POINT_RANGE = 500;
+
 var isOn = {}; // Map of button input number to true/false
 var autoScroll = 0;
 var scrollSpeed = 4;
@@ -49,6 +61,8 @@ var controller;
 
 var dbgout = "";
 var elDbg = document.getElementById("debug");
+var elArrowDn = document.getElementById("arrowDn");
+var elArrowUp = document.getElementById("arrowUp");
 var elSlider = document.getElementById("slider");
 var elPartyOverlay = document.getElementById("partyOverlay");
 
@@ -83,7 +97,6 @@ function disconnecthandler(e) {
 }
 
 function readGamepad() {
-  dbgout = "";
   console.log("readGamepad");
   const gamepads = navigator.getGamepads();
   controller = gamepads[0];
@@ -278,8 +291,8 @@ function processActions(raf=true) {
     		showHud("Scroll Speed: " + scrollSpeed, 700);
   	}
 
-  	dbgout = "";
-  	dbgout += "<br>ScrollSpeed: " + scrollSpeed;
+	dbgout = "";
+  	dbgout += "ScrollSpeed: " + scrollSpeed;
   	dbgout += "<br>AutoScroll: " + autoScroll;
 	
   	// Handle left/right movement
@@ -290,9 +303,9 @@ function processActions(raf=true) {
       			sliderPos = 0; // Don't go past the left edge
       			autoScroll = 0; // Switch off autoscroll at the edge
     		}
-    		// window.scroll(sliderPos,0);
-    		let keyframes = [ { "marginLeft": -sliderPos + "px" } ];
-    		elSlider.animate(keyframes, SCROLL_ANIMATION_OPTIONS);
+    		window.scroll(sliderPos,0);
+    		//let keyframes = [ { "marginLeft": -sliderPos + "px" } ];
+    		//elSlider.animate(keyframes, SCROLL_ANIMATION_OPTIONS);
   	} else if (isOn[RIGHT] || isOn[GREEN] || autoScroll == RIGHT) {
     		// Right
     		sliderPos += scrollSpeed;
@@ -301,11 +314,40 @@ function processActions(raf=true) {
       			sliderPos = maxScroll; // Don't go past the right edge
       			autoScroll = 0; // Switch off autoscroll at the edge
     		}
-    		// window.scroll({left: sliderPos, behaviour: "smooth"});
-    		let keyframes = [ { "marginLeft": -sliderPos + "px"} ];
-    		elSlider.animate(keyframes, SCROLL_ANIMATION_OPTIONS);
+    		window.scroll({left: sliderPos, behaviour: "smooth"});
+    		// let keyframes = [ { "marginLeft": -sliderPos + "px"} ];
+    		// elSlider.animate(keyframes, SCROLL_ANIMATION_OPTIONS);
   	}
   	dbgout += "<br>sliderPos: " + sliderPos;
+	
+	// Find out if we are near an transition point
+	let gotOne = false;
+	for (let i = 0; i < TRANSITION_POINTS.length; i++) {
+		if (Math.abs(sliderPos - TRANSITION_POINTS[i][0]) < TRANSITION_POINT_RANGE) {
+			let direction = TRANSITION_POINTS[i][1];
+			let directionStr = "";
+			if (direction <= 0) {
+				directionStr += "down";
+				//elArrowDn.style.left = window.innerWidth / 2 + TRANSITION_POINTS[i][0] + "px";
+				elArrowDn.style.left = "50vw";
+			}
+			if (direction == 0) {
+				directionStr += " and "
+			}
+			if (direction >= 0) {
+				directionStr += "up";
+				//elArrowUp.style.left = window.innerWidth / 2 + TRANSITION_POINTS[i][0] + "px";
+				elArrowUp.style.left = "50vw";
+			}
+			dbgout += "<br>Transition Point " + i + " in range - can go " + directionStr;
+			gotOne = true;
+			break;
+		}
+	}
+	if (!gotOne) {
+		// Hide the arrows off screen if they don't apply
+		elArrowUp.style.left = elArrowDn.style.left = "-500px";
+	}
 	
   	// Output the debug messages
   	dbg(dbgout);

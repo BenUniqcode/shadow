@@ -38,6 +38,7 @@
 	      width: 300px;
 	      border: 1px dotted white;
 	      color: white;
+	      padding: 5px 10px;
       }
       #hud {
 	      position: fixed;
@@ -70,30 +71,66 @@
 	      bottom: 0;
 	      right: 0;
       }
+      @keyframes arrowpulse {
+	      0% { transform: scale(1.0); }
+	      100% { transform: scale(1.2); }
+      }
+	      
+      .arrow {
+	      position: fixed;
+	      left: -500px;
+	      width: 50px;
+	      height: 50px;
+	      z-index: 2;
+              animation-name: arrowpulse;
+	      animation-timing-function: ease-in;
+	      animation-duration: 1s;
+	      animation-iteration-count: infinite;
+	      animation-direction: alternate;
+      }
+
+      #arrowUp {
+	      /* It's a 1080px screen but a 760px image, so bars of 160px top and bottom */
+	      top: 180px;
+      }
+
+      #arrowDn {
+	      bottom: 180px;
+      }
+
+      #arrowDn img {
+	      transform: rotate(180deg);
+      }
+
     </style>
   </head>
   <body>
     <div id="partyOverlay"><canvas id="canv"></canvas></div>
     <div id="debug"></div>
     <textarea id="keyinput"></textarea><!-- Offscreen; required for keyboard control -->
-    <div id="hud">
+    <div id="hud"></div>
+    <div id="arrowDn" class="arrow">
+    	<img src="images/v3.1/arrow2.png">
+    </div>
+    <div id="arrowUp" class="arrow">
+    	<img src="images/v3.1/arrow2.png">
     </div>
     <div id="slider">
-      <img src="images/Shadow 1 v2.0.png">
-      <img src="images/Shadow 2 v2.0.png">
-      <img src="images/Shadow 3 v2.0.png">
-      <img src="images/Shadow 4 v2.0.png">
-      <img src="images/Shadow 5 v2.0.png">
-      <img src="images/Shadow 6 v2.0.png">
-      <img src="images/Shadow 7 v2.1.png">
-      <img src="images/Shadow 8 v2.0.png">
-      <img src="images/Shadow 9 v2.0.png">
-      <img src="images/Shadow 10 v2.0.png">
-      <img src="images/Shadow 11 v2.0.png">
-      <img src="images/Shadow 12 v2.0.png">
-      <img src="images/Shadow 13 v2.0.png">
-      <img src="images/Shadow 14 v2.0.png">
-      <img src="images/Shadow 15 v2.0.png">
+      <img src="images/v3.1/level0/1.png">
+      <img src="images/v3.1/level0/2.png">
+      <img src="images/v3.1/level0/3.png">
+      <img src="images/v3.1/level0/4.png">
+      <img src="images/v3.1/level0/5.png">
+      <img src="images/v3.1/level0/6.png">
+      <img src="images/v3.1/level0/7.png">
+      <img src="images/v3.1/level0/8.png">
+      <img src="images/v3.1/level0/9.png">
+      <img src="images/v3.1/level0/10.png">
+      <img src="images/v3.1/level0/11.png">
+      <img src="images/v3.1/level0/12.png">
+      <img src="images/v3.1/level0/13.png">
+      <img src="images/v3.1/level0/14.png">
+      <img src="images/v3.1/level0/15.png">
     </div>
 
     <script src="shadowtheatre.js"></script>
