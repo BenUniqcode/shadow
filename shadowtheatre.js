@@ -255,6 +255,9 @@ function party() {
 
 // Respond to inputs. The arg is whether to call requestAnimationFrame - true for keyboard control, false for joystick because it's called from readGamePad
 function processActions(raf=true) {  
+  if (raf) {
+	  dbgout="";
+  }
   // Keep track of progress through Konami. To ensure that only discrete movements advance the pattern,
   // we only step to the next one when entering the correct state from a "nothing pressed" state
   if (wasIdle) { 

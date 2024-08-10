@@ -75,7 +75,7 @@
       }
       @keyframes arrowpulse {
 	      0% { transform-origin: center; transform: scale(1.0); }
-	      100% { transform-origin: center; transform: scale(1.2); }
+	      100% { transform-origin: center; transform: scale(1.1); }
       }
 	      
       .arrow {
@@ -87,28 +87,26 @@
 	      height: 50px;
 	      z-index: 2;
               animation-name: arrowpulse;
-	      animation-timing-function: ease-in;
-	      animation-duration: 1s;
+	      animation-timing-function: ease-out;
+	      animation-duration: 200ms;
 	      animation-iteration-count: infinite;
 	      animation-direction: alternate;
       }
 
       #arrowUp {
 	      /* It's a 1080px screen but a 760px image, so bars of 160px top and bottom */
-	      top: 180px;
+	      top: 105px;
 	      color: green;
       }
 
       #arrowDn {
-	      bottom: 180px;
+	      bottom: 80px;
 	      color: lightgreen;
       }
 
-      /*
       #arrowDn img {
 	      transform: rotate(180deg);
       }
-      */
 
     </style>
   </head>
@@ -118,12 +116,10 @@
     <textarea id="keyinput"></textarea><!-- Offscreen; required for keyboard control -->
     <div id="hud"></div>
     <div id="arrowDn" class="arrow">
-	    ⬇︎
-	    <!--<img src="images/v3.1/arrow2.png"> -->
+	    <img src="images/v3.1/arrow2.png">
     </div>
     <div id="arrowUp" class="arrow">
-	    ⬆︎
-	    <!-- <img src="images/v3.1/arrow2.png"> -->
+	    <img src="images/v3.1/arrow2.png">
     </div>
     <div id="slider">
       <img src="images/v3.1/level0/1.png">
