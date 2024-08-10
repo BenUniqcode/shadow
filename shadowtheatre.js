@@ -97,6 +97,7 @@ function disconnecthandler(e) {
 }
 
 function readGamepad() {
+  dbgout = "";
   console.log("readGamepad");
   const gamepads = navigator.getGamepads();
   controller = gamepads[0];
@@ -107,6 +108,27 @@ function readGamepad() {
   }
   console.log("Found gamepad with ${controller.buttons.length} buttons");
 
+  for (var i = 0; i < controller.axes.length; i++) {
+    dbgout += "<br>Axis " + i + " value " + controller.axes[i];
+  }
+  if (controller.axes[0] > 0.5) {
+    isOn[DOWN] = 1;
+    isOn[UP] = 0;
+  } else if (controller.axes[0] < -0.5) {
+    isOn[UP] = 1;
+    isOn[DOWN] = 0;
+  } else {
+    isOn[UP] = isOn[DOWN] = 0;
+  }
+  if (controller.axes[1] > 0.5) {
+    isOn[LEFT] = 1;
+    isOn[RIGHT] = 0;
+  } else if (controller.axes[1] < -0.5) {
+    isOn[RIGHT] = 1;
+    isOn[LEFT] = 0;
+  } else {
+    isOn[LEFT] = isOn[RIGHT] = 0;
+  }
   // Due to inconsistencies in the way different browsers report axes, 
   // plus the fact they are analogue numbers when our joystick is a simple on/off microswitch for each direction
   // we use button inputs for the joystick instead of axes.
@@ -123,7 +145,8 @@ function readGamepad() {
       isPressed = val == 1.0;
     }
     dbgout += i + ": " + (isPressed ? "pressed " : "") + (isTouched ? "touched" : "") + "<br>";
-    isOn[i] = isPressed | isTouched;
+    // Button pressed are OR'd with joystick movements
+    isOn[i] |= isPressed | isTouched;
     anyInputOn |= isOn[i];
     if (i == RED || i == GREEN) {
       anyButtonOn |= isOn[i];
@@ -291,7 +314,6 @@ function processActions(raf=true) {
     		showHud("Scroll Speed: " + scrollSpeed, 700);
   	}
 
-	dbgout = "";
   	dbgout += "ScrollSpeed: " + scrollSpeed;
   	dbgout += "<br>AutoScroll: " + autoScroll;
 	
