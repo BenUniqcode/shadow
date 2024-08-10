@@ -6,7 +6,7 @@
     <style type="text/css">
       body {
 	      font-family: sans-serif;
-	      background-color: blue;
+	      background-color: black;
 	      margin-top: 0;
 	      margin-bottom: 0;
 	      xscroll-behavior: smooth;
@@ -20,7 +20,7 @@
         left: -10px;
         top: -10px;
       }
-      #slider {
+      #slider > * {
 	display: flex;     
 	xheight: 760px; /* Scale images to aspect ratio of the shadow theatre screen */
 	padding-top: 160px; /* Position scaled images central on screen */
@@ -38,10 +38,11 @@
 	      top: 10px;
 	      left: 5px;
 	      width: 300px;
-	      border: 1px dotted red;
-	      color: red;
+	      border: 1px solid red;
+	      color: green;
 	      padding: 5px 10px;
               z-index: 999;
+	      background-color: #333;
       }
       #hud {
 	      position: fixed;
@@ -121,21 +122,31 @@
 	    <img src="images/v3.1/arrow2.png">
     </div>
     <div id="slider">
-      <img src="images/v3.1/level0/1.png">
-      <img src="images/v3.1/level0/2.png">
-      <img src="images/v3.1/level0/3.png">
-      <img src="images/v3.1/level0/4.png">
-      <img src="images/v3.1/level0/5.png">
-      <img src="images/v3.1/level0/6.png">
-      <img src="images/v3.1/level0/7.png">
-      <img src="images/v3.1/level0/8.png">
-      <img src="images/v3.1/level0/9.png">
-      <img src="images/v3.1/level0/10.png">
-      <img src="images/v3.1/level0/11.png">
-      <img src="images/v3.1/level0/12.png">
-      <img src="images/v3.1/level0/13.png">
-      <img src="images/v3.1/level0/14.png">
-      <img src="images/v3.1/level0/15.png">
+      <div id="area-main">
+      	<img src="images/v3.1/level0/1.png">
+      	<img src="images/v3.1/level0/2.png">
+      	<img src="images/v3.1/level0/3.png">
+      	<img src="images/v3.1/level0/4.png">
+      	<img src="images/v3.1/level0/5.png">
+      	<img src="images/v3.1/level0/6.png">
+      	<img src="images/v3.1/level0/7.png">
+      	<img src="images/v3.1/level0/8.png">
+      	<img src="images/v3.1/level0/9.png">
+      	<img src="images/v3.1/level0/10.png">
+      	<img src="images/v3.1/level0/11.png">
+      	<img src="images/v3.1/level0/12.png">
+      	<img src="images/v3.1/level0/13.png">
+      	<img src="images/v3.1/level0/14.png">
+      	<img src="images/v3.1/level0/15.png">
+      </div>
+      <div id="area-pirate" style="display: none">
+      	<img src="images/v3.1/level-1/a1.png">
+      	<img src="images/v3.1/level-1/a2.png">
+      	<img src="images/v3.1/level-1/a3.png">
+      	<img src="images/v3.1/level-1/a4.png">
+      	<img src="images/v3.1/level-1/a5.png">
+      </div>
+
     </div>
 
     <script src="shadowtheatre.js"></script>

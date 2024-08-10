@@ -30,17 +30,28 @@ const SCROLL_ANIMATION_OPTIONS = {
 	    fill: 'forwards', // Stay in the final position instead of springing back
 };
 
-// These are the horizontal positions on the base level from where we can go up (1) or down (-1) a level, or both (0).
+// These are the horizontal positions on the base level from where we can go up (1) or down (-1) a level (or both)
 // If our position is within a certain distance of such a place, the arrow will appear and going up/down is allowed.
-const TRANSITION_POINTS = [
-	[1300, -1],
-	[6325, 0],
-	[12800, 1],
-	[15600, -1],
-	[17200, 1],
-];
+// Format: {fromArea: [exitPosition, direction, leadsToArea, entryPosition], ...}
+// Each level's images are joined in a strip, but the relative entry and exit positions don't necessarily line up.
+// All transitions are reversible - you can always go back from whence you came. Such exits don't need to be stated here.
+const TRANSITIONS = {
+	"main": [
+		[1300, -1, "pirate", 2000],
+		[6325, -1, "pirate", 3000],
+		[6325, 1, "disco", 500],
+		[12800, 1, "giant", 500],
+		[15600, -1, "dragon", 1000],
+		[17200, 1, "wuzworld", 500],
+	],
+	"dragon": [
+		[2000, -1, "hell", 500],
+	],
+};
+let transitions = TRANSITIONS; // A copy of the stock ones to which we add the reverse step from where we just came from. Each time we change area it gets reset so that we don't end up with a bunch of temporary paths.
+
 // scrollPos must be within +/- this amount of the specific point to allow transitioning
-const TRANSITION_POINT_RANGE = 500;
+const TRANSITION_RANGE = 500;
 
 var isOn = {}; // Map of button input number to true/false
 var autoScroll = 0;
@@ -54,6 +65,9 @@ var wasIdle = true; // Whether no inputs were read on the last run through - for
 
 var anyInputOn = false; // Is anything being pressed or the joystick being moved?
 var anyButtonOn = false; // Is an actual button being pressed?
+var curLevel = 0; // Which level are we on? May not actually need to know this...
+var curArea = "main"; // Which area (contiguous left-right set of images) are we in?
+var permittedVertical = []; // Whether we can go up or down (or both) from the current location
 
 var haveEvents = 'GamepadEvent' in window;
 var haveWebkitEvents = 'WebKitGamepadEvent' in window;
@@ -293,32 +307,6 @@ function processActions(raf=true) {
 	wasIdle = true;
   } else {
 	wasIdle = false;
-  	// Handle up/down to change scroll speed
-  	var scrollSpeedChanged = false;
-  	if (isOn[UP] && !scrollSpeedLimiter) {
-    		scrollSpeedChanged = true;
-    		scrollSpeed++;
-    		if (scrollSpeed > SCROLLSPEED_MAX) {
-      			scrollSpeed = SCROLLSPEED_MAX;
-    		}
-  	} else if (isOn[DOWN] && !scrollSpeedLimiter) {
-    		scrollSpeedChanged = true;
-    		scrollSpeed--;
-    		if (scrollSpeed < SCROLLSPEED_MIN) {
-      			scrollSpeed = SCROLLSPEED_MIN;
-    		}
-  	}
-  	if (scrollSpeedChanged) {
-    		// Limit how fast the scroll speed changes
-    		scrollSpeedLimiter = true;
-    		setTimeout(function() {
-      			scrollSpeedLimiter = false;
-    		}, 100);
-    		showHud("Scroll Speed: " + scrollSpeed, 700);
-  	}
-
-  	dbgout += "ScrollSpeed: " + scrollSpeed;
-  	dbgout += "<br>AutoScroll: " + autoScroll;
 	
   	// Handle left/right movement
   	if (isOn[LEFT] || isOn[RED] || autoScroll == LEFT) {
@@ -346,30 +334,56 @@ function processActions(raf=true) {
   	dbgout += "<br>sliderPos: " + sliderPos;
 	
 	// Find out if we are near an transition point
-	let gotOne = false;
-	for (let i = 0; i < TRANSITION_POINTS.length; i++) {
-		if (Math.abs(sliderPos - TRANSITION_POINTS[i][0]) < TRANSITION_POINT_RANGE) {
-			let direction = TRANSITION_POINTS[i][1];
+	let canMove = false;
+	let changeArea = false;
+	let trans = transitions[curArea];
+	permittedVertical[UP] = permittedVertical[DOWN] = 0;
+	for (let i = 0; i < trans.length; i++) {
+		if (Math.abs(sliderPos - trans[i][0]) < TRANSITION_RANGE) {
+			let direction = trans[i][1];
+			let destArea = trans[i][2];
+			let destPos = trans[i][3];
 			let directionStr = "";
+			canMove = true;
 			if (direction <= 0) {
-				directionStr += "down";
-				//elArrowDn.style.left = window.innerWidth / 2 + TRANSITION_POINTS[i][0] + "px";
+				dbgout += "<br>Transition Point " + i + " in range - can go DOWN"
 				elArrowDn.style.left = "50vw";
-			}
-			if (direction == 0) {
-				directionStr += " and "
-			}
+				if (isOn[DOWN]) {
+					dbgout += "<br><b>Going DOWN to " + destArea + " position " + destPos + "</b>";
+					changeArea = true;
+				}
+			} // 0 used to mean up and down, hence why this is like it is, but now we specify each separately
 			if (direction >= 0) {
+				dbgout += "<br>Transition Point " + i + " in range - can go UP"
 				directionStr += "up";
-				//elArrowUp.style.left = window.innerWidth / 2 + TRANSITION_POINTS[i][0] + "px";
 				elArrowUp.style.left = "50vw";
+				if (isOn[UP]) {
+					dbgout += "<br><b>Going UP to " + destArea + " position " + destPos + "</b>";
+					changeArea = true;
+				}
 			}
-			dbgout += "<br>Transition Point " + i + " in range - can go " + directionStr;
-			gotOne = true;
-			break;
+			if (changeArea) {
+				// Start with the core set of transitions - the one we just followed might have been dynamic
+				transitions = TRANSITIONS;
+				// Going back up should take us to exactly where we left from, so add it as an exit with the sliderPos
+				if (!(destArea in transitions)) {
+					transitions[destArea] = [];
+				}
+				transitions[destArea].push([destPos, -direction, curArea, sliderPos]);
+				let elCurArea = document.getElementById("area-" + curArea);
+				let elNewArea = document.getElementById("area-" + destArea);
+				// Set location to the new area and pos
+				curArea = destArea;
+				sliderPos = destPos;
+				console.log(elCurArea);
+				console.log(elNewArea);
+				elNewArea.style.display = "block";
+				elCurArea.style.display = "none";
+				window.scroll({left: sliderPos, behaviour: "smooth"});
+			}
 		}
 	}
-	if (!gotOne) {
+	if (!canMove) {
 		// Hide the arrows off screen if they don't apply
 		elArrowUp.style.left = elArrowDn.style.left = "-500px";
 	}
@@ -384,7 +398,7 @@ function processActions(raf=true) {
    	clearTimeout(raftimer);
     	raftimer = setTimeout(function() {
       		rAF(processActions);
-  	}, 50); // It loops too fast otherwise
+  	}, 20); // It loops too fast otherwise
   }
 }
 
