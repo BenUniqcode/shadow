@@ -6,7 +6,7 @@
     <style type="text/css">
       body {
 	      font-family: sans-serif;
-	      background-color: black;
+	      background-color: blue;
 	      margin-top: 0;
 	      margin-bottom: 0;
 	      xscroll-behavior: smooth;
@@ -24,6 +24,7 @@
 	display: flex;     
 	xheight: 760px; /* Scale images to aspect ratio of the shadow theatre screen */
 	padding-top: 160px; /* Position scaled images central on screen */
+	padding-bottom: 160px; /* Position scaled images central on screen */
       }
       #slider > img {
       }
@@ -80,8 +81,6 @@
 	      
       .arrow {
 	      position: fixed;
-	      font-size: 140px;
-	      font-weight: bold;
 	      left: -500px;
 	      width: 50px;
 	      height: 50px;
@@ -95,12 +94,12 @@
 
       #arrowUp {
 	      /* It's a 1080px screen but a 760px image, so bars of 160px top and bottom */
-	      top: 105px;
+	      top: 170px;
 	      color: green;
       }
 
       #arrowDn {
-	      bottom: 80px;
+	      bottom: 170px;
 	      color: lightgreen;
       }
 
