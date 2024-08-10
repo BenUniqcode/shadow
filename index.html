@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<meta charset="UTF-8">
 <html>
   <head>
     <title>Shadow Theatre</title>
@@ -72,12 +73,14 @@
 	      right: 0;
       }
       @keyframes arrowpulse {
-	      0% { transform: scale(1.0); }
-	      100% { transform: scale(1.2); }
+	      0% { transform-origin: center; transform: scale(1.0); }
+	      100% { transform-origin: center; transform: scale(1.2); }
       }
 	      
       .arrow {
 	      position: fixed;
+	      font-size: 140px;
+	      font-weight: bold;
 	      left: -500px;
 	      width: 50px;
 	      height: 50px;
@@ -92,15 +95,19 @@
       #arrowUp {
 	      /* It's a 1080px screen but a 760px image, so bars of 160px top and bottom */
 	      top: 180px;
+	      color: green;
       }
 
       #arrowDn {
 	      bottom: 180px;
+	      color: lightgreen;
       }
 
+      /*
       #arrowDn img {
 	      transform: rotate(180deg);
       }
+      */
 
     </style>
   </head>
@@ -110,10 +117,12 @@
     <textarea id="keyinput"></textarea><!-- Offscreen; required for keyboard control -->
     <div id="hud"></div>
     <div id="arrowDn" class="arrow">
-    	<img src="images/v3.1/arrow2.png">
+	    ⬇︎
+	    <!--<img src="images/v3.1/arrow2.png"> -->
     </div>
     <div id="arrowUp" class="arrow">
-    	<img src="images/v3.1/arrow2.png">
+	    ⬆︎
+	    <!-- <img src="images/v3.1/arrow2.png"> -->
     </div>
     <div id="slider">
       <img src="images/v3.1/level0/1.png">
