@@ -35,7 +35,8 @@ const SCROLL_ANIMATION_OPTIONS = {
 // Format: {fromArea: [exitPosition, direction, leadsToArea, entryPosition], ...}
 // Each level's images are joined in a strip, but the relative entry and exit positions don't necessarily line up.
 // All transitions are reversible - you can always go back from whence you came. Such exits don't need to be stated here.
-const TRANSITIONS = {
+// TODO: Put back to const when quarter-size scaling off
+let TRANSITIONS = {
 	"main": [
 		[1300, -1, "pirate", 2000],
 		[6325, -1, "pirate", 3000],
@@ -48,10 +49,23 @@ const TRANSITIONS = {
 		[2000, -1, "hell", 500],
 	],
 };
-let transitions = TRANSITIONS; // A copy of the stock ones to which we add the reverse step from where we just came from. Each time we change area it gets reset so that we don't end up with a bunch of temporary paths.
-
 // scrollPos must be within +/- this amount of the specific point to allow transitioning
-const TRANSITION_RANGE = 500;
+// TODO: Put back to const when quarter-size scaling off
+let TRANSITION_RANGE = 500;
+
+// TODO: Temporarily scale down by factor of 4
+TRANSITION_RANGE = Math.floor(TRANSITION_RANGE / 4.0);
+for (let a in TRANSITIONS) {
+	for (let i = 0; i < TRANSITIONS[a].length; i++) {
+		let oldVal = TRANSITIONS[a][i][0];
+		let newVal = Math.floor(TRANSITIONS[a][i][0] / 4.0);
+		console.log("Temporary scaling in effect: " + oldVal + " -> " + newVal);
+		TRANSITIONS[a][i][0] = newVal;
+	}
+}
+
+
+let transitions = JSON.parse(JSON.stringify(TRANSITIONS)); // A copy of the stock ones to which we add the reverse step from where we just came from. Each time we change area it gets reset so that we don't end up with a bunch of temporary paths.
 
 var isOn = {}; // Map of button input number to true/false
 var autoScroll = 0;
@@ -266,6 +280,42 @@ function party() {
 	elSlider.animate(imageAnims, {duration: partyTime});
 }
 
+function calculatePermittedVertical() {
+	let canMove = false;
+	let trans = transitions[curArea];
+	console.log("CPV " + curArea + " trans has " + trans.length + " exits");
+	console.log(trans);
+	permittedVertical[DOWN] = permittedVertical[UP] = 0;
+	elArrowUp.style.left = elArrowDn.style.left = "-500px";
+	for (let i = 0; i < trans.length; i++) {
+		if (Math.abs(sliderPos - trans[i][0]) < TRANSITION_RANGE) {
+			let direction = trans[i][1];
+			let destArea = trans[i][2];
+			let destPos = trans[i][3];
+			canMove = true;
+			if (direction < 0) {
+				dbgout += "<br>Transition Point " + i + " in range - can go DOWN to " + destArea + ":" + destPos;
+				elArrowDn.style.left = "50vw";
+				permittedVertical[DOWN] = [destArea, destPos];
+				console.log("Showing down arrow");
+			} else if (direction > 0) {
+				dbgout += "<br>Transition Point " + i + " in range - can go UP to " + destArea + ":" + destPos;
+				elArrowUp.style.left = "50vw";
+				permittedVertical[UP] = [destArea, destPos];
+				console.log("Showing up arrow");
+			} else {
+				console.log("Invalid direction value");
+			}
+		}
+	}
+	// Hide the arrows that do not apply
+	if (!permittedVertical[DOWN]) {
+		elArrowDn.style.left = "-500px";
+	}
+	if (!permittedVertical[UP]) {
+		elArrowUp.style.left = "-500px";
+	}
+}
 
 // Respond to inputs. The arg is whether to call requestAnimationFrame - true for keyboard control, false for joystick because it's called from readGamePad
 function processActions(raf=true) {  
@@ -331,63 +381,52 @@ function processActions(raf=true) {
     		// let keyframes = [ { "marginLeft": -sliderPos + "px"} ];
     		// elSlider.animate(keyframes, SCROLL_ANIMATION_OPTIONS);
   	}
+	dbgout += "<br>Level " + curLevel + ", Area: " + curArea;
   	dbgout += "<br>sliderPos: " + sliderPos;
 	
-	// Find out if we are near an transition point
-	let canMove = false;
+	// Find out if we are near a transition point
+	calculatePermittedVertical();
+	// Are we actually moving up or down?
 	let changeArea = false;
-	let trans = transitions[curArea];
-	permittedVertical[UP] = permittedVertical[DOWN] = 0;
-	for (let i = 0; i < trans.length; i++) {
-		if (Math.abs(sliderPos - trans[i][0]) < TRANSITION_RANGE) {
-			let direction = trans[i][1];
-			let destArea = trans[i][2];
-			let destPos = trans[i][3];
-			let directionStr = "";
-			canMove = true;
-			if (direction <= 0) {
-				dbgout += "<br>Transition Point " + i + " in range - can go DOWN"
-				elArrowDn.style.left = "50vw";
-				if (isOn[DOWN]) {
-					dbgout += "<br><b>Going DOWN to " + destArea + " position " + destPos + "</b>";
-					changeArea = true;
-				}
-			} // 0 used to mean up and down, hence why this is like it is, but now we specify each separately
-			if (direction >= 0) {
-				dbgout += "<br>Transition Point " + i + " in range - can go UP"
-				directionStr += "up";
-				elArrowUp.style.left = "50vw";
-				if (isOn[UP]) {
-					dbgout += "<br><b>Going UP to " + destArea + " position " + destPos + "</b>";
-					changeArea = true;
-				}
-			}
-			if (changeArea) {
-				// Start with the core set of transitions - the one we just followed might have been dynamic
-				transitions = TRANSITIONS;
-				// Going back up should take us to exactly where we left from, so add it as an exit with the sliderPos
-				if (!(destArea in transitions)) {
-					transitions[destArea] = [];
-				}
-				transitions[destArea].push([destPos, -direction, curArea, sliderPos]);
-				let elCurArea = document.getElementById("area-" + curArea);
-				let elNewArea = document.getElementById("area-" + destArea);
-				// Set location to the new area and pos
-				curArea = destArea;
-				sliderPos = destPos;
-				console.log(elCurArea);
-				console.log(elNewArea);
-				elNewArea.style.display = "block";
-				elCurArea.style.display = "none";
-				window.scroll({left: sliderPos, behaviour: "smooth"});
-			}
+	let destArea, destPos, direction;
+	if (permittedVertical[DOWN] && isOn[DOWN]) {
+		destArea = permittedVertical[DOWN][0];
+		destPos = permittedVertical[DOWN][1];
+		direction = -1;
+		dbgout += "<br><b>Going DOWN to " + destArea + ":"  + destPos + "</b>";
+		changeArea = true;
+	} else if (permittedVertical[UP] && isOn[UP]) {
+		destArea = permittedVertical[UP][0];
+		destPos = permittedVertical[UP][1];
+		direction = 1;
+		dbgout += "<br><b>Going UP to " + destArea + " position " + destPos + "</b>";
+		changeArea = true;
+	}
+	if (changeArea) {
+		// Start with the core set of transitions - the one we just followed might have been dynamic
+		transitions = JSON.parse(JSON.stringify(TRANSITIONS)); // Shite yet officially sanctioned method of deep copying
+		// Going back up should take us to exactly where we left from, so add it as an exit with the sliderPos
+		if (!(destArea in transitions)) {
+			transitions[destArea] = [];
 		}
+		transitions[destArea].push([destPos, -direction, curArea, sliderPos]);
+		let elCurArea = document.getElementById("area-" + curArea);
+		let elNewArea = document.getElementById("area-" + destArea);
+		// Set location to the new area and pos
+		dbgout += "Moving from " + curArea + ":" + sliderPos;
+		curArea = destArea;
+		sliderPos = destPos;
+		dbgout += "to " + curArea + ":" + sliderPos;
+		console.log(elCurArea);
+		console.log(elNewArea);
+		elNewArea.style.display = "block";
+		//elCurArea.animate([{opacity: 1}, {opacity: 0}], {duration: 1000, follow: "forwards"});
+		//elNewArea.animate([{opacity: 0}, {opacity: 1}], {duration: 1000, follow: "forwards"});
+		elCurArea.style.display = "none";
+		window.scroll({left: sliderPos, behaviour: "smooth"});
+		// Recalculate permitted verticals from new location to update arrows
+		calculatePermittedVertical();
 	}
-	if (!canMove) {
-		// Hide the arrows off screen if they don't apply
-		elArrowUp.style.left = elArrowDn.style.left = "-500px";
-	}
-	
   	// Output the debug messages
   	dbg(dbgout);
   }
