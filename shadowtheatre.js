@@ -34,28 +34,46 @@ const SCROLL_ANIMATION_OPTIONS = {
 // If our position is within a certain distance of such a place, the arrow will appear and going up/down is allowed.
 // Format: {fromArea: [exitPosition, direction, leadsToArea, entryPosition], ...}
 // Each level's images are joined in a strip, but the relative entry and exit positions don't necessarily line up.
-// All transitions are reversible - you can always go back from whence you came. Such exits don't need to be stated here.
+// All transitions are reversible - you can always go back from whence you came. But trying to dynamically add such exits
+// is problematic, as they can be "dragged" by going up and down while moving left or right, and then you end up with 
+// an exit in the wrong place, or to the wrong place. Better to explicitly state all transitions in both directions.
 const TRANSITIONS = {
 	"main": [
-		[1300, -1, "pirate", 2000],
-		[6325, -1, "pirate", 3000],
-		[6325, 1, "disco", 500],
-		[12800, 1, "giant", 500],
+		[1600, -1, "pirate", 2500],
+		[6400, -1, "pirate", 3000],
+		[6400, 1, "disco", 500],
+		[12800, 1, "giant", 200],
 		[15600, -1, "dragon", 1000],
 		[17200, 1, "wuzworld", 500],
 	],
-	"dragon": [
-		[2000, -1, "hell", 500],
+	"disco": [
+		[500, -1, "main", 6400],
 	],
+	"dragon": [
+		[1000, 1, "main", 15600],
+		[2600, -1, "hell", 0],
+	],
+	"giant": [
+		[200, -1, "main", 12800],
+	],
+	"hell": [
+		[0, 1, "dragon", 2600],
+	],
+	"pirate": [
+		[2500, 1, "main", 1600],
+		[5500, 1, "main", 6400],
+	],
+	"wuzworld": [
+		[500, -1, "main", 17200],
+	],
+
 };
 // scrollPos must be within +/- this amount of the specific point to allow transitioning
 const TRANSITION_RANGE = 500;
 
-let transitions = JSON.parse(JSON.stringify(TRANSITIONS)); // A copy of the stock ones to which we add the reverse step from where we just came from. Each time we change area it gets reset so that we don't end up with a bunch of temporary paths.
-
 var isOn = {}; // Map of button input number to true/false
 var autoScroll = 0;
-var scrollSpeed = 4;
+var scrollSpeed = 40;
 var sliderPos = 0;
 var scrollSpeedLimiter = false; // Is set to true when the scroll speed changes, which blocks further changes for a while, to reduce the speed at which it was changing
 var raftimer;
@@ -268,7 +286,7 @@ function party() {
 
 function calculatePermittedVertical() {
 	let canMove = false;
-	let trans = transitions[curArea];
+	let trans = TRANSITIONS[curArea];
 	console.log("CPV " + curArea + " trans has " + trans.length + " exits");
 	console.log(trans);
 	permittedVertical[DOWN] = permittedVertical[UP] = 0;
@@ -389,13 +407,6 @@ function processActions(raf=true) {
 		changeArea = true;
 	}
 	if (changeArea) {
-		// Start with the core set of transitions - the one we just followed might have been dynamic
-		transitions = JSON.parse(JSON.stringify(TRANSITIONS)); // Shite yet officially sanctioned method of deep copying
-		// Going back up should take us to exactly where we left from, so add it as an exit with the sliderPos
-		if (!(destArea in transitions)) {
-			transitions[destArea] = [];
-		}
-		transitions[destArea].push([destPos, -direction, curArea, sliderPos]);
 		let elCurArea = document.getElementById("area-" + curArea);
 		let elNewArea = document.getElementById("area-" + destArea);
 		// Set location to the new area and pos
