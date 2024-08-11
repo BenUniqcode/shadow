@@ -413,10 +413,10 @@ function processActions(raf=true) {
 		let elCurArea = document.getElementById("area-" + curArea);
 		let elNewArea = document.getElementById("area-" + destArea);
 		// Set location to the new area and pos
-		dbgout += "Moving from " + curArea + ":" + sliderPos;
+		dbgout += "<br>Moving from " + curArea + ":" + sliderPos;
 		curArea = destArea;
 		sliderPos = destPos;
-		dbgout += "to " + curArea + ":" + sliderPos;
+		dbgout += " to " + curArea + ":" + sliderPos;
 		console.log(elCurArea);
 		console.log(elNewArea);
 		elNewArea.style.display = "block";
@@ -432,9 +432,14 @@ function processActions(raf=true) {
   }
 	
   // If using only keyboard control, we need to loop this function so that holding a key down has the right effect
-  // but with a delay or it moves much faster than joystick control
+  // but with a delay or it moves much faster than the joystick. This doesn't apply to up and down, which do not repeat.
   if (raf) {
    	clearTimeout(raftimer);
+	if (isOn[UP]) {
+		keyup({code: "ArrowUp", preventDefault: () => {}});
+  	} else if (isOn[DOWN]) {
+		keyup({code: "ArrowDown", preventDefault: () => {}});
+	}
     	raftimer = setTimeout(function() {
       		rAF(processActions);
   	}, 20); // It loops too fast otherwise
