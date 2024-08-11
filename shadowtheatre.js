@@ -35,8 +35,7 @@ const SCROLL_ANIMATION_OPTIONS = {
 // Format: {fromArea: [exitPosition, direction, leadsToArea, entryPosition], ...}
 // Each level's images are joined in a strip, but the relative entry and exit positions don't necessarily line up.
 // All transitions are reversible - you can always go back from whence you came. Such exits don't need to be stated here.
-// TODO: Put back to const when quarter-size scaling off
-let TRANSITIONS = {
+const TRANSITIONS = {
 	"main": [
 		[1300, -1, "pirate", 2000],
 		[6325, -1, "pirate", 3000],
@@ -50,20 +49,7 @@ let TRANSITIONS = {
 	],
 };
 // scrollPos must be within +/- this amount of the specific point to allow transitioning
-// TODO: Put back to const when quarter-size scaling off
-let TRANSITION_RANGE = 500;
-
-// TODO: Temporarily scale down by factor of 4
-TRANSITION_RANGE = Math.floor(TRANSITION_RANGE / 4.0);
-for (let a in TRANSITIONS) {
-	for (let i = 0; i < TRANSITIONS[a].length; i++) {
-		let oldVal = TRANSITIONS[a][i][0];
-		let newVal = Math.floor(TRANSITIONS[a][i][0] / 5.0) - 300; 
-		console.log("Temporary scaling in effect: " + oldVal + " -> " + newVal);
-		TRANSITIONS[a][i][0] = newVal;
-	}
-}
-
+const TRANSITION_RANGE = 500;
 
 let transitions = JSON.parse(JSON.stringify(TRANSITIONS)); // A copy of the stock ones to which we add the reverse step from where we just came from. Each time we change area it gets reset so that we don't end up with a bunch of temporary paths.
 
