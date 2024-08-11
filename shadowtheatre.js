@@ -58,7 +58,7 @@ TRANSITION_RANGE = Math.floor(TRANSITION_RANGE / 4.0);
 for (let a in TRANSITIONS) {
 	for (let i = 0; i < TRANSITIONS[a].length; i++) {
 		let oldVal = TRANSITIONS[a][i][0];
-		let newVal = Math.floor(TRANSITIONS[a][i][0] / 4.0);
+		let newVal = Math.floor(TRANSITIONS[a][i][0] / 5.0) - 300; 
 		console.log("Temporary scaling in effect: " + oldVal + " -> " + newVal);
 		TRANSITIONS[a][i][0] = newVal;
 	}
