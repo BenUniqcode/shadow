@@ -40,7 +40,7 @@ const SCROLL_ANIMATION_OPTIONS = {
 const TRANSITIONS = {
 	"main": [
 		[1600, -1, "pirate", 2500],
-		[6400, -1, "pirate", 4700],
+		[6400, -1, "pirate", 5200],
 		[6400, 1, "disco", 0],
 		[10320, 1, "hug", 560],
 		[11480, -1, "skyworld", 480], // NB Mario tube, goes DOWN but to a world that is UP from elsewhere in the map
@@ -63,7 +63,7 @@ const TRANSITIONS = {
 	],
 	"pirate": [
 		[2500, 1, "main", 1600],
-		[4700, 1, "main", 6400],
+		[5200, 1, "main", 6400],
 	],
 	"skyworld": [
 		[480, -1, "main", 11480], // Goes back DOWN to main even though we came DOWN from there

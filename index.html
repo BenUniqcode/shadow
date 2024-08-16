@@ -20,11 +20,11 @@
         left: -10px;
         top: -10px;
       }
-      #slider {
+      .slider {
 	padding-top: 160px; /* Position scaled images central on screen */
 	padding-bottom: 160px; /* Position scaled images central on screen */
       }
-      #slider .flexbox {
+      .slider .flexbox {
 	display: flex;     
 	height: 760px;
       }
@@ -121,8 +121,8 @@
     <div id="arrowUp" class="arrow">
 	    <img src="images/v3.1/arrow2_transp.png">
     </div>
-    <div id="slider">
       <div id="area-main">
+        <div class="slider">
 	      <div class="flexbox">
       		<img src="images/v3.1/main/1.png">
       		<img src="images/v3.1/main/2.png">
@@ -140,8 +140,10 @@
       		<img src="images/v3.1/main/14.png">
       		<img src="images/v3.1/main/15.png">
 	      </div>
+        </div>
       </div>
       <div id="area-pirate" style="display: none">
+        <div class="slider">
 	      <div class="flexbox">
       		<img src="images/v3.1/pirate/1.png">
       		<img src="images/v3.1/pirate/2.png">
@@ -149,11 +151,15 @@
       		<img src="images/v3.1/pirate/4.png">
       		<img src="images/v3.1/pirate/5.png">
 	      </div>
+        </div>
       </div>
       <div id="area-disco" style="display: none">
+        <div class="slider">
 	      <div class="flexbox" style="text-align: center; font-size: 100px; font-weight: bold; border: 2px solid white; color: white; padding: 20px 10px;">Disco</div>
+        </div>
       </div>
       <div id="area-giant" style="display: none">
+        <div class="slider">
 	      <div class="flexbox">
       		<img src="images/v3.1/giant/1.png">
       		<img src="images/v3.1/giant/2.png">
@@ -161,30 +167,37 @@
       		<img src="images/v3.1/giant/4.png">
       		<img src="images/v3.1/giant/5.png">
 	      </div>
+        </div>
       </div>
       <div id="area-dragon" style="display: none">
+        <div class="slider">
 	      <div class="flexbox">
       		<img src="images/v3.1/dragon/1.png">
       		<img src="images/v3.1/dragon/2.png">
       		<img src="images/v3.1/dragon/3.png">
 	      </div>
+        </div>
       </div>
       <div id="area-hell" style="display: none">
-	      <div class="flexbox">
-      		<video autoplay muted playsinline width="1351" height="760">
+	<!-- NO SLIDER - needs to fill whole screen due to aspect ratio -->
+        <!-- No flexbox needed as it's a single -->
+      		<video autoplay muted playsinline loop width="1920" height="1080" style="width: 100%; height: 100%">
 			<source src="images/v3.1/hell/Hell Fire video Loop footage.mp4" type="video/mp4">
 		</video>
-	      </div>
       </div>
       <div id="area-skyworld" style="display: none">
+        <div class="slider">
 	      <div class="flexbox">
       		<img src="images/v3.1/skyworld/cropped.png">
 	      </div>
+        </div>
       </div>
       <div id="area-hug" style="display: none">
+        <div class="slider">
 	      <div class="flexbox">
       		<img src="images/v3.1/hug/cropped.png">
 	      </div>
+        </div>
       </div>
     </div>
 
