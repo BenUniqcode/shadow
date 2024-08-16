@@ -42,6 +42,7 @@ const TRANSITIONS = {
 		[1600, -1, "pirate", 2500],
 		[6400, -1, "pirate", 4700],
 		[6400, 1, "disco", 0],
+		[10320, 1, "hug", 560],
 		[11480, -1, "skyworld", 480], // NB Mario tube, goes DOWN but to a world that is UP from elsewhere in the map
 		[12800, 1, "giant", 1000],
 		[15600, -1, "dragon", 1000],
@@ -66,11 +67,10 @@ const TRANSITIONS = {
 	],
 	"skyworld": [
 		[480, -1, "main", 11480], // Goes back DOWN to main even though we came DOWN from there
-		[2000, 1, "hug", 0],
 		[6250, -1, "main", 17600],
 	],
 	"hug": [
-		[0, -1, "skyworld", 2000],
+		[560, -1, "main", 10320],
 	],
 
 };
