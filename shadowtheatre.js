@@ -42,6 +42,7 @@ const TRANSITIONS = {
 		[1600, -1, "pirate", 2500],
 		[6400, -1, "pirate", 4700],
 		[6400, 1, "disco", 0],
+		[11480, -1, "wuzworld", 0], // NB Mario tube, goes DOWN but to a world that is UP from elsewhere in the map
 		[12800, 1, "giant", 0],
 		[15600, -1, "dragon", 1000],
 		[17200, 1, "wuzworld", 0],
@@ -83,7 +84,6 @@ var wasIdle = true; // Whether no inputs were read on the last run through - for
 
 var anyInputOn = false; // Is anything being pressed or the joystick being moved?
 var anyButtonOn = false; // Is an actual button being pressed?
-var curLevel = 0; // Which level are we on? May not actually need to know this...
 var curArea = "main"; // Which area (contiguous left-right set of images) are we in?
 var permittedVertical = []; // Whether we can go up or down (or both) from the current location
 
@@ -385,7 +385,6 @@ function processActions(raf=true) {
     		// let keyframes = [ { "marginLeft": -sliderPos + "px"} ];
     		// elSlider.animate(keyframes, SCROLL_ANIMATION_OPTIONS);
   	}
-	dbgout += "<br>Level " + curLevel + ", Area: " + curArea;
   	dbgout += "<br>sliderPos: " + sliderPos;
 	
 	// Find out if we are near a transition point
