@@ -42,10 +42,10 @@ const TRANSITIONS = {
 		[1600, -1, "pirate", 2500],
 		[6400, -1, "pirate", 4700],
 		[6400, 1, "disco", 0],
-		[11480, -1, "wuzworld", 0], // NB Mario tube, goes DOWN but to a world that is UP from elsewhere in the map
+		[11480, -1, "skyworld", 480], // NB Mario tube, goes DOWN but to a world that is UP from elsewhere in the map
 		[12800, 1, "giant", 0],
 		[15600, -1, "dragon", 1000],
-		[17200, 1, "wuzworld", 0],
+		[17200, 1, "skyworld", 4200],
 	],
 	"disco": [
 		[0, -1, "main", 6400],
@@ -64,8 +64,13 @@ const TRANSITIONS = {
 		[2500, 1, "main", 1600],
 		[4700, 1, "main", 6400],
 	],
-	"wuzworld": [
-		[0, -1, "main", 17200],
+	"skyworld": [
+		[480, -1, "main", 11480], // Goes back DOWN to main even though we came DOWN from there
+		[2000, 1, "hug", 0],
+		[4200, -1, "main", 17200],
+	],
+	"hug": [
+		[0, -1, "skyworld", 2000],
 	],
 
 };
@@ -385,6 +390,7 @@ function processActions(raf=true) {
     		// let keyframes = [ { "marginLeft": -sliderPos + "px"} ];
     		// elSlider.animate(keyframes, SCROLL_ANIMATION_OPTIONS);
   	}
+	dbgout += "<br>Area: " + curArea;
   	dbgout += "<br>sliderPos: " + sliderPos;
 	
 	// Find out if we are near a transition point
@@ -396,13 +402,15 @@ function processActions(raf=true) {
 		destArea = permittedVertical[DOWN][0];
 		destPos = permittedVertical[DOWN][1];
 		direction = -1;
-		dbgout += "<br><b>Going DOWN to " + destArea + ":"  + destPos + "</b>";
+		// Clear any previous dbg messages
+		dbgout = "<b>Going DOWN to " + destArea + ":"  + destPos + "</b>";
 		changeArea = true;
 	} else if (permittedVertical[UP] && isOn[UP]) {
 		destArea = permittedVertical[UP][0];
 		destPos = permittedVertical[UP][1];
 		direction = 1;
-		dbgout += "<br><b>Going UP to " + destArea + " position " + destPos + "</b>";
+		// Clear any previous dbg messages
+		dbgout = "<b>Going UP to " + destArea + " position " + destPos + "</b>";
 		changeArea = true;
 	}
 	if (changeArea) {
