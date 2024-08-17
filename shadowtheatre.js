@@ -100,7 +100,6 @@ var dbgout = "";
 var elDbg = document.getElementById("debug");
 var elArrowDn = document.getElementById("arrowDn");
 var elArrowUp = document.getElementById("arrowUp");
-var elSlider = document.getElementById("slider");
 var elPartyOverlay = document.getElementById("partyOverlay");
 
 var dbg = function(str) {
@@ -258,6 +257,7 @@ function matrixLoop () {
   ctx.fillStyle = '#0f0';
   ctx.font = '15pt monospace';
   
+
   ypos.forEach((y, ind) => {
     const text = String.fromCharCode(Math.random() * 128);
     const x = ind * 20;
@@ -278,22 +278,82 @@ function party() {
 	colorAnims.push({backgroundColor: "black"});
 	let imageAnims = [];
 	for (let i = 0; i < 50; i++) {
-		let randomSize = Math.random() * 0.02 + 0.99; // From 0.99 to 1.01
+		let theseanims = {};
 		let randomOpacity = Math.random() * 0.25 + 0.25; // From 0.25 to 0.5
-		imageAnims.push({opacity: randomOpacity, transform: "scale(" + randomSize + ")"});
+		theseanims["opacity"] = randomOpacity;
+		theseanims["transform"] = "";
+		// Transforms become progressively more likely, and potentially larger, as we proceed
+		if (Math.random() * i > 5) {
+			let randomMoveX = Math.random() * i - i/2; // From -i/2 to +i/2
+			let randomMoveY = Math.random() * i - i/2; 
+			theseanims["transform"] += " translate(" + randomMoveX + "px, " + randomMoveY + "px)";
+		}
+		if (Math.random() * i > 10) {
+			let randomSizeX = Math.random() * i/4 - i/8 + 100; // From 100-i/4 to 100+i/4
+			// Preserve aspect ratio at first, then allow it to squish later
+			let randomSizeY = randomSizeX;
+			if (i > 30) {
+				randomSizeY = Math.random() * i/4 - i/8 + 100; // From 100-i/4 to 100+i/4
+			}
+			theseanims["transform"] += " scale(" + randomSizeX + "%, " + randomSizeY + "%)";
+		}
+		if (Math.random() * i > 20) {
+			let randomSkewX = Math.random() * i/5 - i/10; // From -i/10 to +i/10
+			let randomSkewY = Math.random() * i/5 - i/10;
+			theseanims["transform"] += " skew(" + randomSkewX + "deg, " + randomSkewY + "deg)";
+		}
+		theseanims["filter"] = "";
+		if (Math.random() * i > 30) {
+			let randomInvert = Math.random() * 100;
+			theseanims["filter"] += " invert(" + randomInvert + "%)";
+		}
+		if (Math.random() * i > 20) {
+			let randomDS1 = Math.random() * 20;
+			let randomDS2 = Math.random() * 20;
+			let randomDS3 = Math.random() * 30;
+			let randomDSR = Math.random() * 256;
+			let randomDSG = Math.random() * 256;
+			let randomDSB = Math.random() * 256;
+			theseanims["filter"] += " drop-shadow(" + randomDS1 + "px " + randomDS2 + "px " + randomDS3 + "px rgb(" + randomDSR + ", " + randomDSG + ", " + randomDSB + "))";
+		}
+		if (Math.random() * i > 30) {
+			let randomBlur = Math.random() * 20;
+			theseanims["filter"] += " blur(" + randomBlur + "px)";
+		}
+		imageAnims.push(theseanims);
+
 	}
-	imageAnims.push({transform: "scale(1)", opacity: 0.5}, {opacity: 0.75}, {opacity: 1});
+	imageAnims.push({transform: "scale(1.0) translate(0px,0px)", opacity: 0.5}, {opacity: 0.75}, {opacity: 1});
+	console.log(imageAnims);
 	// No forwards fill on these as we want them to return to the starting condition. Which we ensure anyway because we want to animate to the end
 	// instead of suddenly snapping back.
 	document.body.animate(colorAnims, {duration: partyTime});
-	elSlider.animate(imageAnims, {duration: partyTime});
+	let images = document.querySelectorAll(".slider .flexbox img");
+	for (let i = 0; i < images.length; i++) {
+		images[i].animate(imageAnims, {duration: partyTime}); 
+	}
+	// Motivational message
+	let messages = [
+		"REMAIN CALM",
+		"DON'T PANIC!!!",
+		"NORMALITY WILL RESUME SHORTLY. MAYBE.",
+		"EVERYTHING IS FINE.",
+		"IT'S SUPPOSED TO DO THAT, I THINK...",
+		"OH NO, WHAT HAVE YOU DONE?!?!",
+		"I FEEL STRANGE...",
+	];
+	let randomChoice = Math.random();
+	let offset = randomChoice * messages.length;
+	let selectedMessage = Math.trunc(offset);
+	console.log("randomChoice " + randomChoice + " > offset " + offset + " > selectedMessage " + selectedMessage);
+	setTimeout(function() {
+		showHud(messages[selectedMessage], 7000);
+	}, 3000);
 }
 
 function calculatePermittedVertical() {
 	let canMove = false;
 	let trans = TRANSITIONS[curArea];
-	console.log("CPV " + curArea + " trans has " + trans.length + " exits");
-	console.log(trans);
 	permittedVertical[DOWN] = permittedVertical[UP] = 0;
 	elArrowUp.style.left = elArrowDn.style.left = "-500px";
 	for (let i = 0; i < trans.length; i++) {
@@ -306,12 +366,10 @@ function calculatePermittedVertical() {
 				dbgout += "<br>Transition Point " + i + " in range - can go DOWN to " + destArea + ":" + destPos;
 				elArrowDn.style.left = "50vw";
 				permittedVertical[DOWN] = [destArea, destPos];
-				console.log("Showing down arrow");
 			} else if (direction > 0) {
 				dbgout += "<br>Transition Point " + i + " in range - can go UP to " + destArea + ":" + destPos;
 				elArrowUp.style.left = "50vw";
 				permittedVertical[UP] = [destArea, destPos];
-				console.log("Showing up arrow");
 			} else {
 				console.log("Invalid direction value");
 			}
@@ -340,7 +398,7 @@ function processActions(raf=true) {
 		  	// Got the code!
 			let matrixTime = 15000;
 			let matrixFadeTime = 3000;
-			elPartyOverlay.animate([{backgroundColor: "black",opacity: 0}, {backgroundColor: "black", opacity: 1.0}, {opacity: 0.5}, {backgroundColor: "white"}], {duration: matrixTime, fill: 'forwards'});
+			elPartyOverlay.animate([{backgroundColor: "black",opacity: 0, transform: "scale(1.0)"}, {backgroundColor: "black", opacity: 1.0, transform: "scale(1.05)"}, {opacity: 0.5, transform: "scale(1.1)"}, {opacity: 0, backgroundColor: "white", transform: "scale(1.2)"}], {duration: matrixTime, fill: 'forwards'});
 			canvas.animate([{opacity: 0}, {opacity: 1}], {duration: matrixFadeTime, fill: 'forwards'});
 			let matrixHandle = setInterval(matrixLoop, 50);
 			setTimeout(function() {
@@ -376,8 +434,6 @@ function processActions(raf=true) {
       			autoScroll = 0; // Switch off autoscroll at the edge
     		}
     		window.scroll(sliderPos,0);
-    		//let keyframes = [ { "marginLeft": -sliderPos + "px" } ];
-    		//elSlider.animate(keyframes, SCROLL_ANIMATION_OPTIONS);
   	} else if (isOn[RIGHT] || isOn[GREEN] || autoScroll == RIGHT) {
     		// Right
     		sliderPos += scrollSpeed;
@@ -387,8 +443,6 @@ function processActions(raf=true) {
       			autoScroll = 0; // Switch off autoscroll at the edge
     		}
     		window.scroll({left: sliderPos, behaviour: "smooth"});
-    		// let keyframes = [ { "marginLeft": -sliderPos + "px"} ];
-    		// elSlider.animate(keyframes, SCROLL_ANIMATION_OPTIONS);
   	}
 	dbgout += "<br>Area: " + curArea;
   	dbgout += "<br>sliderPos: " + sliderPos;
@@ -421,8 +475,6 @@ function processActions(raf=true) {
 		curArea = destArea;
 		sliderPos = destPos;
 		dbgout += " to " + curArea + ":" + sliderPos;
-		console.log(elCurArea);
-		console.log(elNewArea);
 		elNewArea.style.display = "block";
 		//elCurArea.animate([{opacity: 1}, {opacity: 0}], {duration: 1000, follow: "forwards"});
 		//elNewArea.animate([{opacity: 0}, {opacity: 1}], {duration: 1000, follow: "forwards"});

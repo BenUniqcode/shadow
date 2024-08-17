@@ -39,7 +39,7 @@
 	      border: 1px solid red;
 	      color: lightgreen;
 	      padding: 5px 10px;
-              z-index: 999;
+              z-index: 9999;
 	      background-color: #333;
       }
       #hud {
@@ -66,12 +66,13 @@
       }
       #partyOverlay {
 	      opacity: 0;
-	      background-color: black;
-	      position: absolute;
+	      background-color: green;
+	      position: fixed;
 	      top: 0;
 	      left: 0;
 	      bottom: 0;
 	      right: 0;
+	      z-index: 999;
       }
       @keyframes arrowpulse {
 	      0% { transform-origin: center; transform: scale(1.0); }
