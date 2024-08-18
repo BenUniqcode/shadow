@@ -6,13 +6,19 @@
  * Written in 2013 by Ted Mielczarek <ted@mielczarek.org>
  */
 // Meaning of button input numbers (i.e. which thing is plugged into which input on the controller PCB)
-const NUM_INPUTS = 6;
-const RED = 0;
-const GREEN = 1;
-const LEFT = 2;
-const RIGHT = 3;
-const UP = 4;
-const DOWN = 5;
+const NUM_INPUTS = 12;
+const LEFT = 0;
+const RIGHT = 1;
+const UP = 2;
+const DOWN = 3;
+const BTN_L1 = 4;
+const BTN_R1 = 5;
+const BTN_A = 6;
+const BTN_B = 7;
+const BTN_L2 = 8;
+const BTN_R2 = 9;
+const BTN_X = 10;
+const BTN_Y = 11;
 const SCROLLSPEED_MIN = 1;
 const SCROLLSPEED_MAX = 100;
 const KEYMAP = { // Keyboard control mapping to joystick equivalents
@@ -20,10 +26,10 @@ const KEYMAP = { // Keyboard control mapping to joystick equivalents
 	ArrowDown: DOWN,
 	ArrowLeft: LEFT,
 	ArrowRight: RIGHT,
-	Digit1: RED,
-	Digit2: GREEN,
+	Digit1: BTN_A,
+	Digit2: BTN_B,
 };
-const KONAMI_CODE = [UP, UP, DOWN, DOWN, LEFT, RIGHT, LEFT, RIGHT, GREEN, RED];
+const KONAMI_CODE = [UP, UP, DOWN, DOWN, LEFT, RIGHT, LEFT, RIGHT, BTN_B, BTN_A];
 
 const SCROLL_ANIMATION_OPTIONS = {
 	duration: 200,
@@ -169,10 +175,8 @@ function readGamepad() {
 	} else {
 		isOn[LEFT] = isOn[RIGHT] = 0;
 	}
-	// Due to inconsistencies in the way different browsers report axes, 
-	// plus the fact they are analogue numbers when our joystick is a simple on/off microswitch for each direction
-	// we use button inputs for the joystick instead of axes.
-	// The first two buttons (0 and 1) are the actual buttons. The next four are the L, R, U, D.
+  	// Button inputs are numbered 0 ..
+  	// For our internal numbering, add 4 because 0..3 are for left/right/up/down joystick
 	for (var i = 0; i < controller.buttons.length; i++) {
 		var isPressed = false, isTouched = false; // Is this button pressed/touched
 		var val = controller.buttons[i];
@@ -185,12 +189,12 @@ function readGamepad() {
 			isPressed = val == 1.0;
 		}
 		dbgout += i + ": " + (isPressed ? "pressed " : "") + (isTouched ? "touched" : "") + "<br>";
-		// Button pressed are OR'd with joystick movements
-		isOn[i] |= isPressed | isTouched;
-		anyInputOn |= isOn[i];
-		if (i == RED || i == GREEN) {
-			anyButtonOn |= isOn[i];
-		}
+		// Store the button state in its own slot first
+		isOn[i + 4] = isPressed | isTouched;
+		anyInputOn = isOn[i + 4];
+		// But the meaning of all the buttons is just direction movements, so OR them with joystick movements
+		// They've been wired up such that the order of each block of 4 matches the order of the joystick directions
+		isOn[i % 4] |= isOn[i + 4];
 	}
 
 	processActions(false);
@@ -235,6 +239,7 @@ function keyup(e) {
 
 		rAF(processActions);
 	}
+    
 }
 
 // Show the hud (if it's not already showing) with the given text, for the given number of milliseconds
