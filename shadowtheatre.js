@@ -283,22 +283,22 @@ function party() {
 		theseanims["transform"] = "";
 		// Transforms become progressively more likely, and potentially larger, as we proceed
 		if (Math.random() * i > 5) {
-			let randomMoveX = Math.random() * i - i/2; // From -i/2 to +i/2
-			let randomMoveY = Math.random() * i - i/2; 
+			let randomMoveX = Math.random() * i - i / 2; // From -i/2 to +i/2
+			let randomMoveY = Math.random() * i - i / 2;
 			theseanims["transform"] += " translate(" + randomMoveX + "px, " + randomMoveY + "px)";
 		}
 		if (Math.random() * i > 10) {
-			let randomSizeX = Math.random() * i/4 - i/8 + 100; // From 100-i/4 to 100+i/4
+			let randomSizeX = Math.random() * i / 4 - i / 8 + 100; // From 100-i/4 to 100+i/4
 			// Preserve aspect ratio at first, then allow it to squish later
 			let randomSizeY = randomSizeX;
 			if (i > 30) {
-				randomSizeY = Math.random() * i/4 - i/8 + 100; // From 100-i/4 to 100+i/4
+				randomSizeY = Math.random() * i / 4 - i / 8 + 100; // From 100-i/4 to 100+i/4
 			}
 			theseanims["transform"] += " scale(" + randomSizeX + "%, " + randomSizeY + "%)";
 		}
 		if (Math.random() * i > 20) {
-			let randomSkewX = Math.random() * i/5 - i/10; // From -i/10 to +i/10
-			let randomSkewY = Math.random() * i/5 - i/10;
+			let randomSkewX = Math.random() * i / 5 - i / 10; // From -i/10 to +i/10
+			let randomSkewY = Math.random() * i / 5 - i / 10;
 			theseanims["transform"] += " skew(" + randomSkewX + "deg, " + randomSkewY + "deg)";
 		}
 		theseanims["filter"] = "";
@@ -322,14 +322,14 @@ function party() {
 		imageAnims.push(theseanims);
 
 	}
-	imageAnims.push({transform: "scale(1.0) translate(0px,0px)", opacity: 0.5}, {opacity: 0.75}, {opacity: 1});
+	imageAnims.push({ transform: "scale(1.0) translate(0px,0px)", opacity: 0.5 }, { opacity: 0.75 }, { opacity: 1 });
 	console.log(imageAnims);
 	// No forwards fill on these as we want them to return to the starting condition. Which we ensure anyway because we want to animate to the end
 	// instead of suddenly snapping back.
-	document.body.animate(colorAnims, {duration: partyTime});
+	document.body.animate(colorAnims, { duration: partyTime });
 	let images = document.querySelectorAll(".slider .flexbox img");
 	for (let i = 0; i < images.length; i++) {
-		images[i].animate(imageAnims, {duration: partyTime}); 
+		images[i].animate(imageAnims, { duration: partyTime });
 	}
 	// Motivational message
 	let messages = [
@@ -345,7 +345,7 @@ function party() {
 	let offset = randomChoice * messages.length;
 	let selectedMessage = Math.trunc(offset);
 	console.log("randomChoice " + randomChoice + " > offset " + offset + " > selectedMessage " + selectedMessage);
-	setTimeout(function() {
+	setTimeout(function () {
 		showHud(messages[selectedMessage], 7000);
 	}, 3000);
 }
@@ -396,9 +396,9 @@ function moveTo(destArea, destPos) {
 	// see the jump when we scroll to the right place on the new image. So it's easier to just fade everything to black 
 	// (including the arrows because they change too) while the changeover happens.
 	let everything = document.getElementById("everything");
-	everything.animate([{opacity: 1}, {opacity: 0}, {opacity: 1}], {duration: TRANSITION_TIME, follow: "forwards"});
+	everything.animate([{ opacity: 1 }, { opacity: 0 }, { opacity: 1 }], { duration: TRANSITION_TIME, follow: "forwards" });
 	// Halfway through the transition, swap over the images, scroll to the right place, and calculate the new exits
-	setTimeout(function() {
+	setTimeout(function () {
 		elCurArea.style.display = "none";
 		elNewArea.style.display = "block";
 		window.scroll({ left: sliderPos });
