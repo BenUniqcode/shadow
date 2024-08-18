@@ -143,7 +143,7 @@ function disconnecthandler(e) {
 }
 
 function readGamepad() {
-	dbgout = "";
+	//dbgout = "";
 	const gamepads = navigator.getGamepads();
 	controller = gamepads[0];
 
@@ -155,7 +155,7 @@ function readGamepad() {
 	anyInputOn = false;
 
 	for (var i = 0; i < controller.axes.length; i++) {
-		dbgout += "Axis " + i + " value " + controller.axes[i] + "<br>";
+		//dbgout += "Axis " + i + " value " + controller.axes[i] + "<br>";
 	}
 	if (controller.axes[0] > 0.5) {
 		isOn[DOWN] = 1;
@@ -192,7 +192,7 @@ function readGamepad() {
 		} else {
 			isPressed = val == 1.0;
 		}
-		dbgout += i + ": " + (isPressed ? "pressed " : "") + (isTouched ? "touched" : "") + "<br>";
+		//dbgout += i + ": " + (isPressed ? "pressed " : "") + (isTouched ? "touched" : "") + "<br>";
 		// Store the button state in its own slot first
 		isOn[i + 4] = isPressed | isTouched;
 		anyInputOn |= isOn[i + 4];
@@ -500,6 +500,7 @@ function processActions(raf = true) {
 			// let keyframes = [ { "marginLeft": -sliderPos + "px"} ];
 			// elSlider.animate(keyframes, SCROLL_ANIMATION_OPTIONS);
 		}
+		dbgout = ""
 		dbgout += "<br>Area: " + curArea;
 		dbgout += "<br>sliderPos: " + sliderPos;
 
