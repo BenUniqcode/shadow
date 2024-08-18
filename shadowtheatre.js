@@ -152,24 +152,30 @@ function readGamepad() {
 		return;
 	}
 
+	anyInputOn = false;
+
 	for (var i = 0; i < controller.axes.length; i++) {
 		dbgout += "Axis " + i + " value " + controller.axes[i] + "<br>";
 	}
 	if (controller.axes[0] > 0.5) {
 		isOn[DOWN] = 1;
 		isOn[UP] = 0;
+		anyInputOn = true;
 	} else if (controller.axes[0] < -0.5) {
 		isOn[UP] = 1;
 		isOn[DOWN] = 0;
+		anyInputOn = true;
 	} else {
 		isOn[UP] = isOn[DOWN] = 0;
 	}
 	if (controller.axes[1] > 0.5) {
 		isOn[LEFT] = 1;
 		isOn[RIGHT] = 0;
+		anyInputOn = true;
 	} else if (controller.axes[1] < -0.5) {
 		isOn[RIGHT] = 1;
 		isOn[LEFT] = 0;
+		anyInputOn = true;
 	} else {
 		isOn[LEFT] = isOn[RIGHT] = 0;
 	}
@@ -189,7 +195,7 @@ function readGamepad() {
 		dbgout += i + ": " + (isPressed ? "pressed " : "") + (isTouched ? "touched" : "") + "<br>";
 		// Store the button state in its own slot first
 		isOn[i + 4] = isPressed | isTouched;
-		anyInputOn = isOn[i + 4];
+		anyInputOn |= isOn[i + 4];
 		// But the meaning of all the buttons is just direction movements, so OR them with joystick movements
 		// They've been wired up such that the order of each block of 4 matches the order of the joystick directions
 		isOn[i % 4] |= isOn[i + 4];
