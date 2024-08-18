@@ -355,7 +355,7 @@ function party() {
 	// No forwards fill on these as we want them to return to the starting condition. Which we ensure anyway because we want to animate to the end
 	// instead of suddenly snapping back.
 	document.body.animate(colorAnims, { duration: partyTime });
-	let images = document.querySelectorAll(".slider .flexbox img");
+	let images = document.querySelectorAll("#area-" + curArea + " .slider .flexbox img");
 	for (let i = 0; i < images.length; i++) {
 		images[i].animate(imageAnims, { duration: partyTime });
 	}
