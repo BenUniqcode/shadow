@@ -1,208 +1,229 @@
 <!DOCTYPE html>
 <meta charset="UTF-8">
 <html>
-  <head>
-    <title>Shadow Theatre</title>
-    <style type="text/css">
-      body {
-	      font-family: sans-serif;
-	      background-color: black;
-	      margin-top: 0;
-	      margin-bottom: 0;
-	      xscroll-behavior: smooth;
-	      padding: 0;
-	      margin: 0;
-      }
-      #keyinput {
-        width: 1px;
-        height: 1px;
-        position: absolute;
-        left: -10px;
-        top: -10px;
-      }
-      .slider {
-	padding-top: 160px; /* Position scaled images central on screen */
-	padding-bottom: 160px; /* Position scaled images central on screen */
-      }
-      .slider .flexbox {
-	display: flex;     
-	height: 760px;
-      }
-      .hide {
-	      display: none;
-      }
-      #debug {
-	      position: fixed;
-	      top: 10px;
-	      left: 5px;
-	      width: 300px;
-	      border: 1px solid red;
-	      color: lightgreen;
-	      padding: 5px 10px;
-              z-index: 9999;
-	      background-color: #333;
-      }
-      #hud {
-	      position: fixed;
-	      top: calc(50% - 25px);
-	      left: calc(50% - 200px);
-	      width: 400px;
-	      padding: 25px 40px;
-	      border: 2px solid #aaa;
-	      border-radius: 15px;
-	      background-color: #ddd;
-	      color: black;
-	      font-size: 40px;
-	      text-align: center;
-	      font-weight: bold;
-      }
-      #hud:not(.visible) {
-	      opacity: 0;
-	      transition: opacity 0.5s linear;
-      }
-      #hud.visible {
-	      opacity: 1;
-	      transition: opacity 0.1s linear;
-      }
-      #partyOverlay {
-	      opacity: 0;
-	      background-color: green;
-	      position: fixed;
-	      top: 0;
-	      left: 0;
-	      bottom: 0;
-	      right: 0;
-	      z-index: 999;
-      }
-      @keyframes arrowpulse {
-	      0% { transform-origin: center; transform: scale(1.0); }
-	      100% { transform-origin: center; transform: scale(1.1); }
-      }
-	      
-      .arrow {
-	      position: fixed;
-	      left: -500px;
-	      width: 50px;
-	      height: 50px;
-	      z-index: 2;
-              animation-name: arrowpulse;
-	      animation-timing-function: ease-out;
-	      animation-duration: 200ms;
-	      animation-iteration-count: infinite;
-	      animation-direction: alternate;
-      }
 
-      #arrowUp {
-	      /* It's a 1080px screen but a 760px image, so bars of 160px top and bottom */
-	      top: 170px;
-	      color: green;
-      }
+<head>
+	<title>Shadow Theatre</title>
+	<style type="text/css">
+		body {
+			font-family: sans-serif;
+			background-color: black;
+			margin-top: 0;
+			margin-bottom: 0;
+			padding: 0;
+			margin: 0;
+		}
 
-      #arrowDn {
-	      bottom: 170px;
-	      color: lightgreen;
-      }
+		#keyinput {
+			width: 1px;
+			height: 1px;
+			position: absolute;
+			left: -10px;
+			top: -10px;
+		}
 
-      #arrowDn img {
-	      transform: rotate(180deg);
-      }
+		.slider {
+			padding-top: 160px;
+			/* Position scaled images central on screen */
+			padding-bottom: 160px;
+			/* Position scaled images central on screen */
+		}
 
-    </style>
-  </head>
-  <body>
-    <div id="partyOverlay">
-	    <canvas id="canv"></canvas>
-    </div>
-    <div id="debug"></div>
-    <textarea id="keyinput"></textarea><!-- Offscreen; required for keyboard control -->
-    <div id="hud"></div>
-    <div id="arrowDn" class="arrow">
-	    <img src="images/v3.1/arrow2_transp.png">
-    </div>
-    <div id="arrowUp" class="arrow">
-	    <img src="images/v3.1/arrow2_transp.png">
-    </div>
-      <div id="area-main">
-        <div class="slider">
-	      <div class="flexbox">
-      		<img src="images/v3.1/main/1.png">
-      		<img src="images/v3.1/main/2.png">
-      		<img src="images/v3.1/main/3.png">
-      		<img src="images/v3.1/main/4.png">
-      		<img src="images/v3.1/main/5.png">
-      		<img src="images/v3.1/main/6.png">
-      		<img src="images/v3.1/main/7.png">
-      		<img src="images/v3.1/main/8.png">
-      		<img src="images/v3.1/main/9.png">
-      		<img src="images/v3.1/main/10.png">
-      		<img src="images/v3.1/main/11.png">
-      		<img src="images/v3.1/main/12.png">
-      		<img src="images/v3.1/main/13.png">
-      		<img src="images/v3.1/main/14.png">
-      		<img src="images/v3.1/main/15.png">
-	      </div>
-        </div>
-      </div>
-      <div id="area-pirate" style="display: none">
-        <div class="slider">
-	      <div class="flexbox">
-      		<img src="images/v3.1/pirate/1.png">
-      		<img src="images/v3.1/pirate/2.png">
-      		<img src="images/v3.1/pirate/3.png">
-      		<img src="images/v3.1/pirate/4.png">
-      		<img src="images/v3.1/pirate/5.png">
-	      </div>
-        </div>
-      </div>
-      <div id="area-disco" style="display: none">
-        <div class="slider">
-	      <div class="flexbox" style="text-align: center; font-size: 100px; font-weight: bold; border: 2px solid white; color: white; padding: 20px 10px;">Disco</div>
-        </div>
-      </div>
-      <div id="area-giant" style="display: none">
-        <div class="slider">
-	      <div class="flexbox">
-      		<img src="images/v3.1/giant/1.png">
-      		<img src="images/v3.1/giant/2.png">
-      		<img src="images/v3.1/giant/3.png">
-      		<img src="images/v3.1/giant/4.png">
-      		<img src="images/v3.1/giant/5.png">
-	      </div>
-        </div>
-      </div>
-      <div id="area-dragon" style="display: none">
-        <div class="slider">
-	      <div class="flexbox">
-      		<img src="images/v3.1/dragon/1.png">
-      		<img src="images/v3.1/dragon/2.png">
-      		<img src="images/v3.1/dragon/3.png">
-	      </div>
-        </div>
-      </div>
-      <div id="area-hell" style="display: none">
-	<!-- NO SLIDER - needs to fill whole screen due to aspect ratio -->
-        <!-- No flexbox needed as it's a single -->
-      		<video autoplay muted playsinline loop width="1920" height="1080" style="width: 100%; height: 100%">
-			<source src="images/v3.1/hell/Hell Fire video Loop footage.mp4" type="video/mp4">
-		</video>
-      </div>
-      <div id="area-skyworld" style="display: none">
-        <div class="slider">
-	      <div class="flexbox">
-      		<img src="images/v3.1/skyworld/cropped.png">
-	      </div>
-        </div>
-      </div>
-      <div id="area-hug" style="display: none">
-        <div class="slider">
-	      <div class="flexbox">
-      		<img src="images/v3.1/hug/cropped.png">
-	      </div>
-        </div>
-      </div>
-    </div>
+		.slider .flexbox {
+			display: flex;
+			height: 760px;
+		}
 
-    <script src="shadowtheatre.js?34675712"></script>
+		.hide {
+			display: none;
+		}
 
-  </body>
+		#debug {
+			position: fixed;
+			top: 10px;
+			left: 5px;
+			width: 300px;
+			border: 1px solid red;
+			color: lightgreen;
+			padding: 5px 10px;
+			z-index: 999;
+			background-color: #333;
+		}
+
+		#hud {
+			position: fixed;
+			top: calc(50% - 25px);
+			left: calc(50% - 200px);
+			width: 400px;
+			padding: 25px 40px;
+			border: 2px solid #aaa;
+			border-radius: 15px;
+			background-color: #ddd;
+			color: black;
+			font-size: 40px;
+			text-align: center;
+			font-weight: bold;
+		}
+
+		#hud:not(.visible) {
+			opacity: 0;
+			transition: opacity 0.5s linear;
+		}
+
+		#hud.visible {
+			opacity: 1;
+			transition: opacity 0.1s linear;
+		}
+
+		#partyOverlay {
+			opacity: 0;
+			background-color: black;
+			position: absolute;
+			top: 0;
+			left: 0;
+			bottom: 0;
+			right: 0;
+		}
+
+		@keyframes arrowpulse {
+			0% {
+				transform-origin: center;
+				transform: scale(1.0);
+			}
+
+			100% {
+				transform-origin: center;
+				transform: scale(1.1);
+			}
+		}
+
+		.arrow {
+			position: fixed;
+			left: -500px;
+			width: 50px;
+			height: 50px;
+			z-index: 2;
+			animation-name: arrowpulse;
+			animation-timing-function: ease-out;
+			animation-duration: 200ms;
+			animation-iteration-count: infinite;
+			animation-direction: alternate;
+		}
+
+		#arrowUp {
+			/* It's a 1080px screen but a 760px image, so bars of 160px top and bottom */
+			top: 170px;
+			color: green;
+		}
+
+		#arrowDn {
+			bottom: 170px;
+			color: lightgreen;
+		}
+
+		#arrowDn img {
+			transform: rotate(180deg);
+		}
+	</style>
+</head>
+
+<body>
+	<div id="everything">
+		<div id="partyOverlay">
+			<canvas id="canv"></canvas>
+		</div>
+		<textarea id="keyinput"></textarea><!-- Offscreen; required for keyboard control -->
+		<div id="debug"></div>
+		<div id="hud"></div>
+		<div id="arrowDn" class="arrow">
+			<img src="images/v3.1/arrow2_transp.png">
+		</div>
+		<div id="arrowUp" class="arrow">
+			<img src="images/v3.1/arrow2_transp.png">
+		</div>
+		<div id="area-main">
+			<div class="slider">
+				<div class="flexbox">
+					<img src="images/v3.1/main/1.png">
+					<img src="images/v3.1/main/2.png">
+					<img src="images/v3.1/main/3.png">
+					<img src="images/v3.1/main/4.png">
+					<img src="images/v3.1/main/5.png">
+					<img src="images/v3.1/main/6.png">
+					<img src="images/v3.1/main/7.png">
+					<img src="images/v3.1/main/8.png">
+					<img src="images/v3.1/main/9.png">
+					<img src="images/v3.1/main/10.png">
+					<img src="images/v3.1/main/11.png">
+					<img src="images/v3.1/main/12.png">
+					<img src="images/v3.1/main/13.png">
+					<img src="images/v3.1/main/14.png">
+					<img src="images/v3.1/main/15.png">
+				</div>
+			</div>
+		</div>
+		<div id="area-pirate" style="display: none">
+			<div class="slider">
+				<div class="flexbox">
+					<img src="images/v3.1/pirate/1.png">
+					<img src="images/v3.1/pirate/2.png">
+					<img src="images/v3.1/pirate/3.png">
+					<img src="images/v3.1/pirate/4.png">
+					<img src="images/v3.1/pirate/5.png">
+				</div>
+			</div>
+		</div>
+		<div id="area-disco" style="display: none">
+			<div class="slider">
+				<div class="flexbox"
+					style="text-align: center; font-size: 100px; font-weight: bold; border: 2px solid white; color: white; padding: 20px 10px;">
+					Disco</div>
+			</div>
+		</div>
+		<div id="area-giant" style="display: none">
+			<div class="slider">
+				<div class="flexbox">
+					<img src="images/v3.1/giant/1.png">
+					<img src="images/v3.1/giant/2.png">
+					<img src="images/v3.1/giant/3.png">
+					<img src="images/v3.1/giant/4.png">
+					<img src="images/v3.1/giant/5.png">
+				</div>
+			</div>
+		</div>
+		<div id="area-dragon" style="display: none">
+			<div class="slider">
+				<div class="flexbox">
+					<img src="images/v3.1/dragon/1.png">
+					<img src="images/v3.1/dragon/2.png">
+					<img src="images/v3.1/dragon/3.png">
+				</div>
+			</div>
+		</div>
+		<div id="area-hell" style="display: none">
+			<!-- NO SLIDER - needs to fill whole screen due to aspect ratio -->
+			<!-- No flexbox needed as it's a single -->
+			<video autoplay muted playsinline loop width="1920" height="1080" style="width: 100%; height: 100%">
+				<source src="images/v3.1/hell/Hell Fire video Loop footage.mp4" type="video/mp4">
+			</video>
+		</div>
+		<div id="area-skyworld" style="display: none">
+			<div class="slider">
+				<div class="flexbox">
+					<img src="images/v3.1/skyworld/cropped.png">
+				</div>
+			</div>
+		</div>
+		<div id="area-hug" style="display: none">
+			<div class="slider">
+				<div class="flexbox">
+					<img src="images/v3.1/hug/cropped.png">
+				</div>
+			</div>
+		</div>
+	</div>
+	<script src="shadowtheatre.js?34675712"></script>
+
+</body>
+
 </html>
