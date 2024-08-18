@@ -292,7 +292,7 @@ function party() {
 		inputsBlocked = false;
 	}, partyTime);
 	let colorAnims = [];
-	for (let i = 0; i < 50; i++) {
+	for (let i = 0; i < 20; i++) {
 		let randomR = Math.floor(Math.random() * 256);
 		let randomG = Math.floor(Math.random() * 256);
 		let randomB = Math.floor(Math.random() * 256);
@@ -356,8 +356,37 @@ function party() {
 	// instead of suddenly snapping back.
 	document.body.animate(colorAnims, { duration: partyTime });
 	let images = document.querySelectorAll("#area-" + curArea + " .slider .flexbox img");
-	for (let i = 0; i < images.length; i++) {
-		images[i].animate(imageAnims, { duration: partyTime });
+	// If there is only one image, do it
+	// Otherwise, try to only animate the main image that's on the screen, and its neighbours
+	if (images.length == 1) {
+		console.log("Only one image in this area");
+		images[0].animate(imageAnims, { duration: partyTime });
+	} else {
+		// When there are multiple images in a slider, assume they are all the same size (1351 wide)
+		// The image at the leftmost edge of the screen will therefore be floor(sliderPos / 1351)
+		let leftImage = Math.floor(sliderPos / 1351);
+		console.log("leftImage: " + leftImage);
+		let imagesToAnimate = [leftImage];
+		// But do the left neighbour too because they might be on the screen, or creep
+		// onto the screen during the animations
+		if (leftImage > 0) {
+			imagesToAnimate.push(leftImage - 1);
+			console.log("Also animating the one to the left: " + (leftImage - 1));
+		}
+		// Doing the two to the right (if there are that many) should always be sufficient to cover 
+		// the whole screen. 
+		if (leftImage < images.length - 1) {
+			imagesToAnimate.push(leftImage + 1);
+			console.log("Also animating the one to the right: " + (leftImage + 1));
+		}
+		if (leftImage < images.length - 2) {
+			imagesToAnimate.push(leftImage + 2);
+			console.log("Also animating two to the right: " + (leftImage + 2));
+		}
+		for (let i = 0; i < imagesToAnimate.length; i++) {
+			console.log("Animating: " + imagesToAnimate[i]);
+			images[imagesToAnimate[i]].animate(imageAnims, { duration: partyTime });
+		}
 	}
 	// Motivational message
 	let messages = [
@@ -444,7 +473,9 @@ function moveTo(destArea, destPos) {
 function processActions(raf = true) {
 	if (inputsBlocked) {
 		if (raf) {
-			rAF(processActions);
+			setTimeout(function() {
+				rAF(processActions);
+			}, 20);
 		}
 		return;
 	}
