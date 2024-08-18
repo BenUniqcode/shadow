@@ -327,16 +327,20 @@ function party() {
 			theseanims["filter"] += " invert(" + randomInvert + "%)";
 		}
 		if (Math.random() * i > 20) {
-			let randomDS1 = Math.random() * 20;
-			let randomDS2 = Math.random() * 20;
-			let randomDS3 = Math.random() * 30;
-			let randomDSR = Math.random() * 256;
-			let randomDSG = Math.random() * 256;
-			let randomDSB = Math.random() * 256;
+			let randomDS1 = Math.floor(Math.random() * 50);
+			let randomDS2 = Math.floor(Math.random() * 50);
+			let randomDS3 = Math.floor(Math.random() * 70);
+			let randomDSR = Math.floor(Math.random() * 256);
+			let randomDSG = Math.floor(Math.random() * 256);
+			let randomDSB = Math.floor(Math.random() * 256);
 			theseanims["filter"] += " drop-shadow(" + randomDS1 + "px " + randomDS2 + "px " + randomDS3 + "px rgb(" + randomDSR + ", " + randomDSG + ", " + randomDSB + "))";
 		}
+		if (Math.random() * i > 20) {
+			let randomRot = Math.floor(Math.random() * 360);
+			theseanims["filter"] += " hue-rotate(" + randomRot + "deg)";
+		}
 		if (Math.random() * i > 30) {
-			let randomBlur = Math.random() * 20;
+			let randomBlur = Math.floor(Math.random() * 30);
 			theseanims["filter"] += " blur(" + randomBlur + "px)";
 		}
 		imageAnims.push(theseanims);
