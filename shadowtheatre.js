@@ -238,9 +238,25 @@ function keyup(e) {
 }
 
 // Show the hud (if it's not already showing) with the given text, for the given number of milliseconds
-function showHud(text, fadeTime) {
+function showHud(text, fadeTime, flashing = false) {
 	var hud = document.getElementById("hud");
 	hud.innerHTML = text;
+	if (flashing) {
+		var flashOns = setInterval(function() {
+			hud.classList.add("visible");
+		}, 900);
+		setTimeout(function() {
+			var flashOffs = setInterval(function() {
+				hud.classList.remove("visible");
+			}, 900);
+		}, 450);
+		setTimeout(function() {
+			clearInterval(flashOns);
+			clearInterval(flashOffs);
+			hud.classList.remove("visible");
+		}, fadeTime);
+		return;
+	} 
 	hud.classList.add("visible");
 	// Start fading the hud after a bit, first resetting the timer if already running
 	clearTimeout(hudFader);
@@ -346,7 +362,7 @@ function party() {
 	let selectedMessage = Math.trunc(offset);
 	console.log("randomChoice " + randomChoice + " > offset " + offset + " > selectedMessage " + selectedMessage);
 	setTimeout(function () {
-		showHud(messages[selectedMessage], 7000);
+		showHud(messages[selectedMessage], 7000, true);
 	}, 3000);
 }
 
