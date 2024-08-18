@@ -98,7 +98,6 @@ var wasIdle = true; // Whether no inputs were read on the last run through - for
 
 var inputsBlocked = false; // Further inputs are ignored during a transition from one area to another
 var anyInputOn = false; // Is anything being pressed or the joystick being moved?
-var anyButtonOn = false; // Is an actual button being pressed?
 var curArea = "main"; // Which area (contiguous left-right set of images) are we in?
 var permittedVertical = []; // Whether we can go up or down (or both) from the current location
 
@@ -210,9 +209,6 @@ function keydown(e) {
 		let i = KEYMAP[e.code];
 		isOn[i] = true;
 		anyInputOn |= isOn[i];
-		if (i == RED || i == GREEN) {
-			anyButtonOn |= isOn[i];
-		}
 		rAF(processActions);
 	}
 }
@@ -227,15 +223,10 @@ function keyup(e) {
 		// If nothing else is on, update the global any* variables
 		// Do it with local variables so we don't set them false if they shouldn't be false
 		let anyInputOnNow = false;
-		let anyButtonOnNow = false;
 		for (let i = 0; i < NUM_INPUTS; i++) {
 			anyInputOnNow |= isOn[i];
-			if (i == RED || i == GREEN) {
-				anyButtonOnNow |= isOn[i];
-			}
 		}
 		anyInputOn = anyInputOnNow;
-		anyButtonOn = anyButtonOnNow;
 
 		rAF(processActions);
 	}
@@ -481,7 +472,7 @@ function processActions(raf = true) {
 		wasIdle = false;
 
 		// Handle left/right movement
-		if (isOn[LEFT] || isOn[RED] || autoScroll == LEFT) {
+		if (isOn[LEFT] || autoScroll == LEFT) {
 			// Left
 			sliderPos -= scrollSpeed;
 			if (sliderPos < 0) {
@@ -491,7 +482,7 @@ function processActions(raf = true) {
 			window.scroll(sliderPos, 0);
 			//let keyframes = [ { "marginLeft": -sliderPos + "px" } ];
 			//elSlider.animate(keyframes, SCROLL_ANIMATION_OPTIONS);
-		} else if (isOn[RIGHT] || isOn[GREEN] || autoScroll == RIGHT) {
+		} else if (isOn[RIGHT] || autoScroll == RIGHT) {
 			// Right
 			sliderPos += scrollSpeed;
 			var maxScroll = document.body.scrollWidth - document.body.clientWidth;
