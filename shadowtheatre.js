@@ -112,7 +112,9 @@ var elArrowUp = document.getElementById("arrowUp");
 var elPartyOverlay = document.getElementById("partyOverlay");
 
 var dbg = function (str) {
-	elDbg.innerHTML = str;
+	if (elDbg.innerHTML != str) {
+		elDbg.innerHTML = str;
+	}
 };
 
 var rAF = window.requestAnimationFrame;
@@ -143,7 +145,6 @@ function disconnecthandler(e) {
 
 function readGamepad() {
 	dbgout = "";
-	console.log("readGamepad");
 	const gamepads = navigator.getGamepads();
 	controller = gamepads[0];
 
@@ -151,10 +152,9 @@ function readGamepad() {
 		dbg("No controller");
 		return;
 	}
-	console.log("Found gamepad with ${controller.buttons.length} buttons");
 
 	for (var i = 0; i < controller.axes.length; i++) {
-		dbgout += "<br>Axis " + i + " value " + controller.axes[i];
+		dbgout += "Axis " + i + " value " + controller.axes[i] + "<br>";
 	}
 	if (controller.axes[0] > 0.5) {
 		isOn[DOWN] = 1;
@@ -195,7 +195,7 @@ function readGamepad() {
 		// They've been wired up such that the order of each block of 4 matches the order of the joystick directions
 		isOn[i % 4] |= isOn[i + 4];
 	}
-
+	
 	processActions(false);
 	rAF(readGamepad);
 }
@@ -238,11 +238,12 @@ function showHud(text, fadeTime, flashing = false) {
 	var hud = document.getElementById("hud");
 	hud.innerHTML = text;
 	if (flashing) {
-		var flashOns = setInterval(function() {
+		var flashOns, flashOffs;
+		flashOns = setInterval(function() {
 			hud.classList.add("visible");
 		}, 900);
 		setTimeout(function() {
-			var flashOffs = setInterval(function() {
+			flashOffs = setInterval(function() {
 				hud.classList.remove("visible");
 			}, 900);
 		}, 450);
@@ -283,8 +284,10 @@ function party() {
 	let partyTime = 12000;
 	let colorAnims = [];
 	for (let i = 0; i < 50; i++) {
-		let randomColor = Math.floor(Math.random() * 16777215).toString(16);
-		colorAnims.push({ backgroundColor: '#' + randomColor });
+		let randomR = Math.floor(Math.random() * 256);
+		let randomG = Math.floor(Math.random() * 256);
+		let randomB = Math.floor(Math.random() * 256);
+		colorAnims.push({ backgroundColor: "rgb(" + randomR + "," + randomG + "," + randomB + ")" });
 	}
 	colorAnims.push({ backgroundColor: "black" });
 	let imageAnims = [];
@@ -520,7 +523,7 @@ function processActions(raf = true) {
 		if (changeArea) {
 			moveTo(destArea, destPos);
 		}
-		// Output the debug messages
+		// Output the debug messages only if they've changed
 		dbg(dbgout);
 	}
 
