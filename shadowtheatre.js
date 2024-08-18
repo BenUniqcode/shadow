@@ -87,7 +87,6 @@ const TRANSITION_RANGE = 500;
 const TRANSITION_TIME = 1000;
 
 var isOn = {}; // Map of button input number to true/false
-var autoScroll = 0;
 var scrollSpeed = 40;
 var sliderPos = 0;
 var scrollSpeedLimiter = false; // Is set to true when the scroll speed changes, which blocks further changes for a while, to reduce the speed at which it was changing
@@ -475,23 +474,21 @@ function processActions(raf = true) {
 		wasIdle = false;
 
 		// Handle left/right movement
-		if (isOn[LEFT] || autoScroll == LEFT) {
+		if (isOn[LEFT]) {
 			// Left
 			sliderPos -= scrollSpeed;
 			if (sliderPos < 0) {
 				sliderPos = 0; // Don't go past the left edge
-				autoScroll = 0; // Switch off autoscroll at the edge
 			}
 			window.scroll(sliderPos, 0);
 			//let keyframes = [ { "marginLeft": -sliderPos + "px" } ];
 			//elSlider.animate(keyframes, SCROLL_ANIMATION_OPTIONS);
-		} else if (isOn[RIGHT] || autoScroll == RIGHT) {
+		} else if (isOn[RIGHT]) {
 			// Right
 			sliderPos += scrollSpeed;
 			var maxScroll = document.body.scrollWidth - document.body.clientWidth;
 			if (sliderPos > maxScroll) {
 				sliderPos = maxScroll; // Don't go past the right edge
-				autoScroll = 0; // Switch off autoscroll at the edge
 			}
 			window.scroll({ left: sliderPos, behaviour: "smooth" });
 			// let keyframes = [ { "marginLeft": -sliderPos + "px"} ];
