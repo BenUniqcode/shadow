@@ -287,6 +287,10 @@ function matrixLoop() {
 
 function party() {
 	let partyTime = 12000;
+	inputsBlocked = true;
+	setTimeout(function() {
+		inputsBlocked = false;
+	}, partyTime);
 	let colorAnims = [];
 	for (let i = 0; i < 50; i++) {
 		let randomR = Math.floor(Math.random() * 256);
