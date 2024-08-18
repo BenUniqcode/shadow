@@ -86,7 +86,7 @@ const TRANSITIONS = {
 const TRANSITION_RANGE = 500;
 const TRANSITION_TIME = 1000;
 
-var isOn = {}; // Map of button input number to true/false
+var isOn = []; // Map of button input number to true/false
 var scrollSpeed = 40;
 var sliderPos = 0;
 var scrollSpeedLimiter = false; // Is set to true when the scroll speed changes, which blocks further changes for a while, to reduce the speed at which it was changing
