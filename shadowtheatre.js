@@ -396,13 +396,15 @@ function moveTo(destArea, destPos) {
 	// see the jump when we scroll to the right place on the new image. So it's easier to just fade everything to black 
 	// (including the arrows because they change too) while the changeover happens.
 	let everything = document.getElementById("everything");
-	everything.animate([{ opacity: 1 }, { opacity: 0 }, { opacity: 1 }], { duration: TRANSITION_TIME, follow: "forwards" });
+	everything.classList.add("fadeOut");
+	// everything.animate([{ opacity: 1 }, { opacity: 0 }, { opacity: 1 }], { duration: TRANSITION_TIME, follow: "forwards" });
 	// Halfway through the transition, swap over the images, scroll to the right place, and calculate the new exits
 	setTimeout(function () {
 		elCurArea.style.display = "none";
 		elNewArea.style.display = "block";
 		window.scroll({ left: sliderPos });
 		calculatePermittedVertical();
+		everything.classList.replace("fadeOut", "fadeIn");
 	}, TRANSITION_TIME / 2);
 	// Re-enable inputs once the transition is complete
 	setTimeout(function () {
@@ -557,5 +559,6 @@ document.getElementById("keyinput").focus();
 
 
 dbg("Loaded");
+document.getElementById("everything").classList.replace("fadeOut", "fadeIn");
 
 

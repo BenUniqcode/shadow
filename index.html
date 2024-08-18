@@ -14,6 +14,16 @@
 			margin: 0;
 		}
 
+		.fadeIn {
+			transition: opacity 0.5s ease-in;
+			opacity: 1;
+		}
+
+		.fadeOut {
+			transition: opacity 0.5s ease-out;
+			opacity: 0;
+		}
+
 		#keyinput {
 			width: 1px;
 			height: 1px;
@@ -32,10 +42,6 @@
 		.slider .flexbox {
 			display: flex;
 			height: 760px;
-		}
-
-		.hide {
-			display: none;
 		}
 
 		#debug {
@@ -128,7 +134,7 @@
 </head>
 
 <body>
-	<div id="everything">
+	<div id="everything" class="fadeOut">
 		<div id="partyOverlay">
 			<canvas id="canv"></canvas>
 		</div>
