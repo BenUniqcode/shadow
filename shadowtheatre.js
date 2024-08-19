@@ -459,7 +459,7 @@ function moveTo(destArea, destPos) {
 	setTimeout(function () {
 		elCurArea.style.display = "none";
 		elNewArea.style.display = "block";
-		window.scroll({ left: sliderPos });
+		window.scroll(sliderPos, 0);
 		calculatePermittedVertical();
 		everything.classList.replace("fadeOut", "fadeIn");
 	}, TRANSITION_TIME / 2);
@@ -526,18 +526,17 @@ function processActions(raf = true) {
 				sliderPos = 0; // Don't go past the left edge
 			}
 			window.scroll(sliderPos, 0);
-			//let keyframes = [ { "marginLeft": -sliderPos + "px" } ];
-			//elSlider.animate(keyframes, SCROLL_ANIMATION_OPTIONS);
-		} else if (isOn[RIGHT]) {
+		} 
+		// This is not an else, so that left and right cancel
+		// out when both are pressed, rather than left dominating
+		if (isOn[RIGHT]) {
 			// Right
 			sliderPos += scrollSpeed;
 			var maxScroll = document.body.scrollWidth - document.body.clientWidth;
 			if (sliderPos > maxScroll) {
 				sliderPos = maxScroll; // Don't go past the right edge
 			}
-			window.scroll({ left: sliderPos, behaviour: "smooth" });
-			// let keyframes = [ { "marginLeft": -sliderPos + "px"} ];
-			// elSlider.animate(keyframes, SCROLL_ANIMATION_OPTIONS);
+			window.scroll(sliderPos, 0);
 		}
 		dbgout = ""
 		dbgout += "<br>Area: " + curArea;
