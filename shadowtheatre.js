@@ -110,6 +110,8 @@ var elArrowDn = document.getElementById("arrowDn");
 var elArrowUp = document.getElementById("arrowUp");
 var elPartyOverlay = document.getElementById("partyOverlay");
 
+var partyHandle;
+
 var dbg = function (str) {
 	if (elDbg.innerHTML != str) {
 		elDbg.innerHTML = str;
@@ -284,13 +286,8 @@ function matrixLoop() {
 	});
 }
 
-
-function party() {
-	let partyTime = 12000;
-	inputsBlocked = true;
-	setTimeout(function() {
-		inputsBlocked = false;
-	}, partyTime);
+function partyColors(partyTime, partyPlace = document.body) {
+	console.log("partyColors");
 	let colorAnims = [];
 	for (let i = 0; i < 20; i++) {
 		let randomR = Math.floor(Math.random() * 256);
@@ -299,6 +296,16 @@ function party() {
 		colorAnims.push({ backgroundColor: "rgb(" + randomR + "," + randomG + "," + randomB + ")" });
 	}
 	colorAnims.push({ backgroundColor: "black" });
+	partyPlace.animate(colorAnims, { duration: partyTime });
+}
+
+function party() {
+	let partyTime = 12000;
+	inputsBlocked = true;
+	setTimeout(function() {
+		inputsBlocked = false;
+	}, partyTime);
+	partyColors(partyTime);
 	let imageAnims = [];
 	for (let i = 0; i < 50; i++) {
 		let theseanims = {};
@@ -352,9 +359,6 @@ function party() {
 	}
 	imageAnims.push({ transform: "scale(1.0) translate(0px,0px)", opacity: 0.5 }, { opacity: 0.75 }, { opacity: 1 });
 	console.log(imageAnims);
-	// No forwards fill on these as we want them to return to the starting condition. Which we ensure anyway because we want to animate to the end
-	// instead of suddenly snapping back.
-	document.body.animate(colorAnims, { duration: partyTime });
 	let images = document.querySelectorAll("#area-" + curArea + " .slider .flexbox img");
 	// If there is only one image, do it
 	// Otherwise, try to only animate the main image that's on the screen, and its neighbours
@@ -460,9 +464,7 @@ function moveTo(destArea, destPos) {
 	let elNewArea = document.getElementById("area-" + destArea);
 	// Set location to the new area and pos
 	dbgout += "<br>Moving from " + curArea + ":" + sliderPos;
-	curArea = destArea;
-	sliderPos = destPos;
-	dbgout += " to " + curArea + ":" + sliderPos;
+	dbgout += " to " + destArea + ":" + destPos;
 	// I tried to do something fancier with the images overlaid, but it's problematic because they don't line up - you can
 	// see the jump when we scroll to the right place on the new image. So it's easier to just fade everything to black 
 	// (including the arrows because they change too) while the changeover happens.
@@ -492,17 +494,32 @@ function moveTo(destArea, destPos) {
 	setTimeout(function () {
 		elCurArea.style.display = "none";
 		elNewArea.style.display = "block";
+		curArea = destArea;
+		sliderPos = destPos;
 		window.scroll(sliderPos, 0);
 		calculatePermittedVertical();
 		everything.classList.replace("fadeOut", "fadeIn");
+		if (destArea == "disco") {
+			lighthouse.classList.remove("zoomToLighthouse");
+			hideBlackBars();
+			// Start the party now so that the colours fade up
+			// This value determines how rapidly the colours cycle - 30s gives a fairly slow one
+			let partyTime = 30000;
+			let partyPlace = document.getElementById("area-disco");
+			partyColors(partyTime, partyPlace);
+			partyHandle = setInterval(function() {
+				partyColors(partyTime, partyPlace);
+			}, partyTime);
+		} else {
+			// Stop any ongoing party
+			if (partyHandle) {
+				clearInterval(partyHandle);
+			}
+		}
 	}, swapTime);
 	// Re-enable inputs once the transition is complete
 	setTimeout(function () {
 		inputsBlocked = false;
-		if (destArea == 'disco') {
-			lighthouse.classList.remove("zoomToLighthouse");
-			hideBlackBars();
-		}
 	}, endTime);
 }
 
