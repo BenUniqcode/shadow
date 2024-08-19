@@ -440,6 +440,20 @@ function calculatePermittedVertical() {
 	}
 }
 
+function showBlackBars() {
+	let bars = document.getElementsByClassName("blackBar");
+	for (let i = 0; i < bars.length; i++) {
+		bars[i].classList.remove("hidden");
+	}
+}
+
+function hideBlackBars() {
+	let bars = document.getElementsByClassName("blackBar");
+	for (let i = 0; i < bars.length; i++) {
+		bars[i].classList.add("hidden");
+	}
+}
+
 function moveTo(destArea, destPos) {
 	inputsBlocked = true;
 	let elCurArea = document.getElementById("area-" + curArea);
@@ -452,8 +466,27 @@ function moveTo(destArea, destPos) {
 	// I tried to do something fancier with the images overlaid, but it's problematic because they don't line up - you can
 	// see the jump when we scroll to the right place on the new image. So it's easier to just fade everything to black 
 	// (including the arrows because they change too) while the changeover happens.
+	// The exception is going from the lighthouse into the disco, which I felt would be clearer
+	// what's going on if we zoom in to the top of it...
 	let everything = document.getElementById("everything");
-	everything.classList.add("fadeOut");
+	let lighthouse = document.getElementById("lighthouse");
+	let swapTime = TRANSITION_TIME / 2;
+	let endTime = TRANSITION_TIME;
+	if (destArea == 'disco') {
+		const zoomTime = 1500;
+		// Add top and bottom black bars so that the enlarging image doesn't light up above and below
+		// I'm sure it should be possible to do this with overflow-y: hidden but I couldn't make that work,
+		// the image just disappears...
+		showBlackBars();
+		lighthouse.classList.add("zoomToLighthouse");
+		setTimeout(function() {
+			everything.classList.add("fadeOut");
+		}, zoomTime);
+		swapTime += zoomTime;
+		endTime += zoomTime;					
+	} else {
+		everything.classList.add("fadeOut");
+	}
 	// everything.animate([{ opacity: 1 }, { opacity: 0 }, { opacity: 1 }], { duration: TRANSITION_TIME, follow: "forwards" });
 	// Halfway through the transition, swap over the images, scroll to the right place, and calculate the new exits
 	setTimeout(function () {
@@ -462,11 +495,15 @@ function moveTo(destArea, destPos) {
 		window.scroll(sliderPos, 0);
 		calculatePermittedVertical();
 		everything.classList.replace("fadeOut", "fadeIn");
-	}, TRANSITION_TIME / 2);
+	}, swapTime);
 	// Re-enable inputs once the transition is complete
 	setTimeout(function () {
 		inputsBlocked = false;
-	}, TRANSITION_TIME);
+		if (destArea == 'disco') {
+			lighthouse.classList.remove("zoomToLighthouse");
+			hideBlackBars();
+		}
+	}, endTime);
 }
 
 // Respond to inputs. The arg is whether to call requestAnimationFrame - true for keyboard control, false for joystick because it's called from readGamePad
