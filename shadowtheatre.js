@@ -545,24 +545,23 @@ function processActions(raf = true) {
 		// Find out if we are near a transition point
 		calculatePermittedVertical();
 		// Are we actually moving up or down?
-		let changeArea = false;
-		let destArea, destPos, direction;
+		let destArea, destPos;
+		let direction = 0;
 		if (permittedVertical[DOWN] && isOn[DOWN]) {
 			destArea = permittedVertical[DOWN][0];
 			destPos = permittedVertical[DOWN][1];
-			direction = -1;
-			// Clear any previous dbg messages
-			dbgout = "<b>Going DOWN to " + destArea + ":" + destPos + "</b>";
-			changeArea = true;
-		} else if (permittedVertical[UP] && isOn[UP]) {
+			direction -= 1;
+		} 
+		// No else here, so that simultaneous up and down cancel
+		// instead of down dominating
+		if (permittedVertical[UP] && isOn[UP]) {
 			destArea = permittedVertical[UP][0];
 			destPos = permittedVertical[UP][1];
-			direction = 1;
-			// Clear any previous dbg messages
-			dbgout = "<b>Going UP to " + destArea + " position " + destPos + "</b>";
-			changeArea = true;
+			direction += 1;
 		}
-		if (changeArea) {
+		if (direction != 0) {
+			// Clear any previous dbg messages
+			dbgout = "<b>Going " + (direction > 0 ? "UP" : "DOWN") + " to " + destArea + ":" + destPos + "</b>";
 			moveTo(destArea, destPos);
 		}
 		// Output the debug messages only if they've changed
