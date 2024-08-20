@@ -363,7 +363,7 @@ function discoColorsEvolve() {
 function partyColors(partyTime) {
 	console.log("partyColors");
 	let colorAnims = [];
-	for (let i = 0; i < 50; i++) {
+	for (let i = 0; i < 20; i++) {
 		let randomH = Math.floor(Math.random() * 360);
 		let randomS = Math.floor(Math.random() * 20) + 80; // 80-100% saturation
 		let randomL = Math.floor(Math.random() * 50) + 50; // 50-100%
@@ -405,8 +405,8 @@ function party() {
 		theseanims["transform"] = "";
 		// Transforms become progressively more likely, and potentially larger, as we proceed
 		if (Math.random() * i > 5) {
-			let randomMoveX = Math.random() * i - i / 2; // From -i/2 to +i/2
-			let randomMoveY = Math.random() * i - i / 2;
+			let randomMoveX = Math.floor(Math.random() * i - i / 2); // From -i/2 to +i/2
+			let randomMoveY = Math.floor(Math.random() * i - i / 2);
 			theseanims["transform"] += " translate(" + randomMoveX + "px, " + randomMoveY + "px)";
 		}
 		if (Math.random() * i > 10) {
@@ -423,6 +423,10 @@ function party() {
 			let randomSkewY = Math.random() * i / 5 - i / 10;
 			theseanims["transform"] += " skew(" + randomSkewX + "deg, " + randomSkewY + "deg)";
 		}
+		if (Math.random() * i > 30) {
+			let randomAngle = Math.random() * 2 * i - i; // From -i to +i degrees
+			theseanims["transform"] += " rotate("  + randomAngle + "deg)";
+		}
 		theseanims["filter"] = "";
 		if (Math.random() * i > 30) {
 			let randomInvert = Math.random() * 100;
@@ -431,7 +435,7 @@ function party() {
 		if (Math.random() * i > 20) {
 			let randomDS1 = Math.floor(Math.random() * 50);
 			let randomDS2 = Math.floor(Math.random() * 50);
-			let randomDS3 = Math.floor(Math.random() * 70);
+			let randomDS3 = Math.floor(Math.random() * 100);
 			let randomDSR = Math.floor(Math.random() * 256);
 			let randomDSG = Math.floor(Math.random() * 256);
 			let randomDSB = Math.floor(Math.random() * 256);
