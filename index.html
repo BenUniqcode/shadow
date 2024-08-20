@@ -104,6 +104,7 @@
 			font-size: 40px;
 			text-align: center;
 			font-weight: bold;
+			z-index: 11;
 		}
 
 		#hud:not(.visible) {
@@ -191,13 +192,13 @@
 	</div>
 	<div id="blackBarBottom" class="blackBar hidden">
 	</div>
+	<div id="hud"></div>
 	<div id="partyOverlay">
 		<canvas id="canv"></canvas>
 	</div>
 	<div id="everything" class="fadeOut">
 		<textarea id="keyinput"></textarea><!-- Offscreen; required for keyboard control -->
 		<div id="debug"></div>
-		<div id="hud"></div>
 		<div id="arrowDn" class="arrow">
 			<img src="images/v3.1/arrow2_transp.png">
 		</div>

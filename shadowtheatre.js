@@ -130,12 +130,25 @@ const cols = Math.floor(cw / 20) + 1;
 const ypos = Array(cols).fill(0);
 ctx.fillStyle = '#000';
 ctx.fillRect(0, 0, cw, ch);
+// Motivational messages
+var nextMotivationalMessage = 0;
+const motivationalMessages = [
+	"REMAIN CALM",
+	["PLEASE RELAX WHILE WE PROBE YOUR BRAIN...", "ERROR: BRAIN NOT FOUND"],
+	"DON'T PANIC!!!",
+	["NORMALITY WILL RESUME SHORTLY...", "...MAYBE"],
+	"EVERYTHING IS FINE.",
+	["IT'S SUPPOSED TO DO THAT...", "...I THINK..."],
+	"OH NO, WHAT HAVE YOU DONE?!?!",
+	"I FEEL STRANGE...",
+	"FNORD",
+];
 
 // Disco Gradient initialisation
 // Based on ideas from https://www.joshwcomeau.com/react/rainbow-button/
 const discoGradientColorNames = [
-'--disco-gradient-color-0',
-'--disco-gradient-color-1',
+	'--disco-gradient-color-0',
+	'--disco-gradient-color-1',
 ];
 // Register properties
 discoGradientColorNames.forEach((name, index) => {
@@ -147,6 +160,8 @@ discoGradientColorNames.forEach((name, index) => {
 	});
 });
 var evolveIndex = 0;
+
+var lastMessage = -1; // Avoid repeating the last Easter Egg message
 
 function connecthandler(e) {
 	console.log("Connected");
@@ -197,8 +212,8 @@ function readGamepad() {
 	} else {
 		isOn[LEFT] = isOn[RIGHT] = 0;
 	}
-  	// Button inputs are numbered 0 ..
-  	// For our internal numbering, add 4 because 0..3 are for left/right/up/down joystick
+	// Button inputs are numbered 0 ..
+	// For our internal numbering, add 4 because 0..3 are for left/right/up/down joystick
 	for (var i = 0; i < controller.buttons.length; i++) {
 		var isPressed = false, isTouched = false; // Is this button pressed/touched
 		var val = controller.buttons[i];
@@ -218,7 +233,7 @@ function readGamepad() {
 		// They've been wired up such that the order of each block of 4 matches the order of the joystick directions
 		isOn[i % 4] |= isOn[i + 4];
 	}
-	
+
 	processActions(false);
 	rAF(readGamepad);
 }
@@ -253,7 +268,7 @@ function keyup(e) {
 
 		rAF(processActions);
 	}
-    
+
 }
 
 // Show the hud (if it's not already showing) with the given text, for the given number of milliseconds
@@ -262,21 +277,21 @@ function showHud(text, fadeTime, flashing = false) {
 	hud.innerHTML = text;
 	if (flashing) {
 		var flashOns, flashOffs;
-		flashOns = setInterval(function() {
+		flashOns = setInterval(function () {
 			hud.classList.add("visible");
 		}, 900);
-		setTimeout(function() {
-			flashOffs = setInterval(function() {
+		setTimeout(function () {
+			flashOffs = setInterval(function () {
 				hud.classList.remove("visible");
 			}, 900);
 		}, 450);
-		setTimeout(function() {
+		setTimeout(function () {
 			clearInterval(flashOns);
 			clearInterval(flashOffs);
 			hud.classList.remove("visible");
 		}, fadeTime);
 		return;
-	} 
+	}
 	hud.classList.add("visible");
 	// Start fading the hud after a bit, first resetting the timer if already running
 	clearTimeout(hudFader);
@@ -309,7 +324,7 @@ function arrowMover() {
 }
 
 // Alternate evolving one or the other colour of the gradient
-function partyColorsEvolve() {
+function discoColorsEvolve() {
 	let randomH = Math.floor(Math.random() * 360);
 	let randomS = Math.floor(Math.random() * 20) + 80; // 80-100% saturation
 	let randomL = Math.floor(Math.random() * 50) + 50; // 50-100%
@@ -320,24 +335,40 @@ function partyColorsEvolve() {
 	evolveIndex = (evolveIndex + 1) % discoGradientColorNames.length;
 }
 
-function partyColors(partyTime, partyPlace = document.body) {
+function partyColors(partyTime) {
 	console.log("partyColors");
+	let colorAnims = [];
+	for (let i = 0; i < 50; i++) {
+		let randomH = Math.floor(Math.random() * 360);
+		let randomS = Math.floor(Math.random() * 20) + 80; // 80-100% saturation
+		let randomL = Math.floor(Math.random() * 50) + 50; // 50-100%
+		colorAnims.push({ backgroundColor: "hsl(" + randomH + "deg," + randomS + "%," + randomL + "%)" });
+	}
+	document.body.animate(colorAnims, { duration: partyTime });
+}
+
+function discoColors(partyTime, partyPlace) {
+	console.log("discoColors");
 	let colorAnims = [];
 	for (let i = 0; i < 50; i++) {
 		let randomX = Math.floor(Math.random() * 100); // in %
 		let randomY = Math.floor(Math.random() * 100); // in %
-		// colorAnims.push({ backgroundColor: "rgb(" + randomR + "," + randomG + "," + randomB + ")" });
-		// colorAnims.push({ backgroundImage: "radial-gradient(farthest-corner at " + randomX + "vw " + randomY + "vh in hsl shorter hue," + 
-			// " var(--disco-gradient-color-0), var(--disco-gradient-color-1), var(--disco-gradient-color-2)" });
-		colorAnims.push({ backgroundPosition: randomX + "% " + randomY + "%" });
-	}	
+		if (partyPlace == document.body) {
+			let randomH = Math.floor(Math.random() * 360);
+			let randomS = Math.floor(Math.random() * 20) + 80; // 80-100% saturation
+			let randomL = Math.floor(Math.random() * 50) + 50; // 50-100%
+			colorAnims.push({ backgroundColor: "hsl(" + randomH + "," + randomS + "," + randomL + ")" });
+		} else {
+			colorAnims.push({ backgroundPosition: randomX + "% " + randomY + "%" });
+		}
+	}
 	partyPlace.animate(colorAnims, { duration: partyTime });
 }
 
 function party() {
 	let partyTime = 12000;
 	inputsBlocked = true;
-	setTimeout(function() {
+	setTimeout(function () {
 		inputsBlocked = false;
 	}, partyTime);
 	partyColors(partyTime);
@@ -427,23 +458,22 @@ function party() {
 			images[imagesToAnimate[i]].animate(imageAnims, { duration: partyTime });
 		}
 	}
-	// Motivational message
-	let messages = [
-		"REMAIN CALM",
-		"DON'T PANIC!!!",
-		"NORMALITY WILL RESUME SHORTLY. MAYBE.",
-		"EVERYTHING IS FINE.",
-		"IT'S SUPPOSED TO DO THAT, I THINK...",
-		"OH NO, WHAT HAVE YOU DONE?!?!",
-		"I FEEL STRANGE...",
-	];
-	let randomChoice = Math.random();
-	let offset = randomChoice * messages.length;
-	let selectedMessage = Math.trunc(offset);
-	console.log("randomChoice " + randomChoice + " > offset " + offset + " > selectedMessage " + selectedMessage);
-	setTimeout(function () {
-		showHud(messages[selectedMessage], 7000, true);
-	}, 3000);
+	let selectedMessage = motivationalMessages[nextMotivationalMessage];
+	// It's about 900ms per flash of the message
+	if (Array.isArray(selectedMessage)) {
+		// 2-part message
+		setTimeout(function () {
+			showHud(selectedMessage[0], 5000, true);
+		}, 500);
+		setTimeout(function () {
+			showHud(selectedMessage[1], 4000, true);
+		}, 6500);
+	} else {
+		setTimeout(function () {
+			showHud(selectedMessage, 6000, true);
+		}, 3000);
+	}
+	nextMotivationalMessage = (nextMotivationalMessage + 1) % motivationalMessages.length;
 }
 
 function calculatePermittedVertical() {
@@ -516,11 +546,11 @@ function moveTo(destArea, destPos) {
 		// the image just disappears...
 		showBlackBars();
 		lighthouse.classList.add("zoomToLighthouse");
-		setTimeout(function() {
+		setTimeout(function () {
 			everything.classList.add("fadeOut");
 		}, zoomTime);
 		swapTime += zoomTime;
-		endTime += zoomTime;					
+		endTime += zoomTime;
 	} else {
 		everything.classList.add("fadeOut");
 	}
@@ -541,14 +571,14 @@ function moveTo(destArea, destPos) {
 			// This value determines how rapidly the colours cycle - 30s gives a fairly slow one
 			let partyTime = 120000;
 			let partyPlace = document.getElementById("area-disco");
-			partyColors(partyTime, partyPlace);
-			partyColorsEvolve();
-			setInterval(partyColorsEvolve, 6000);
-			partyHandle = setInterval(function() {
-				partyColors(partyTime, partyPlace);
+			discoColors(partyTime, partyPlace);
+			discoColorsEvolve();
+			setInterval(discoColorsEvolve, 6000);
+			partyHandle = setInterval(function () {
+				discoColors(partyTime, partyPlace);
 			}, partyTime);
 			elArrowDn.classList.add("moving");
-			arrowMoverHandle = setInterval(function() {
+			arrowMoverHandle = setInterval(function () {
 				arrowMover();
 			}, 30000);
 		} else {
@@ -572,7 +602,7 @@ function moveTo(destArea, destPos) {
 function processActions(raf = true) {
 	if (inputsBlocked) {
 		if (raf) {
-			setTimeout(function() {
+			setTimeout(function () {
 				rAF(processActions);
 			}, 20);
 		}
@@ -625,7 +655,7 @@ function processActions(raf = true) {
 				sliderPos = 0; // Don't go past the left edge
 			}
 			window.scroll(sliderPos, 0);
-		} 
+		}
 		// This is not an else, so that left and right cancel
 		// out when both are pressed, rather than left dominating
 		if (isOn[RIGHT]) {
@@ -650,7 +680,7 @@ function processActions(raf = true) {
 			destArea = permittedVertical[DOWN][0];
 			destPos = permittedVertical[DOWN][1];
 			direction -= 1;
-		} 
+		}
 		// No else here, so that simultaneous up and down cancel
 		// instead of down dominating
 		if (permittedVertical[UP] && isOn[UP]) {
