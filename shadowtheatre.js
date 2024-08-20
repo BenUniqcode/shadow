@@ -87,7 +87,7 @@ const TRANSITION_RANGE = 500;
 const TRANSITION_TIME = 1000;
 
 var isOn = []; // Map of button input number to true/false
-var scrollSpeed = 4;
+var scrollSpeed = 2;
 var centerX = Math.floor(window.innerWidth / 2);
 var scrollSpeedLimiter = false; // Is set to true when the scroll speed changes, which blocks further changes for a while, to reduce the speed at which it was changing
 var raftimer;
@@ -611,7 +611,7 @@ function moveTo(destArea, destX) {
 				clearInterval(partyHandle);
 				clearInterval(arrowMoverHandle);
 				elArrowDn.classList.remove("moving");
-				elArrowDn.style.bottom = "170px";
+				elArrowDn.style.bottom = "220px";
 				elArrowDn.style.left = "50vw";
 			}
 		}
