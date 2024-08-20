@@ -110,7 +110,7 @@ var elArrowDn = document.getElementById("arrowDn");
 var elArrowUp = document.getElementById("arrowUp");
 var elPartyOverlay = document.getElementById("partyOverlay");
 
-var partyHandle;
+var partyHandle, arrowMoverHandle;
 
 var dbg = function (str) {
 	if (elDbg.innerHTML != str) {
@@ -300,6 +300,12 @@ function matrixLoop() {
 		if (y > 100 + Math.random() * 10000) ypos[ind] = 0;
 		else ypos[ind] = y + 20;
 	});
+}
+
+// In disco mode, the down arrow is kinda annoying stuck in one place, so let's move it around
+function arrowMover() {
+	elArrowDn.style.bottom = (10 + Math.floor(Math.random() * 80)) + "vh";
+	elArrowDn.style.left = (10 + Math.floor(Math.random() * 80)) + "vw";
 }
 
 // Alternate evolving one or the other colour of the gradient
@@ -541,10 +547,18 @@ function moveTo(destArea, destPos) {
 			partyHandle = setInterval(function() {
 				partyColors(partyTime, partyPlace);
 			}, partyTime);
+			elArrowDn.classList.add("moving");
+			arrowMoverHandle = setInterval(function() {
+				arrowMover();
+			}, 30000);
 		} else {
 			// Stop any ongoing party
 			if (partyHandle) {
 				clearInterval(partyHandle);
+				clearInterval(arrowMoverHandle);
+				elArrowDn.classList.remove("moving");
+				elArrowDn.style.bottom = "170px";
+				elArrowDn.style.left = "50vw";
 			}
 		}
 	}, swapTime);
