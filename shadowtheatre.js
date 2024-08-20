@@ -7,8 +7,8 @@
  */
 // Meaning of button input numbers (i.e. which thing is plugged into which input on the controller PCB)
 const NUM_INPUTS = 12;
-const LEFT = 0;
-const RIGHT = 1;
+const LEFT = 0; 
+const RIGHT = 1; 
 const UP = 2;
 const DOWN = 3;
 const BTN_L1 = 4;
@@ -95,6 +95,9 @@ var hudFader;
 var konamiPos = 0; // Current position in the Konami code
 var wasIdle = true; // Whether no inputs were read on the last run through - for Konami discretisation
 
+// Whether to reverse left and right inputs. Press "X" on keyboard to toggle. Useful if the image 
+// is horizontally flipped for back-projection (didn't have to do that in 2023 because there was no text)
+var reverseLeftRight = true; 
 var inputsBlocked = false; // Further inputs are ignored during a transition from one area to another
 var anyInputOn = false; // Is anything being pressed or the joystick being moved?
 var curArea = "main"; // Which area (contiguous left-right set of images) are we in?
@@ -112,9 +115,14 @@ var elPartyOverlay = document.getElementById("partyOverlay");
 
 var partyHandle, arrowMoverHandle;
 
-var dbg = function (str) {
-	if (elDbg.innerHTML != str) {
-		elDbg.innerHTML = str;
+var dbg;
+if (elDbg.style.display == "none") {
+	dbg = () => {};
+} else {
+	dbg = (str) => {
+		if (elDbg.innerHTML != str) {
+			elDbg.innerHTML = str;
+		}
 	}
 };
 
@@ -202,12 +210,22 @@ function readGamepad() {
 		isOn[UP] = isOn[DOWN] = 0;
 	}
 	if (controller.axes[1] > 0.5) {
-		isOn[LEFT] = 1;
-		isOn[RIGHT] = 0;
+		if (reverseLeftRight) {
+			isOn[LEFT] = 0;
+			isOn[RIGHT] = 1;
+		} else {
+			isOn[LEFT] = 1;
+			isOn[RIGHT] = 0;
+		}
 		anyInputOn = true;
 	} else if (controller.axes[1] < -0.5) {
-		isOn[RIGHT] = 1;
-		isOn[LEFT] = 0;
+		if (reverseLeftRight) {
+			isOn[RIGHT] = 0;
+			isOn[LEFT] = 1;
+		} else {
+			isOn[RIGHT] = 1;
+			isOn[LEFT] = 0;
+		}	
 		anyInputOn = true;
 	} else {
 		isOn[LEFT] = isOn[RIGHT] = 0;
@@ -231,7 +249,14 @@ function readGamepad() {
 		anyInputOn |= isOn[i + 4];
 		// But the meaning of all the buttons is just direction movements, so OR them with joystick movements
 		// They've been wired up such that the order of each block of 4 matches the order of the joystick directions
-		isOn[i % 4] |= isOn[i + 4];
+		// ... except if L/R reversed!
+		if (reverseLeftRight && i % 4 == LEFT) {
+			isOn[RIGHT] |= isOn[i + 4];
+		} else if (reverseLeftRight && i % 4 == RIGHT) {
+			isOn[LEFT] |= isOn[i + 4];
+		} else {
+			isOn[i % 4] |= isOn[i + 4];
+		}
 	}
 
 	processActions(false);
@@ -245,9 +270,22 @@ function keydown(e) {
 			return;
 		}
 		let i = KEYMAP[e.code];
-		isOn[i] = true;
-		anyInputOn |= isOn[i];
+		if (reverseLeftRight && i == LEFT) {
+			isOn[RIGHT] = 1;
+			anyInputOn |= isOn[RIGHT];
+		} else if (reverseLeftRight && i == RIGHT) {
+			isOn[LEFT] = 1;
+			anyInputOn |= isOn[LEFT];
+		} else {
+			isOn[i] = 1;
+			anyInputOn |= isOn[i];
+		}
 		rAF(processActions);
+	} else if (e.key == 'X' || e.key == 'x') {
+		e.preventDefault();
+		console.log("Reversing the polarity");
+		reverseLeftRight = !reverseLeftRight;
+		console.log(reverseLeftRight);
 	}
 }
 
@@ -257,7 +295,14 @@ function keyup(e) {
 		if (e.repeat) {
 			return;
 		}
-		isOn[KEYMAP[e.code]] = false;
+		let i = KEYMAP[e.code];
+		if (reverseLeftRight && i == LEFT) {
+			isOn[RIGHT] = 0;
+		} else if (reverseLeftRight && i == RIGHT) {
+			isOn[LEFT] = 0;
+		} else {
+			isOn[i] = 0;
+		}
 		// If nothing else is on, update the global any* variables
 		// Do it with local variables so we don't set them false if they shouldn't be false
 		let anyInputOnNow = false;
@@ -483,11 +528,11 @@ function calculatePermittedVertical() {
 			let destX = trans[i][3];
 			canMove = true;
 			if (direction < 0) {
-				dbgout += "<br>Transition Point " + i + " in range - can go DOWN to " + destArea + ":" + destX;
+				dbgout += "Transition Point " + i + " in range - can go DOWN to " + destArea + ":" + destX + "<br>";
 				elArrowDn.classList.remove("hidden");
 				permittedVertical[DOWN] = [destArea, destX];
 			} else if (direction > 0) {
-				dbgout += "<br>Transition Point " + i + " in range - can go UP to " + destArea + ":" + destX;
+				dbgout += "Transition Point " + i + " in range - can go UP to " + destArea + ":" + destX + "<br>";
 				elArrowUp.classList.remove("hidden");
 				permittedVertical[UP] = [destArea, destX];
 			} else {
@@ -523,8 +568,8 @@ function moveTo(destArea, destX) {
 	let elCurArea = document.getElementById("area-" + curArea);
 	let elNewArea = document.getElementById("area-" + destArea);
 	// Set location to the new area and pos
-	dbgout += "<br>Moving from " + curArea + ":" + centerX;
-	dbgout += " to " + destArea + ":" + destX;
+	dbgout += "Moving from " + curArea + ":" + centerX;
+	dbgout += "to " + destArea + ":" + destX + "<br>";
 	// I tried to do something fancier with the images overlaid, but it's problematic because they don't line up - you can
 	// see the jump when we scroll to the right place on the new image. So it's easier to just fade everything to black 
 	// (including the arrows because they change too) while the changeover happens.
@@ -662,9 +707,11 @@ function processActions(raf = true) {
 			}
 			window.scroll(centerX - window.innerWidth / 2, 0);
 		}
-		dbgout = ""
-		dbgout += "<br>Area: " + curArea;
-		dbgout += "<br>centerX: " + centerX;
+		if (reverseLeftRight) {
+			dbgout += "<em>L/R Reversed</em><br>";
+		}
+		dbgout += "Area: " + curArea + "<br>";
+		dbgout += "centerX: " + centerX + "<br>";
 
 		// Find out if we are near a transition point
 		calculatePermittedVertical();
