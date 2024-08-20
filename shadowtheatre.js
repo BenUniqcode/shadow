@@ -7,8 +7,8 @@
  */
 // Meaning of button input numbers (i.e. which thing is plugged into which input on the controller PCB)
 const NUM_INPUTS = 12;
-const LEFT = 0; 
-const RIGHT = 1; 
+const LEFT = 0;
+const RIGHT = 1;
 const UP = 2;
 const DOWN = 3;
 const BTN_L1 = 4;
@@ -97,7 +97,7 @@ var wasIdle = true; // Whether no inputs were read on the last run through - for
 
 // Whether to reverse left and right inputs. Press "X" on keyboard to toggle. Useful if the image 
 // is horizontally flipped for back-projection (didn't have to do that in 2023 because there was no text)
-var reverseLeftRight = true; 
+var reverseLeftRight = true;
 var inputsBlocked = false; // Further inputs are ignored during a transition from one area to another
 var anyInputOn = false; // Is anything being pressed or the joystick being moved?
 var curArea = "main"; // Which area (contiguous left-right set of images) are we in?
@@ -117,7 +117,7 @@ var partyHandle, arrowMoverHandle;
 
 var dbg;
 if (elDbg.style.display == "none") {
-	dbg = () => {};
+	dbg = () => { };
 } else {
 	dbg = (str) => {
 		if (elDbg.innerHTML != str) {
@@ -210,22 +210,12 @@ function readGamepad() {
 		isOn[UP] = isOn[DOWN] = 0;
 	}
 	if (controller.axes[1] > 0.5) {
-		if (reverseLeftRight) {
-			isOn[LEFT] = 0;
-			isOn[RIGHT] = 1;
-		} else {
-			isOn[LEFT] = 1;
-			isOn[RIGHT] = 0;
-		}
+		isOn[LEFT] = 1;
+		isOn[RIGHT] = 0;
 		anyInputOn = true;
 	} else if (controller.axes[1] < -0.5) {
-		if (reverseLeftRight) {
-			isOn[RIGHT] = 0;
-			isOn[LEFT] = 1;
-		} else {
-			isOn[RIGHT] = 1;
-			isOn[LEFT] = 0;
-		}	
+		isOn[RIGHT] = 1;
+		isOn[LEFT] = 0;
 		anyInputOn = true;
 	} else {
 		isOn[LEFT] = isOn[RIGHT] = 0;
@@ -250,19 +240,15 @@ function readGamepad() {
 		// But the meaning of all the buttons is just direction movements, so OR them with joystick movements
 		// They've been wired up such that the order of each block of 4 matches the order of the joystick directions
 		// ... except if L/R reversed!
-		if (reverseLeftRight && i % 4 == LEFT) {
-			isOn[RIGHT] |= isOn[i + 4];
-		} else if (reverseLeftRight && i % 4 == RIGHT) {
-			isOn[LEFT] |= isOn[i + 4];
-		} else {
-			isOn[i % 4] |= isOn[i + 4];
-		}
+		isOn[i % 4] |= isOn[i + 4];
 	}
 
 	processActions(false);
 	rAF(readGamepad);
 }
 
+// Note we only call e.preventDefault() for keys that we handle - others are passed through to
+// the browser as normal so that we can access devtools, reload etc.
 function keydown(e) {
 	if (e.code in KEYMAP) {
 		e.preventDefault();
@@ -270,16 +256,8 @@ function keydown(e) {
 			return;
 		}
 		let i = KEYMAP[e.code];
-		if (reverseLeftRight && i == LEFT) {
-			isOn[RIGHT] = 1;
-			anyInputOn |= isOn[RIGHT];
-		} else if (reverseLeftRight && i == RIGHT) {
-			isOn[LEFT] = 1;
-			anyInputOn |= isOn[LEFT];
-		} else {
-			isOn[i] = 1;
-			anyInputOn |= isOn[i];
-		}
+		isOn[i] = 1;
+		anyInputOn |= isOn[i];
 		rAF(processActions);
 	} else if (e.key == 'X' || e.key == 'x') {
 		e.preventDefault();
@@ -294,8 +272,6 @@ function keydown(e) {
 		e.preventDefault();
 		scrollSpeed = Math.min(SCROLLSPEED_MAX, ++scrollSpeed);
 		showHud("Scroll speed: " + scrollSpeed, 500);
-	} else {
-		console.log(e.key);
 	}
 }
 
@@ -306,13 +282,7 @@ function keyup(e) {
 			return;
 		}
 		let i = KEYMAP[e.code];
-		if (reverseLeftRight && i == LEFT) {
-			isOn[RIGHT] = 0;
-		} else if (reverseLeftRight && i == RIGHT) {
-			isOn[LEFT] = 0;
-		} else {
-			isOn[i] = 0;
-		}
+		isOn[i] = 0;
 		// If nothing else is on, update the global any* variables
 		// Do it with local variables so we don't set them false if they shouldn't be false
 		let anyInputOnNow = false;
@@ -648,6 +618,24 @@ function moveTo(destArea, destX) {
 	}, endTime);
 }
 
+function moveLeft() {
+	centerX -= scrollSpeed;
+	if (centerX - window.innerWidth / 2 < 0) {
+		centerX = window.innerWidth / 2; // Don't go past the left edge
+	}
+	window.scroll(centerX - window.innerWidth / 2, 0);
+}
+
+function moveRight() {
+	// Right
+	centerX += scrollSpeed;
+	var maxScroll = document.body.scrollWidth - window.innerWidth / 2;
+	if (centerX > maxScroll) {
+		centerX = maxScroll; // Don't go past the right edge
+	}
+	window.scroll(centerX - window.innerWidth / 2, 0);
+}
+
 // Respond to inputs. The arg is whether to call requestAnimationFrame - true for keyboard control, false for joystick because it's called from readGamePad
 function processActions(raf = true) {
 	if (inputsBlocked) {
@@ -699,23 +687,21 @@ function processActions(raf = true) {
 
 		// Handle left/right movement
 		if (isOn[LEFT]) {
-			// Left
-			centerX -= scrollSpeed;
-			if (centerX - window.innerWidth / 2 < 0) {
-				centerX = window.innerWidth / 2; // Don't go past the left edge
+			// Left (or is it right?)
+			if (reverseLeftRight) {
+				moveRight();
+			} else {
+				moveLeft();
 			}
-			window.scroll(centerX - window.innerWidth / 2, 0);
 		}
 		// This is not an else, so that left and right cancel
 		// out when both are pressed, rather than left dominating
 		if (isOn[RIGHT]) {
-			// Right
-			centerX += scrollSpeed;
-			var maxScroll = document.body.scrollWidth - window.innerWidth / 2;
-			if (centerX > maxScroll) {
-				centerX = maxScroll; // Don't go past the right edge
+			if (reverseLeftRight) {
+				moveLeft();
+			} else {
+				moveRight();
 			}
-			window.scroll(centerX - window.innerWidth / 2, 0);
 		}
 		if (reverseLeftRight) {
 			dbgout += "<em>L/R Reversed</em><br>";
