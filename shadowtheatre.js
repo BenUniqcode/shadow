@@ -87,7 +87,7 @@ const TRANSITION_RANGE = 500;
 const TRANSITION_TIME = 1000;
 
 var isOn = []; // Map of button input number to true/false
-var scrollSpeed = 40;
+var scrollSpeed = 4;
 var centerX = Math.floor(window.innerWidth / 2);
 var scrollSpeedLimiter = false; // Is set to true when the scroll speed changes, which blocks further changes for a while, to reduce the speed at which it was changing
 var raftimer;
@@ -286,6 +286,16 @@ function keydown(e) {
 		console.log("Reversing the polarity");
 		reverseLeftRight = !reverseLeftRight;
 		console.log(reverseLeftRight);
+	} else if (e.key == 'S' || e.key == 's') {
+		e.preventDefault();
+		scrollSpeed = Math.max(SCROLLSPEED_MIN, --scrollSpeed);
+		showHud("Scroll speed: " + scrollSpeed, 500);
+	} else if (e.key == 'F' || e.key == 'f') {
+		e.preventDefault();
+		scrollSpeed = Math.min(SCROLLSPEED_MAX, ++scrollSpeed);
+		showHud("Scroll speed: " + scrollSpeed, 500);
+	} else {
+		console.log(e.key);
 	}
 }
 
