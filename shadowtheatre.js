@@ -47,38 +47,38 @@ const SCROLL_ANIMATION_OPTIONS = {
 // Better to explicitly state all transitions in all directions.
 const TRANSITIONS = {
 	"main": [
-		[1600, -1, "pirate", 2500],
-		[6400, -1, "pirate", 5200],
-		[6400, 1, "disco", 0],
-		[10320, 1, "hug", 560],
-		[11480, -1, "skyworld", 480], // NB Mario tube, goes DOWN but to a world that is UP from elsewhere in the map
-		[12800, 1, "giant", 1000],
-		[15600, -1, "dragon", 1000],
-		[17600, 1, "skyworld", 6250],
+		[2500, -1, "pirate", 3400],
+		[7420, -1, "pirate", 6000],
+		[7420, 1, "disco", 675],
+		[11000, 1, "hug", 1200],
+		[12240, -1, "skyworld", 1240], // NB Mario tube, goes DOWN but to a world that is UP from elsewhere in the map
+		[13850, 1, "giant", 2000],
+		[16680, -1, "dragon", 2040],
+		[18200, 1, "skyworld", 7250],
 	],
 	"disco": [
-		[0, -1, "main", 6400],
+		[675, -1, "main", 7420],
 	],
 	"dragon": [
-		[1000, 1, "main", 15600],
-		[2600, -1, "hell", 0],
+		[2040, 1, "main", 16680],
+		[3000, -1, "hell", 675],
 	],
 	"giant": [
-		[1000, -1, "main", 12800],
+		[2000, -1, "main", 13850],
 	],
 	"hell": [
-		[0, 1, "dragon", 2600],
-	],
-	"pirate": [
-		[2500, 1, "main", 1600],
-		[5200, 1, "main", 6400],
-	],
-	"skyworld": [
-		[480, -1, "main", 11480], // Goes back DOWN to main even though we came DOWN from there
-		[6250, -1, "main", 17600],
+		[675, 1, "dragon", 3000],
 	],
 	"hug": [
-		[560, -1, "main", 10320],
+		[1200, -1, "main", 11000],
+	],
+	"pirate": [
+		[3400, 1, "main", 2500],
+		[6000, 1, "main", 7420],
+	],
+	"skyworld": [
+		[1240, -1, "main", 12240], // Goes back DOWN to main even though we came DOWN from there
+		[7250, -1, "main", 18200],
 	],
 
 };
@@ -88,7 +88,7 @@ const TRANSITION_TIME = 1000;
 
 var isOn = []; // Map of button input number to true/false
 var scrollSpeed = 40;
-var sliderPos = 0;
+var centerX = Math.floor(window.innerWidth / 2);
 var scrollSpeedLimiter = false; // Is set to true when the scroll speed changes, which blocks further changes for a while, to reduce the speed at which it was changing
 var raftimer;
 var hudFader;
@@ -433,25 +433,21 @@ function party() {
 		images[0].animate(imageAnims, { duration: partyTime });
 	} else {
 		// When there are multiple images in a slider, assume they are all the same size (1351 wide)
-		// The image at the leftmost edge of the screen will therefore be floor(sliderPos / 1351)
-		let leftImage = Math.floor(sliderPos / 1351);
-		console.log("leftImage: " + leftImage);
-		let imagesToAnimate = [leftImage];
+		// The index of the image at the centre of the screen will therefore be floor(centerX / 1351)
+		let centerImage = Math.floor(centerX / 1351);
+		console.log("centerImage: " + centerImage);
+		let imagesToAnimate = [centerImage];
 		// But do the left neighbour too because they might be on the screen, or creep
 		// onto the screen during the animations
-		if (leftImage > 0) {
-			imagesToAnimate.push(leftImage - 1);
-			console.log("Also animating the one to the left: " + (leftImage - 1));
+		if (centerImage > 0) {
+			imagesToAnimate.push(centerImage - 1);
+			console.log("Also animating the one to the left: " + (centerImage - 1));
 		}
 		// Doing the two to the right (if there are that many) should always be sufficient to cover 
 		// the whole screen. 
-		if (leftImage < images.length - 1) {
-			imagesToAnimate.push(leftImage + 1);
-			console.log("Also animating the one to the right: " + (leftImage + 1));
-		}
-		if (leftImage < images.length - 2) {
-			imagesToAnimate.push(leftImage + 2);
-			console.log("Also animating two to the right: " + (leftImage + 2));
+		if (centerImage < images.length - 1) {
+			imagesToAnimate.push(centerImage + 1);
+			console.log("Also animating the one to the right: " + (centerImage + 1));
 		}
 		for (let i = 0; i < imagesToAnimate.length; i++) {
 			console.log("Animating: " + imagesToAnimate[i]);
@@ -482,19 +478,19 @@ function calculatePermittedVertical() {
 	permittedVertical[DOWN] = permittedVertical[UP] = 0;
 	elArrowUp.style.left = elArrowDn.style.left = "-500px";
 	for (let i = 0; i < trans.length; i++) {
-		if (Math.abs(sliderPos - trans[i][0]) < TRANSITION_RANGE) {
+		if (Math.abs(centerX - trans[i][0]) < TRANSITION_RANGE) {
 			let direction = trans[i][1];
 			let destArea = trans[i][2];
-			let destPos = trans[i][3];
+			let destX = trans[i][3];
 			canMove = true;
 			if (direction < 0) {
-				dbgout += "<br>Transition Point " + i + " in range - can go DOWN to " + destArea + ":" + destPos;
+				dbgout += "<br>Transition Point " + i + " in range - can go DOWN to " + destArea + ":" + destX;
 				elArrowDn.style.left = "50vw";
-				permittedVertical[DOWN] = [destArea, destPos];
+				permittedVertical[DOWN] = [destArea, destX];
 			} else if (direction > 0) {
-				dbgout += "<br>Transition Point " + i + " in range - can go UP to " + destArea + ":" + destPos;
+				dbgout += "<br>Transition Point " + i + " in range - can go UP to " + destArea + ":" + destX;
 				elArrowUp.style.left = "50vw";
-				permittedVertical[UP] = [destArea, destPos];
+				permittedVertical[UP] = [destArea, destX];
 			} else {
 				console.log("Invalid direction value");
 			}
@@ -523,13 +519,13 @@ function hideBlackBars() {
 	}
 }
 
-function moveTo(destArea, destPos) {
+function moveTo(destArea, destX) {
 	inputsBlocked = true;
 	let elCurArea = document.getElementById("area-" + curArea);
 	let elNewArea = document.getElementById("area-" + destArea);
 	// Set location to the new area and pos
-	dbgout += "<br>Moving from " + curArea + ":" + sliderPos;
-	dbgout += " to " + destArea + ":" + destPos;
+	dbgout += "<br>Moving from " + curArea + ":" + centerX;
+	dbgout += " to " + destArea + ":" + destX;
 	// I tried to do something fancier with the images overlaid, but it's problematic because they don't line up - you can
 	// see the jump when we scroll to the right place on the new image. So it's easier to just fade everything to black 
 	// (including the arrows because they change too) while the changeover happens.
@@ -560,8 +556,8 @@ function moveTo(destArea, destPos) {
 		elCurArea.style.display = "none";
 		elNewArea.style.display = "block";
 		curArea = destArea;
-		sliderPos = destPos;
-		window.scroll(sliderPos, 0);
+		centerX = destX;
+		window.scroll(centerX - window.innerWidth / 2, 0);
 		calculatePermittedVertical();
 		everything.classList.replace("fadeOut", "fadeIn");
 		if (destArea == "disco") {
@@ -650,48 +646,48 @@ function processActions(raf = true) {
 		// Handle left/right movement
 		if (isOn[LEFT]) {
 			// Left
-			sliderPos -= scrollSpeed;
-			if (sliderPos < 0) {
-				sliderPos = 0; // Don't go past the left edge
+			centerX -= scrollSpeed;
+			if (centerX - window.innerWidth / 2 < 0) {
+				centerX = window.innerWidth / 2; // Don't go past the left edge
 			}
-			window.scroll(sliderPos, 0);
+			window.scroll(centerX - window.innerWidth / 2, 0);
 		}
 		// This is not an else, so that left and right cancel
 		// out when both are pressed, rather than left dominating
 		if (isOn[RIGHT]) {
 			// Right
-			sliderPos += scrollSpeed;
-			var maxScroll = document.body.scrollWidth - document.body.clientWidth;
-			if (sliderPos > maxScroll) {
-				sliderPos = maxScroll; // Don't go past the right edge
+			centerX += scrollSpeed;
+			var maxScroll = document.body.scrollWidth - window.innerWidth / 2;
+			if (centerX > maxScroll) {
+				centerX = maxScroll; // Don't go past the right edge
 			}
-			window.scroll(sliderPos, 0);
+			window.scroll(centerX - window.innerWidth / 2, 0);
 		}
 		dbgout = ""
 		dbgout += "<br>Area: " + curArea;
-		dbgout += "<br>sliderPos: " + sliderPos;
+		dbgout += "<br>centerX: " + centerX;
 
 		// Find out if we are near a transition point
 		calculatePermittedVertical();
 		// Are we actually moving up or down?
-		let destArea, destPos;
+		let destArea, destX;
 		let direction = 0;
 		if (permittedVertical[DOWN] && isOn[DOWN]) {
 			destArea = permittedVertical[DOWN][0];
-			destPos = permittedVertical[DOWN][1];
+			destX = permittedVertical[DOWN][1];
 			direction -= 1;
 		}
 		// No else here, so that simultaneous up and down cancel
 		// instead of down dominating
 		if (permittedVertical[UP] && isOn[UP]) {
 			destArea = permittedVertical[UP][0];
-			destPos = permittedVertical[UP][1];
+			destX = permittedVertical[UP][1];
 			direction += 1;
 		}
 		if (direction != 0) {
 			// Clear any previous dbg messages
-			dbgout = "<b>Going " + (direction > 0 ? "UP" : "DOWN") + " to " + destArea + ":" + destPos + "</b>";
-			moveTo(destArea, destPos);
+			dbgout = "<b>Going " + (direction > 0 ? "UP" : "DOWN") + " to " + destArea + ":" + destX + "</b>";
+			moveTo(destArea, destX);
 		}
 		// Output the debug messages only if they've changed
 		dbg(dbgout);
