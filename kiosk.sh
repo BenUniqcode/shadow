@@ -3,8 +3,8 @@
 
 PATH=/bin:/usr/bin
 
-URL=https://shadow.test.uniqcode.com/
-# URL=file:///home/pi/shadow/index.html
+#URL=https://shadow.test.uniqcode.com/
+URL=file:///home/ben/src/shadow/index.html
 
 # CHROMIUM="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 CHROMIUM="chromium-browser"
@@ -26,9 +26,9 @@ unclutter &
 --disable-session-storage --disable-plugins --disable-plugins-discovery --disable-sync \
 --enable-features=OverlayScrollbar,OverlayScrollbarFlashAfterAnyScrollUpdate,OverlayScrollbarFlashWhenMouseEnter \
 --disable-features=TranslateUI \
---disk-cache-size=0 --disk-cache-dir=/dev/null \
+--disk-cache-size=0 --disk-cache-dir=$CHROMIUM_TMPDIR \
 --safebrowsing-disable-auto-update \
---user-data-dir=/tmp/chromium/ \
+--user-data-dir=$CHROMIUM_TMPDIR \
 --incognito \
 --app="$URL"
 
