@@ -476,7 +476,6 @@ function calculatePermittedVertical() {
 	let canMove = false;
 	let trans = TRANSITIONS[curArea];
 	permittedVertical[DOWN] = permittedVertical[UP] = 0;
-	elArrowUp.style.left = elArrowDn.style.left = "-500px";
 	for (let i = 0; i < trans.length; i++) {
 		if (Math.abs(centerX - trans[i][0]) < TRANSITION_RANGE) {
 			let direction = trans[i][1];
@@ -485,11 +484,11 @@ function calculatePermittedVertical() {
 			canMove = true;
 			if (direction < 0) {
 				dbgout += "<br>Transition Point " + i + " in range - can go DOWN to " + destArea + ":" + destX;
-				elArrowDn.style.left = "50vw";
+				elArrowDn.classList.remove("hidden");
 				permittedVertical[DOWN] = [destArea, destX];
 			} else if (direction > 0) {
 				dbgout += "<br>Transition Point " + i + " in range - can go UP to " + destArea + ":" + destX;
-				elArrowUp.style.left = "50vw";
+				elArrowUp.classList.remove("hidden");
 				permittedVertical[UP] = [destArea, destX];
 			} else {
 				console.log("Invalid direction value");
@@ -498,10 +497,10 @@ function calculatePermittedVertical() {
 	}
 	// Hide the arrows that do not apply
 	if (!permittedVertical[DOWN]) {
-		elArrowDn.style.left = "-500px";
+		elArrowDn.classList.add("hidden");
 	}
 	if (!permittedVertical[UP]) {
-		elArrowUp.style.left = "-500px";
+		elArrowUp.classList.add("hidden");
 	}
 }
 

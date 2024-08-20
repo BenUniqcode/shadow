@@ -169,18 +169,18 @@
 		#arrowUp {
 			/* It's a 1080px screen but a 760px image, so bars of 160px top and bottom */
 			top: 170px;
-			color: green;
+			left: calc(50vw + 25px); /* Image is 50px wide */
 		}
 
 		#arrowDn {
 			bottom: 170px;
-			color: lightgreen;
+			left: calc(50vw + 25px); /* Image is 50px wide */
 		}
 		#arrowDn.moving {
 			/* In Disco mode it moves around - animate that */
 			transition: bottom 30s ease-in-out, left 30s ease-in-out;
 		}
-
+		/* We use the same image for both arrows, and rotate it for the down one */
 		#arrowDn img {
 			transform: rotate(180deg);
 		}
@@ -199,10 +199,10 @@
 	<div id="everything" class="fadeOut">
 		<textarea id="keyinput"></textarea><!-- Offscreen; required for keyboard control -->
 		<div id="debug"></div>
-		<div id="arrowDn" class="arrow">
+		<div id="arrowDn" class="arrow hidden">
 			<img src="images/v3.1/arrow2_transp.png">
 		</div>
-		<div id="arrowUp" class="arrow">
+		<div id="arrowUp" class="arrow hidden">
 			<img src="images/v3.1/arrow2_transp.png">
 		</div>
 		<div id="area-main">
