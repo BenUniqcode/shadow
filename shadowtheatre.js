@@ -650,9 +650,7 @@ function processActions(raf = true) {
 		}
 		return;
 	}
-	if (raf) {
-		dbgout = "";
-	}
+	dbgout = "";
 	// Keep track of progress through Konami. To ensure that only discrete movements advance the pattern,
 	// we only step to the next one when entering the correct state from a "nothing pressed" state
 	if (wasIdle) {
