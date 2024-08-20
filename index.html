@@ -127,6 +127,19 @@
 			z-index: 10;
 		}
 
+		#area-disco {
+			--disco-gradient-color-0: hsl(0deg, 96%, 55%);
+			--disco-gradient-color-1: hsl(25deg, 100%, 50%);
+			background: radial-gradient(circle at center,
+					var(--disco-gradient-color-0),
+					var(--disco-gradient-color-1));
+			background-size: 200% 200%;
+			transition:
+				--disco-gradient-color-0 2s linear,
+				--disco-gradient-color-1 2s linear;
+
+		}
+
 		@keyframes arrowpulse {
 			0% {
 				transform-origin: center;

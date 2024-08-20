@@ -131,6 +131,22 @@ const ypos = Array(cols).fill(0);
 ctx.fillStyle = '#000';
 ctx.fillRect(0, 0, cw, ch);
 
+// Disco Gradient initialisation
+// Based on ideas from https://www.joshwcomeau.com/react/rainbow-button/
+const discoGradientColorNames = [
+'--disco-gradient-color-0',
+'--disco-gradient-color-1',
+];
+// Register properties
+discoGradientColorNames.forEach((name, index) => {
+	CSS.registerProperty({
+		name,
+		syntax: '<color>',
+		inherits: false,
+		initialValue: 'hsl(180deg, 100%, 50%)',
+	});
+});
+var evolveIndex = 0;
 
 function connecthandler(e) {
 	console.log("Connected");
@@ -286,16 +302,29 @@ function matrixLoop() {
 	});
 }
 
+// Alternate evolving one or the other colour of the gradient
+function partyColorsEvolve() {
+	let randomH = Math.floor(Math.random() * 360);
+	let randomS = Math.floor(Math.random() * 20) + 80; // 80-100% saturation
+	let randomL = Math.floor(Math.random() * 50) + 50; // 50-100%
+
+	let nextColor = 'hsl(' + randomH + 'deg, ' + randomS + '%, ' + randomL + '%)';
+	// Apply the new color, update the DOM.
+	document.getElementById("area-disco").style.setProperty(discoGradientColorNames[evolveIndex], nextColor);
+	evolveIndex = (evolveIndex + 1) % discoGradientColorNames.length;
+}
+
 function partyColors(partyTime, partyPlace = document.body) {
 	console.log("partyColors");
 	let colorAnims = [];
-	for (let i = 0; i < 20; i++) {
-		let randomR = Math.floor(Math.random() * 256);
-		let randomG = Math.floor(Math.random() * 256);
-		let randomB = Math.floor(Math.random() * 256);
-		colorAnims.push({ backgroundColor: "rgb(" + randomR + "," + randomG + "," + randomB + ")" });
-	}
-	colorAnims.push({ backgroundColor: "black" });
+	for (let i = 0; i < 50; i++) {
+		let randomX = Math.floor(Math.random() * 100); // in %
+		let randomY = Math.floor(Math.random() * 100); // in %
+		// colorAnims.push({ backgroundColor: "rgb(" + randomR + "," + randomG + "," + randomB + ")" });
+		// colorAnims.push({ backgroundImage: "radial-gradient(farthest-corner at " + randomX + "vw " + randomY + "vh in hsl shorter hue," + 
+			// " var(--disco-gradient-color-0), var(--disco-gradient-color-1), var(--disco-gradient-color-2)" });
+		colorAnims.push({ backgroundPosition: randomX + "% " + randomY + "%" });
+	}	
 	partyPlace.animate(colorAnims, { duration: partyTime });
 }
 
@@ -504,9 +533,11 @@ function moveTo(destArea, destPos) {
 			hideBlackBars();
 			// Start the party now so that the colours fade up
 			// This value determines how rapidly the colours cycle - 30s gives a fairly slow one
-			let partyTime = 30000;
+			let partyTime = 120000;
 			let partyPlace = document.getElementById("area-disco");
 			partyColors(partyTime, partyPlace);
+			partyColorsEvolve();
+			setInterval(partyColorsEvolve, 6000);
 			partyHandle = setInterval(function() {
 				partyColors(partyTime, partyPlace);
 			}, partyTime);
