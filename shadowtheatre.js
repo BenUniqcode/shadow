@@ -83,7 +83,7 @@ const TRANSITIONS = {
 
 };
 // scrollPos must be within +/- this amount of the specific point to allow transitioning
-const TRANSITION_RANGE = 500;
+const TRANSITION_RANGE = 400;
 const TRANSITION_TIME = 1000;
 
 var isOn = []; // Map of button input number to true/false
@@ -164,7 +164,7 @@ discoGradientColorNames.forEach((name, index) => {
 		name,
 		syntax: '<color>',
 		inherits: false,
-		initialValue: 'hsl(180deg, 100%, 50%)',
+		initialValue: 'hsl(180deg, 100%, 20%)',
 	});
 });
 var evolveIndex = 0;
@@ -272,6 +272,9 @@ function keydown(e) {
 		e.preventDefault();
 		scrollSpeed = Math.min(SCROLLSPEED_MAX, ++scrollSpeed);
 		showHud("Scroll speed: " + scrollSpeed, 500);
+	} else if (e.key == 'E' || e.key == 'e') {
+		e.preventDefault();
+		easterEgg();
 	}
 }
 
@@ -352,7 +355,7 @@ function arrowMover() {
 function discoColorsEvolve() {
 	let randomH = Math.floor(Math.random() * 360);
 	let randomS = Math.floor(Math.random() * 20) + 80; // 80-100% saturation
-	let randomL = Math.floor(Math.random() * 50) + 50; // 50-100%
+	let randomL = Math.floor(Math.random() * 50) + 20; // 20-70%
 
 	let nextColor = 'hsl(' + randomH + 'deg, ' + randomS + '%, ' + randomL + '%)';
 	// Apply the new color, update the DOM.
@@ -622,6 +625,23 @@ function moveTo(destArea, destX) {
 	}, endTime);
 }
 
+function easterEgg() {
+	let matrixTime = 15000;
+	let matrixFadeTime = 3000;
+	elPartyOverlay.animate([{ backgroundColor: "black", opacity: 0 }, { backgroundColor: "black", opacity: 1.0 }, { opacity: 0.5 }, { backgroundColor: "white" }], { duration: matrixTime, fill: 'forwards' });
+	canvas.animate([{ opacity: 0 }, { opacity: 1 }], { duration: matrixFadeTime, fill: 'forwards' });
+	let matrixHandle = setInterval(matrixLoop, 50);
+	setTimeout(function () {
+		canvas.animate([{ opacity: 1 }, { opacity: 0 }], { duration: matrixFadeTime, fill: 'forwards' });
+	}, matrixTime);
+	setTimeout(function () {
+		clearInterval(matrixHandle);
+	}, matrixTime + matrixFadeTime);
+	setTimeout(function () {
+		party();
+	}, 10000);
+}
+
 function moveLeft() {
 	centerX -= scrollSpeed;
 	if (centerX - window.innerWidth / 2 < 0) {
@@ -658,20 +678,7 @@ function processActions(raf = true) {
 			console.log("Konami Pos is " + konamiPos);
 			if (konamiPos == 9) {
 				// Got the code!
-				let matrixTime = 15000;
-				let matrixFadeTime = 3000;
-				elPartyOverlay.animate([{ backgroundColor: "black", opacity: 0 }, { backgroundColor: "black", opacity: 1.0 }, { opacity: 0.5 }, { backgroundColor: "white" }], { duration: matrixTime, fill: 'forwards' });
-				canvas.animate([{ opacity: 0 }, { opacity: 1 }], { duration: matrixFadeTime, fill: 'forwards' });
-				let matrixHandle = setInterval(matrixLoop, 50);
-				setTimeout(function () {
-					canvas.animate([{ opacity: 1 }, { opacity: 0 }], { duration: matrixFadeTime, fill: 'forwards' });
-				}, matrixTime);
-				setTimeout(function () {
-					clearInterval(matrixHandle);
-				}, matrixTime + matrixFadeTime);
-				setTimeout(function () {
-					party();
-				}, 10000);
+				easterEgg();
 				console.log("Resetting Konami Pos after success");
 				konamiPos = 0;
 			} else {
@@ -685,7 +692,6 @@ function processActions(raf = true) {
 	if (!anyInputOn) {
 		wasIdle = true;
 	} else {
-		wasIdle = false;
 
 		// Handle left/right movement
 		if (isOn[LEFT]) {
@@ -716,14 +722,14 @@ function processActions(raf = true) {
 		// Are we actually moving up or down?
 		let destArea, destX;
 		let direction = 0;
-		if (permittedVertical[DOWN] && isOn[DOWN]) {
+		if (wasIdle && permittedVertical[DOWN] && isOn[DOWN]) {
 			destArea = permittedVertical[DOWN][0];
 			destX = permittedVertical[DOWN][1];
 			direction -= 1;
 		}
 		// No else here, so that simultaneous up and down cancel
 		// instead of down dominating
-		if (permittedVertical[UP] && isOn[UP]) {
+		if (wasIdle && permittedVertical[UP] && isOn[UP]) {
 			destArea = permittedVertical[UP][0];
 			destX = permittedVertical[UP][1];
 			direction += 1;
@@ -735,6 +741,7 @@ function processActions(raf = true) {
 		}
 		// Output the debug messages only if they've changed
 		dbg(dbgout);
+		wasIdle = false;
 	}
 
 	// If using only keyboard control, we need to loop this function so that holding a key down has the right effect
