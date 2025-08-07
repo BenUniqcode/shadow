@@ -62,6 +62,9 @@ const WIDTH = {
 // Better to explicitly state all transitions in all directions.
 const TRANSITIONS = {
 	"main": [
+		// Because of main's looping, these will not be used as actual centerX values, but translated into imagenum,offset
+		// Same goes for re-entry points to main.
+		// Other levels aren't affected and the number is just the centerX value.
 		[2500, -1, "pirate", 3400],
 		[7420, -1, "pirate", 6000],
 		[7420, 1, "disco", 675],
@@ -106,7 +109,7 @@ const TRANSITION_RANGE = 400;
 const TRANSITION_TIME = 1000;
 
 var isOn = []; // Map of button input number to true/false
-var scrollSpeed = 50;
+var scrollSpeed = 2;
 var centerX = Math.floor(window.innerWidth / 2);
 var scrollSpeedLimiter = false; // Is set to true when the scroll speed changes, which blocks further changes for a while, to reduce the speed at which it was changing
 var raftimer;
@@ -318,6 +321,29 @@ function keyup(e) {
 
 }
 
+// Get the offset of the image currently closest to the center of the screen, according to the current DOM order
+// Say there are three images, currently in this order: <img id="2"> <img id="3"> <img id="1">
+// and we're centred on the middle one, it will return the element object for the middle one.
+function getCenterImagePos() {
+	let centerImagePos = Math.floor(centerX / STANDARD_IMAGE_WIDTH);
+	console.log("centerImagePos: " + centerImagePos);
+	return centerImagePos;
+}
+
+// Get the image element of the center image
+function getCenterImage() {
+	let centerImagePos = getCenterImagePos();
+	let images = document.querySelectorAll("#area-" + curArea + " .slider img");
+	return images[centerImagePos];
+}
+
+// Get the ID number of the given main image - because their order in the DOM may have been rearranged
+function getMainImageNum(imageEl) {
+	let id = imageEl.id;
+	let num = id.replace('main', '');
+	return num;
+}
+
 // Show the hud (if it's not already showing) with the given text, for the given number of milliseconds
 function showHud(text, fadeTime, flashing = false) {
 	var hud = document.getElementById("hud");
@@ -485,20 +511,19 @@ function party() {
 	} else {
 		// When there are multiple images in a slider, assume they are all the same size (1351 wide)
 		// The index of the image at the centre of the screen will therefore be floor(centerX / 1351)
-		let centerImage = Math.floor(centerX / STANDARD_IMAGE_WIDTH);
-		console.log("centerImage: " + centerImage);
-		let imagesToAnimate = [centerImage];
+		let centerImagePos = getCenterImagePos();
+		let imagesToAnimate = [centerImagePos];
 		// But do the left neighbour too because they might be on the screen, or creep
 		// onto the screen during the animations
-		if (centerImage > 0) {
-			imagesToAnimate.push(centerImage - 1);
-			console.log("Also animating the one to the left: " + (centerImage - 1));
+		if (centerImagePos > 0) {
+			imagesToAnimate.push(centerImagePos - 1);
+			console.log("Also animating the one to the left: " + (centerImagePos - 1));
 		}
 		// Doing the two to the right (if there are that many) should always be sufficient to cover 
 		// the whole screen. 
-		if (centerImage < images.length - 1) {
-			imagesToAnimate.push(centerImage + 1);
-			console.log("Also animating the one to the right: " + (centerImage + 1));
+		if (centerImagePos < images.length - 1) {
+			imagesToAnimate.push(centerImagePos + 1);
+			console.log("Also animating the one to the right: " + (centerImagePos + 1));
 		}
 		for (let i = 0; i < imagesToAnimate.length; i++) {
 			console.log("Animating: " + imagesToAnimate[i]);
@@ -523,22 +548,51 @@ function party() {
 	nextMotivationalMessage = (nextMotivationalMessage + 1) % motivationalMessages.length;
 }
 
+function isVisibleInViewport(element) {
+    const rect = element.getBoundingClientRect()
+    return (
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+    )
+}
+
+
 function calculatePermittedVertical() {
 	let canMove = false;
 	let trans = TRANSITIONS[curArea];
 	permittedVertical[DOWN] = permittedVertical[UP] = 0;
+	// We don't want to change centerX, so use xpos in this function
+	let xpos;
+	if (curArea == "main") {
+		// Translate the current image closest to the center of the screen, and its center position, into the old-style centerX value
+		let centerImage = getCenterImage();
+		let centerImageNum = getMainImageNum(centerImage);
+		let boundingRect = centerImage.getBoundingClientRect(); // This is relative to the viewport
+		let imageCenterXpos = Math.floor(boundingRect.right - STANDARD_IMAGE_WIDTH / 2);
+		// But the image position goes the opposite way than the x position we want, so we actually want screenwidth - centrexpos as the offset
+		let imageCenterXrev = 1920 - imageCenterXpos;
+		xpos = (centerImageNum - 1) * STANDARD_IMAGE_WIDTH + imageCenterXrev;
+		// But it needs a fudge because something about the maths isn't quite right
+		xpos -= 250;
+		dbgout += "<br>Image #" + centerImageNum + " is at position " + imageCenterXpos + " = revpos " + imageCenterXrev + " = old centerX of " + xpos;
+	} else {
+		xpos = centerX;
+	}
+
 	for (let i = 0; i < trans.length; i++) {
-		if (Math.abs(centerX - trans[i][0]) < TRANSITION_RANGE) {
+		if (Math.abs(xpos - trans[i][0]) < TRANSITION_RANGE) {
 			let direction = trans[i][1];
 			let destArea = trans[i][2];
 			let destX = trans[i][3];
 			canMove = true;
 			if (direction < 0) {
-				dbgout += "Transition Point " + i + " in range - can go DOWN to " + destArea + ":" + destX + "<br>";
+				dbgout += "<br>Transition Point " + i + " in range - can go DOWN to " + destArea + ":" + destX + "<br>";
 				elArrowDn.classList.remove("hidden");
 				permittedVertical[DOWN] = [destArea, destX];
 			} else if (direction > 0) {
-				dbgout += "Transition Point " + i + " in range - can go UP to " + destArea + ":" + destX + "<br>";
+				dbgout += "<br>Transition Point " + i + " in range - can go UP to " + destArea + ":" + destX + "<br>";
 				elArrowUp.classList.remove("hidden");
 				permittedVertical[UP] = [destArea, destX];
 			} else {
@@ -576,6 +630,13 @@ function changeArea(destArea, destX) {
 	// Set location to the new area and pos
 	dbgout += "<br>Moving from " + curArea + ":" + centerX;
 	dbgout += "<br>to " + destArea + ":" + destX + "<br>";
+	if (destArea == "main") {
+		// Translate into image number and offset
+		let mainImageNumber = Math.floor(destX / STANDARD_IMAGE_WIDTH);
+		let mainImageOffset = destX % STANDARD_IMAGE_WIDTH;
+		dbgout += "<br>(image:" + mainImageNumber + " offset:" + mainImageOffset + "<br>";
+	}
+
 	// I tried to do something fancier with the images overlaid, but it's problematic because they don't line up - you can
 	// see the jump when we scroll to the right place on the new image. So it's easier to just fade everything to black 
 	// (including the arrows because they change too) while the changeover happens.
@@ -684,9 +745,8 @@ function moveLeft() {
 		// If we are on main, we scroll forever. Ensure two images are present to the left of the currently-centred one.
 		let container = document.querySelector("#area-" + curArea + " .slider .flexbox");
 		let images = container.querySelectorAll("img");
-		console.log(images);
-		let centerImage = Math.floor(centerX / STANDARD_IMAGE_WIDTH);
-		if (centerImage < 2) {
+		let centerImagePos = getCenterImagePos();
+		if (centerImagePos < 2) {
 			// Move the rightmost image to the left, and change centerX accordingly
 			container.insertBefore(images[images.length - 1], images[0]);
 			centerX += STANDARD_IMAGE_WIDTH;
@@ -706,9 +766,8 @@ function moveRight() {
 		// If we are on main, we scroll forever. Ensure two images are present to the right of the currently-centred one.
 		let container = document.querySelector("#area-" + curArea + " .slider .flexbox");
 		let images = container.querySelectorAll("img");
-		console.log(images);
-		let centerImage = Math.floor(centerX / STANDARD_IMAGE_WIDTH);
-		if (centerImage > images.length - 3) {
+		let centerImagePos = getCenterImagePos();
+		if (centerImagePos > images.length - 3) {
 			// Move the leftmost image to the right, and change centerX accordingly
 			container.insertBefore(images[0], null); // null means insert at the end
 			centerX -= STANDARD_IMAGE_WIDTH;
