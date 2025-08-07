@@ -36,14 +36,17 @@ const SCROLL_ANIMATION_OPTIONS = {
 	fill: 'forwards', // Stay in the final position instead of springing back
 };
 
+// Width of each image in multi-image areas like main, dragon, giant, and pirate
+const STANDARD_IMAGE_WIDTH = 1351;
+
 // Total widths of each Area
 const WIDTH = {
-	"main": 15 * 1351,
-	"dragon": 3 * 1351,
-	"giant": 5 * 1351,
+	"main": 21 * STANDARD_IMAGE_WIDTH,
+	"dragon": 3 * STANDARD_IMAGE_WIDTH,
+	"giant": 5 * STANDARD_IMAGE_WIDTH,
 	"hell": 1920,
 	"hug": 3407,
-	"pirate": 5 * 1351,
+	"pirate": 5 * STANDARD_IMAGE_WIDTH,
 	"skyworld": 7853,
 	"space": 5760,
 };
@@ -59,7 +62,6 @@ const WIDTH = {
 // Better to explicitly state all transitions in all directions.
 const TRANSITIONS = {
 	"main": [
-		[2000, 1, "space", 2000], 
 		[2500, -1, "pirate", 3400],
 		[7420, -1, "pirate", 6000],
 		[7420, 1, "disco", 675],
@@ -67,7 +69,7 @@ const TRANSITIONS = {
 		[12240, -1, "skyworld", 1240], // NB Mario tube, goes DOWN but to a world that is UP from elsewhere in the map
 		[13850, 1, "giant", 2000],
 		[16680, -1, "dragon", 2040],
-		[18200, 1, "skyworld", 7250],
+		[18200, 1, "skyworld", 6900],
 	],
 	"disco": [
 		[675, -1, "main", 7420],
@@ -91,7 +93,8 @@ const TRANSITIONS = {
 	],
 	"skyworld": [
 		[1240, -1, "main", 12240], // Goes back DOWN to main even though we came DOWN from there
-		[7250, -1, "main", 18200],
+		[6900, -1, "main", 18200],
+		[6900, 1, "space", 4800],
 	],
 	"space": [
 		// Exit from space is via the Black Hole, not up/down
@@ -103,7 +106,7 @@ const TRANSITION_RANGE = 400;
 const TRANSITION_TIME = 1000;
 
 var isOn = []; // Map of button input number to true/false
-var scrollSpeed = 2;
+var scrollSpeed = 50;
 var centerX = Math.floor(window.innerWidth / 2);
 var scrollSpeedLimiter = false; // Is set to true when the scroll speed changes, which blocks further changes for a while, to reduce the speed at which it was changing
 var raftimer;
@@ -473,7 +476,7 @@ function party() {
 	}
 	imageAnims.push({ transform: "scale(1.0) translate(0px,0px)", opacity: 0.5 }, { opacity: 0.75 }, { opacity: 1 });
 	console.log(imageAnims);
-	let images = document.querySelectorAll("#area-" + curArea + " .slider .flexbox img");
+	let images = document.querySelectorAll("#area-" + curArea + " .slider img");
 	// If there is only one image, do it
 	// Otherwise, try to only animate the main image that's on the screen, and its neighbours
 	if (images.length == 1) {
@@ -482,7 +485,7 @@ function party() {
 	} else {
 		// When there are multiple images in a slider, assume they are all the same size (1351 wide)
 		// The index of the image at the centre of the screen will therefore be floor(centerX / 1351)
-		let centerImage = Math.floor(centerX / 1351);
+		let centerImage = Math.floor(centerX / STANDARD_IMAGE_WIDTH);
 		console.log("centerImage: " + centerImage);
 		let imagesToAnimate = [centerImage];
 		// But do the left neighbour too because they might be on the screen, or creep
@@ -677,21 +680,43 @@ function moveTo(newX) {
 
 function moveLeft() {
 	centerX -= scrollSpeed;
-	if (centerX - window.innerWidth / 2 < 0) {
-		centerX = window.innerWidth / 2; // Don't go past the left edge
+	if (curArea == "main") {
+		// If we are on main, we scroll forever. Ensure two images are present to the left of the currently-centred one.
+		let container = document.querySelector("#area-" + curArea + " .slider .flexbox");
+		let images = container.querySelectorAll("img");
+		console.log(images);
+		let centerImage = Math.floor(centerX / STANDARD_IMAGE_WIDTH);
+		if (centerImage < 2) {
+			// Move the rightmost image to the left, and change centerX accordingly
+			container.insertBefore(images[images.length - 1], images[0]);
+			centerX += STANDARD_IMAGE_WIDTH;
+		}
+	} else if (centerX - window.innerWidth / 2 < 0) {
+		// Other areas must not scroll past the left edge
+		centerX = window.innerWidth / 2; 
 	}
-	//window.scroll(centerX - window.innerWidth / 2, 0);
 	moveTo(centerX);
 }
 
 function moveRight() {
 	// Right
 	centerX += scrollSpeed;
-	var maxScroll = WIDTH[curArea] - window.innerWidth / 2;
-	if (centerX > maxScroll) {
-		centerX = maxScroll; // Don't go past the right edge
+	let maxScroll = WIDTH[curArea] - window.innerWidth / 2;
+	if (curArea == "main") {
+		// If we are on main, we scroll forever. Ensure two images are present to the right of the currently-centred one.
+		let container = document.querySelector("#area-" + curArea + " .slider .flexbox");
+		let images = container.querySelectorAll("img");
+		console.log(images);
+		let centerImage = Math.floor(centerX / STANDARD_IMAGE_WIDTH);
+		if (centerImage > images.length - 3) {
+			// Move the leftmost image to the right, and change centerX accordingly
+			container.insertBefore(images[0], null); // null means insert at the end
+			centerX -= STANDARD_IMAGE_WIDTH;
+		}
+	} else if (centerX > maxScroll) {
+		// Other areas must not scroll past the right edge
+		centerX = maxScroll;
 	}
-	//window.scroll(centerX - window.innerWidth / 2, 0);
 	moveTo(centerX);
 }
 
@@ -848,9 +873,7 @@ window.addEventListener("keydown", keydown);
 window.addEventListener("keyup", keyup);
 document.getElementById("keyinput").focus();
 
-
-
-dbg("Loaded");
-document.getElementById("everything").classList.replace("fadeOut", "fadeIn");
-
+// As we have preloaded the "end" image to the left of the start image for wrapping purposes,
+// jump to the start position (and fade in)
+changeArea("main", 2000);
 
