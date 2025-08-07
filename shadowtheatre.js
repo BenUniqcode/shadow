@@ -738,6 +738,11 @@ function rotateMainImagesLeft() {
 }
 
 function move() {
+	// Not all areas have a slider; if not, it's a full-screen level with no left/right movement allowed
+	let slider = document.querySelector("#area-" + curArea + " .slider");
+	if (!slider) {
+		return;
+	}
 	if (curArea == "main") {
 		// If we are on main, we scroll forever. Ensure two images are present to the left and right of the currently-centred one.
 		let container = document.querySelector("#area-main .slider .flexbox");
@@ -749,10 +754,15 @@ function move() {
 			rotateMainImagesLeft();
 		}
 	}
-	document.querySelector("#area-" + curArea + " .slider").style.marginLeft = -centerX + window.innerWidth / 2 + "px";
+	slider.style.marginLeft = -centerX + window.innerWidth / 2 + "px";
 }
 
 function moveLeft() {
+	// Not all areas have a slider; if not, it's a full-screen level with no left/right movement allowed
+	let slider = document.querySelector("#area-" + curArea + " .slider");
+	if (!slider) {
+		return;
+	}
 	centerX -= scrollSpeed;
 	if (curArea != "main" && centerX - window.innerWidth / 2 < 0) {
 		// Other areas must not scroll past the left edge
@@ -762,6 +772,11 @@ function moveLeft() {
 }
 
 function moveRight() {
+	// Not all areas have a slider; if not, it's a full-screen level with no left/right movement allowed
+	let slider = document.querySelector("#area-" + curArea + " .slider");
+	if (!slider) {
+		return;
+	}
 	// Right
 	centerX += scrollSpeed;
 	let maxScroll = WIDTH[curArea] - window.innerWidth / 2;

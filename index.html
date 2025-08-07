@@ -68,12 +68,13 @@
 		}
 
 		.slider {
-			/* Position scaled images central on screen */
-			xmargin-top: 160px;
-			xmargin-bottom: 160px;
 			/* Crop any excess (mainly for 2D areas) */
 			height: 760px;
 			overflow: hidden;
+		}
+		
+		.discospace {
+			height: 760px;
 		}
 
 		#area-space .slider {
@@ -249,10 +250,9 @@
 			</div>
 		</div>
 		<div id="area-disco" style="display: none">
-			<div class="slider">
-				<div class="flexbox">
-					<!-- Nothing here, it's done in JS -->
-				</div>
+			<div class="discospace">
+				<!-- Nothing here, it's done in JS -->
+				<!-- discospace instead of slider ensures no movement, but right height -->
 			</div>
 		</div>
 		<div id="area-giant" style="display: none">
