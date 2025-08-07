@@ -630,11 +630,14 @@ function changeArea(destArea, destX) {
 	// Set location to the new area and pos
 	dbgout += "<br>Moving from " + curArea + ":" + centerX;
 	dbgout += "<br>to " + destArea + ":" + destX + "<br>";
-	if (destArea == "main") {
-		// Translate into image number and offset
-		let mainImageNumber = Math.floor(destX / STANDARD_IMAGE_WIDTH);
-		let mainImageOffset = destX % STANDARD_IMAGE_WIDTH;
-		dbgout += "<br>(image:" + mainImageNumber + " offset:" + mainImageOffset + "<br>";
+	if (curArea != "main" && destArea == "main") {
+		// Can't easily move to a specific image, so we don't bother trying; the old centerX offset will work fine,
+		// BUT we must ensure the images are in their original order. So rotate left the correct number of times if necessary.
+		// The check that curArea is not main prevents this happening when we call changeArea on first load.
+		let images = elNewArea.querySelectorAll(".slider img");
+		for (let i = getMainImageNum(images[0]); i > 1; i--) {
+			rotateMainImagesRight(); // Obviously in some circumstances it would be quicker to go left by 1-i, but fuggit
+		}
 	}
 
 	// I tried to do something fancier with the images overlaid, but it's problematic because they don't line up - you can
@@ -668,8 +671,7 @@ function changeArea(destArea, destX) {
 		elNewArea.style.display = "block";
 		curArea = destArea;
 		centerX = destX;
-		// window.scroll(centerX - window.innerWidth / 2, 0);
-		moveTo(centerX);
+		move();
 		calculatePermittedVertical();
 		everything.classList.replace("fadeOut", "fadeIn");
 		if (destArea == "disco") {
@@ -735,48 +737,55 @@ function easterEgg() {
 	}, 10000);
 }
 
-function moveTo(newX) {
-	document.querySelector("#area-" + curArea + " .slider").style.marginLeft = -newX + window.innerWidth / 2 + "px";
+function rotateMainImagesRight() {
+	// Move the rightmost image to the left (thus doing a right-shift with wrap), and change centerX accordingly
+	let container = document.querySelector("#area-main .slider .flexbox");
+	let images = container.querySelectorAll("img");
+	container.insertBefore(images[images.length - 1], images[0]);
+	centerX += STANDARD_IMAGE_WIDTH;
+}
+
+function rotateMainImagesLeft() {
+	// Move the leftmost image to the right (thus doing a left-shift with wrap) and change centerX accordingly
+	let container = document.querySelector("#area-main .slider .flexbox");
+	let images = container.querySelectorAll("img");
+	container.insertBefore(images[0], null); // null means insert at the end
+	centerX -= STANDARD_IMAGE_WIDTH;
+}
+
+function move() {
+	if (curArea == "main") {
+		// If we are on main, we scroll forever. Ensure two images are present to the left and right of the currently-centred one.
+		let container = document.querySelector("#area-main .slider .flexbox");
+		let images = container.querySelectorAll("img");
+		let centerImagePos = getCenterImagePos();
+		if (centerImagePos < 2) {
+			rotateMainImagesRight();
+		} else if (centerImagePos > images.length - 3) {
+			rotateMainImagesLeft();
+		}
+	}
+	document.querySelector("#area-" + curArea + " .slider").style.marginLeft = -centerX + window.innerWidth / 2 + "px";
 }
 
 function moveLeft() {
 	centerX -= scrollSpeed;
-	if (curArea == "main") {
-		// If we are on main, we scroll forever. Ensure two images are present to the left of the currently-centred one.
-		let container = document.querySelector("#area-" + curArea + " .slider .flexbox");
-		let images = container.querySelectorAll("img");
-		let centerImagePos = getCenterImagePos();
-		if (centerImagePos < 2) {
-			// Move the rightmost image to the left, and change centerX accordingly
-			container.insertBefore(images[images.length - 1], images[0]);
-			centerX += STANDARD_IMAGE_WIDTH;
-		}
-	} else if (centerX - window.innerWidth / 2 < 0) {
+	if (curArea != "main" && centerX - window.innerWidth / 2 < 0) {
 		// Other areas must not scroll past the left edge
 		centerX = window.innerWidth / 2; 
 	}
-	moveTo(centerX);
+	move();
 }
 
 function moveRight() {
 	// Right
 	centerX += scrollSpeed;
 	let maxScroll = WIDTH[curArea] - window.innerWidth / 2;
-	if (curArea == "main") {
-		// If we are on main, we scroll forever. Ensure two images are present to the right of the currently-centred one.
-		let container = document.querySelector("#area-" + curArea + " .slider .flexbox");
-		let images = container.querySelectorAll("img");
-		let centerImagePos = getCenterImagePos();
-		if (centerImagePos > images.length - 3) {
-			// Move the leftmost image to the right, and change centerX accordingly
-			container.insertBefore(images[0], null); // null means insert at the end
-			centerX -= STANDARD_IMAGE_WIDTH;
-		}
-	} else if (centerX > maxScroll) {
+	if (curArea != "main" && centerX > maxScroll) {
 		// Other areas must not scroll past the right edge
 		centerX = maxScroll;
 	}
-	moveTo(centerX);
+	move();
 }
 
 // Up and Down movement (only within Space) use window scrolling rather than margin shifting, because it's easier
