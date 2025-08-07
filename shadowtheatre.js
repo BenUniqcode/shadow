@@ -609,20 +609,6 @@ function calculatePermittedVertical() {
 	}
 }
 
-function showBlackBars() {
-	let bars = document.getElementsByClassName("blackBar");
-	for (let i = 0; i < bars.length; i++) {
-		bars[i].classList.remove("hidden");
-	}
-}
-
-function hideBlackBars() {
-	let bars = document.getElementsByClassName("blackBar");
-	for (let i = 0; i < bars.length; i++) {
-		bars[i].classList.add("hidden");
-	}
-}
-
 function changeArea(destArea, destX) {
 	inputsBlocked = true;
 	let elCurArea = document.getElementById("area-" + curArea);
@@ -646,7 +632,7 @@ function changeArea(destArea, destX) {
 	// The exception is going from the lighthouse into the disco, which I felt would be clearer
 	// what's going on if we zoom in to the top of it...
 	let everything = document.getElementById("everything");
-	let lighthouse = document.getElementById("lighthouse");
+	let lighthouse = document.querySelector(".lighthouse"); // Had to use a class here because we need IDs for the numbering
 	let swapTime = TRANSITION_TIME / 2;
 	let endTime = TRANSITION_TIME;
 	if (destArea == 'disco') {
@@ -654,7 +640,6 @@ function changeArea(destArea, destX) {
 		// Add top and bottom black bars so that the enlarging image doesn't light up above and below
 		// I'm sure it should be possible to do this with overflow-y: hidden but I couldn't make that work,
 		// the image just disappears...
-		showBlackBars();
 		lighthouse.classList.add("zoomToLighthouse");
 		setTimeout(function () {
 			everything.classList.add("fadeOut");
@@ -676,7 +661,6 @@ function changeArea(destArea, destX) {
 		everything.classList.replace("fadeOut", "fadeIn");
 		if (destArea == "disco") {
 			lighthouse.classList.remove("zoomToLighthouse");
-			hideBlackBars();
 			// Start the party now so that the colours fade up
 			// This value determines how rapidly the colours cycle - 30s gives a fairly slow one
 			let partyTime = 120000;
