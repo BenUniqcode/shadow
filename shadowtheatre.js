@@ -36,6 +36,18 @@ const SCROLL_ANIMATION_OPTIONS = {
 	fill: 'forwards', // Stay in the final position instead of springing back
 };
 
+// Total widths of each Area
+const WIDTH = {
+	"main": 15 * 1351,
+	"dragon": 3 * 1351,
+	"giant": 5 * 1351,
+	"hell": 1920,
+	"hug": 3407,
+	"pirate": 5 * 1351,
+	"skyworld": 7853,
+	"space": 5760,
+};
+
 // These are the horizontal positions in each Area from where we can go up (1) or down (-1) to a different Area (or both)
 // If our position is within a certain distance of such a place, the arrow will appear and going up/down is allowed.
 // Format: {fromArea: [exitPosition, direction, leadsToArea, entryPosition], ...}
@@ -47,6 +59,7 @@ const SCROLL_ANIMATION_OPTIONS = {
 // Better to explicitly state all transitions in all directions.
 const TRANSITIONS = {
 	"main": [
+		[2000, 1, "space", 2000], 
 		[2500, -1, "pirate", 3400],
 		[7420, -1, "pirate", 6000],
 		[7420, 1, "disco", 675],
@@ -79,6 +92,9 @@ const TRANSITIONS = {
 	"skyworld": [
 		[1240, -1, "main", 12240], // Goes back DOWN to main even though we came DOWN from there
 		[7250, -1, "main", 18200],
+	],
+	"space": [
+		// Exit from space is via the Black Hole, not up/down
 	],
 
 };
@@ -550,13 +566,13 @@ function hideBlackBars() {
 	}
 }
 
-function moveTo(destArea, destX) {
+function changeArea(destArea, destX) {
 	inputsBlocked = true;
 	let elCurArea = document.getElementById("area-" + curArea);
 	let elNewArea = document.getElementById("area-" + destArea);
 	// Set location to the new area and pos
-	dbgout += "Moving from " + curArea + ":" + centerX;
-	dbgout += "to " + destArea + ":" + destX + "<br>";
+	dbgout += "<br>Moving from " + curArea + ":" + centerX;
+	dbgout += "<br>to " + destArea + ":" + destX + "<br>";
 	// I tried to do something fancier with the images overlaid, but it's problematic because they don't line up - you can
 	// see the jump when we scroll to the right place on the new image. So it's easier to just fade everything to black 
 	// (including the arrows because they change too) while the changeover happens.
@@ -588,7 +604,8 @@ function moveTo(destArea, destX) {
 		elNewArea.style.display = "block";
 		curArea = destArea;
 		centerX = destX;
-		window.scroll(centerX - window.innerWidth / 2, 0);
+		// window.scroll(centerX - window.innerWidth / 2, 0);
+		moveTo(centerX);
 		calculatePermittedVertical();
 		everything.classList.replace("fadeOut", "fadeIn");
 		if (destArea == "disco") {
@@ -608,6 +625,18 @@ function moveTo(destArea, destX) {
 			arrowMoverHandle = setInterval(function () {
 				arrowMover();
 			}, 30000);
+		} else if (destArea == "space") {
+			// Space is 2D. Unlike X scrolling, we handle the Y scrolling by simply showing the full height of the image,
+			// and using window scrolling. As we're coming in from the bottom, we need to scroll to the bottom of the image.
+			// First figure out how tall the document is. Taking the maximum of all of these may not really be necessary, 
+			// but it ensures it will work in all circumstances.
+			let scrollHeight = Math.max(
+				document.body.scrollHeight, document.documentElement.scrollHeight,
+  				document.body.offsetHeight, document.documentElement.offsetHeight,
+  				document.body.clientHeight, document.documentElement.clientHeight
+			);
+			// console.log(scrollHeight);
+			window.scroll(0, scrollHeight - window.innerHeight);
 		} else {
 			// Stop any ongoing party
 			if (partyHandle) {
@@ -642,23 +671,38 @@ function easterEgg() {
 	}, 10000);
 }
 
+function moveTo(newX) {
+	document.querySelector("#area-" + curArea + " .slider").style.marginLeft = -newX + window.innerWidth / 2 + "px";
+}
+
 function moveLeft() {
 	centerX -= scrollSpeed;
 	if (centerX - window.innerWidth / 2 < 0) {
 		centerX = window.innerWidth / 2; // Don't go past the left edge
 	}
-	window.scroll(centerX - window.innerWidth / 2, 0);
+	//window.scroll(centerX - window.innerWidth / 2, 0);
+	moveTo(centerX);
 }
 
 function moveRight() {
 	// Right
 	centerX += scrollSpeed;
-	var maxScroll = document.body.scrollWidth - window.innerWidth / 2;
+	var maxScroll = WIDTH[curArea] - window.innerWidth / 2;
 	if (centerX > maxScroll) {
 		centerX = maxScroll; // Don't go past the right edge
 	}
-	window.scroll(centerX - window.innerWidth / 2, 0);
+	//window.scroll(centerX - window.innerWidth / 2, 0);
+	moveTo(centerX);
 }
+
+// Up and Down movement (only within Space) use window scrolling rather than margin shifting, because it's easier
+function moveUp() {
+	window.scrollBy(0, -scrollSpeed);
+}
+function moveDown() {
+	window.scrollBy(0, scrollSpeed);
+}
+
 
 // Respond to inputs. The arg is whether to call requestAnimationFrame - true for keyboard control, false for joystick because it's called from readGamePad
 function processActions(raf = true) {
@@ -692,7 +736,6 @@ function processActions(raf = true) {
 	if (!anyInputOn) {
 		wasIdle = true;
 	} else {
-
 		// Handle left/right movement
 		if (isOn[LEFT]) {
 			// Left (or is it right?)
@@ -714,30 +757,44 @@ function processActions(raf = true) {
 		if (reverseLeftRight) {
 			dbgout += "<em>L/R Reversed</em><br>";
 		}
+
+
 		dbgout += "Area: " + curArea + "<br>";
 		dbgout += "centerX: " + centerX + "<br>";
 
-		// Find out if we are near a transition point
-		calculatePermittedVertical();
-		// Are we actually moving up or down?
-		let destArea, destX;
-		let direction = 0;
-		if (wasIdle && permittedVertical[DOWN] && isOn[DOWN]) {
-			destArea = permittedVertical[DOWN][0];
-			destX = permittedVertical[DOWN][1];
-			direction -= 1;
-		}
-		// No else here, so that simultaneous up and down cancel
-		// instead of down dominating
-		if (wasIdle && permittedVertical[UP] && isOn[UP]) {
-			destArea = permittedVertical[UP][0];
-			destX = permittedVertical[UP][1];
-			direction += 1;
-		}
-		if (direction != 0) {
-			// Clear any previous dbg messages
-			dbgout = "<b>Going " + (direction > 0 ? "UP" : "DOWN") + " to " + destArea + ":" + destX + "</b>";
-			moveTo(destArea, destX);
+		if (curArea == 'space') {
+			// space allows up/down movement within the area
+			if (isOn[UP]) {
+				moveUp();
+			}
+			// No else here, so that simultaneous up and down cancel instead of down dominating
+			if (isOn[DOWN]) {
+				moveDown();
+			}
+		} else {
+			// other areas use up/down for transitions to other areas
+			// Find out if we are near a transition point
+			calculatePermittedVertical();
+			// Are we actually moving up or down?
+			let destArea, destX;
+			let direction = 0;
+			if (wasIdle && permittedVertical[DOWN] && isOn[DOWN]) {
+				destArea = permittedVertical[DOWN][0];
+				destX = permittedVertical[DOWN][1];
+				direction -= 1;
+			}
+			// No else here, so that simultaneous up and down cancel
+			// instead of down dominating
+			if (wasIdle && permittedVertical[UP] && isOn[UP]) {
+				destArea = permittedVertical[UP][0];
+				destX = permittedVertical[UP][1];
+				direction += 1;
+			}
+			if (direction != 0) {
+				// Clear any previous dbg messages
+				dbgout = "<b>Going " + (direction > 0 ? "UP" : "DOWN") + "</b>";
+				changeArea(destArea, destX);
+			}
 		}
 		// Output the debug messages only if they've changed
 		dbg(dbgout);
@@ -745,13 +802,16 @@ function processActions(raf = true) {
 	}
 
 	// If using only keyboard control, we need to loop this function so that holding a key down has the right effect
-	// but with a delay or it moves much faster than the joystick. This doesn't apply to up and down, which do not repeat.
+	// but with a delay or it moves much faster than the joystick. 
 	if (raf) {
 		clearTimeout(raftimer);
-		if (isOn[UP]) {
-			keyup({ code: "ArrowUp", preventDefault: () => { } });
-		} else if (isOn[DOWN]) {
-			keyup({ code: "ArrowDown", preventDefault: () => { } });
+		if (curArea != "space") {
+			// When using up and down for area transitions, we don't want them to repeat, so inject a keyup.
+			if (isOn[UP]) {
+				keyup({ code: "ArrowUp", preventDefault: () => { } });
+			} else if (isOn[DOWN]) {
+				keyup({ code: "ArrowDown", preventDefault: () => { } });
+			}
 		}
 		raftimer = setTimeout(function () {
 			rAF(processActions);

@@ -44,22 +44,22 @@
 		}
 
 		#blackBarTop {
-			position: fixed;
-			top: 0;
-			left: 0;
+			xposition: fixed;
+			xtop: 0;
+			xleft: 0;
 			width: 100%;
 			height: 160px;
 			background-color: black;
 			z-index: 9;
 		}
 
-		#blackBarBottom {
-			position: fixed;
-			bottom: 0;
-			left: 0;
+		#whiteBarBottom {
+			xposition: fixed;
+			xbottom: 0;
+			xleft: 0;
 			width: 100%;
 			height: 160px;
-			background-color: black;
+			background-color: white;
 			z-index: 9;
 		}
 
@@ -68,10 +68,17 @@
 		}
 
 		.slider {
-			padding-top: 160px;
 			/* Position scaled images central on screen */
-			padding-bottom: 160px;
-			/* Position scaled images central on screen */
+			xmargin-top: 160px;
+			xmargin-bottom: 160px;
+			/* Crop any excess (mainly for 2D areas) */
+			height: 760px;
+			overflow: hidden;
+		}
+
+		#area-space .slider {
+			overflow-y: visible;
+			height: auto;
 		}
 
 		.slider .flexbox {
@@ -80,7 +87,7 @@
 		}
 
 		#debug {
-			display: none;
+			xdisplay: none;
 			position: fixed;
 			top: 10px;
 			left: 5px;
@@ -188,9 +195,7 @@
 </head>
 
 <body>
-	<div id="blackBarTop" class="blackBar hidden">
-	</div>
-	<div id="blackBarBottom" class="blackBar hidden">
+	<div id="blackBarTop" class="blackBar">
 	</div>
 	<div id="hud"></div>
 	<div id="partyOverlay">
@@ -273,9 +278,12 @@
 		</div>
 		<div id="area-skyworld" style="display: none">
 			<div class="slider">
-				<div class="flexbox">
-					<img src="images/v3.1/skyworld/cropped.png">
-				</div>
+				<img src="images/v3.1/skyworld/cropped.png">
+			</div>
+		</div>
+		<div id="area-space" style="display: none">
+			<div class="slider">
+				<img src="images/2025/space/space2.3.5.png" style="vertical-align: bottom">
 			</div>
 		</div>
 		<div id="area-hug" style="display: none">
@@ -285,6 +293,8 @@
 				</div>
 			</div>
 		</div>
+	</div>
+	<div id="whiteBarBottom" class="whiteBar">
 	</div>
 	<script src="shadowtheatre.js?34675712"></script>
 
