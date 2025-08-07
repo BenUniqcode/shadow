@@ -43,24 +43,15 @@
 			top: -10px;
 		}
 
-		#blackBarTop {
-			xposition: fixed;
-			xtop: 0;
-			xleft: 0;
+		.bar {
 			width: 100%;
 			height: 160px;
-			background-color: black;
-			z-index: 9;
 		}
-
+		#blackBarTop {
+			background-color: black;
+		}
 		#whiteBarBottom {
-			xposition: fixed;
-			xbottom: 0;
-			xleft: 0;
-			width: 100%;
-			height: 160px;
 			background-color: white;
-			z-index: 9;
 		}
 
 		.hidden {
@@ -196,7 +187,7 @@
 </head>
 
 <body>
-	<div id="blackBarTop" class="blackBar">
+	<div id="blackBarTop" class="bar blackBar">
 	</div>
 	<div id="hud"></div>
 	<div id="partyOverlay">
@@ -300,7 +291,7 @@
 			</div>
 		</div>
 	</div>
-	<div id="whiteBarBottom" class="whiteBar">
+	<div id="whiteBarBottom" class="bar whiteBar">
 	</div>
 	<script src="shadowtheatre.js?34675712"></script>
 

@@ -344,6 +344,20 @@ function getMainImageNum(imageEl) {
 	return num;
 }
 
+function showBars() {
+	let bars = document.getElementsByClassName("bar");
+	for (let i = 0; i < bars.length; i++) {
+		bars[i].classList.remove("hidden");
+	}
+}
+
+function hideBars() {
+	let bars = document.getElementsByClassName("bar");
+	for (let i = 0; i < bars.length; i++) {
+		bars[i].classList.add("hidden");
+	}
+}
+
 // Show the hud (if it's not already showing) with the given text, for the given number of milliseconds
 function showHud(text, fadeTime, flashing = false) {
 	var hud = document.getElementById("hud");
@@ -659,6 +673,11 @@ function changeArea(destArea, destX) {
 		move();
 		calculatePermittedVertical();
 		everything.classList.replace("fadeOut", "fadeIn");
+		if (destArea == "hell") {
+			hideBars();
+		} else {
+			showBars();
+		}
 		if (destArea == "disco") {
 			lighthouse.classList.remove("zoomToLighthouse");
 			// Start the party now so that the colours fade up
