@@ -51,6 +51,13 @@ const WIDTH = {
 	"space": 5760,
 };
 
+// Which areas loop around horizontally?
+const XLOOP = {
+	"main": true,
+	"sea-upper": true,
+	"sea-lower": true,
+};
+
 // These are the horizontal positions in each Area from where we can go up (1) or down (-1) to a different Area (or both)
 // If our position is within a certain distance of such a place, the arrow will appear and going up/down is allowed.
 // Format: {fromArea: [exitPosition, direction, leadsToArea, entryPosition], ...}
@@ -73,6 +80,7 @@ const TRANSITIONS = {
 		[13850, 1, "giant", 2000],
 		[16680, -1, "dragon", 2040],
 		[18200, 1, "skyworld", 6900],
+		[25000, -1, "sea-upper", 750],
 	],
 	"disco": [
 		[675, -1, "main", 7420],
@@ -93,6 +101,16 @@ const TRANSITIONS = {
 	"pirate": [
 		[3400, 1, "main", 2500],
 		[6000, 1, "main", 7420],
+	],
+	"sea-upper": [
+		[750, 1, "main", 25000],
+		[750, -1, "sea-lower", 750],
+		[1500, 1, "main", 25000],
+		[1500, -1, "sea-lower", 1500],
+	],
+	"sea-lower": [
+		[750, 1, "sea-upper", 750],
+		[1500, 1, "sea-upper", 1500],
 	],
 	"skyworld": [
 		[1240, -1, "main", 12240], // Goes back DOWN to main even though we came DOWN from there
@@ -337,10 +355,10 @@ function getCenterImage() {
 	return images[centerImagePos];
 }
 
-// Get the ID number of the given main image - because their order in the DOM may have been rearranged
-function getMainImageNum(imageEl) {
+// Get the ID number of the given loop area image - because their order in the DOM may have been rearranged
+function getLoopImageNum(area, imageEl) {
 	let id = imageEl.id;
-	let num = id.replace('main', '');
+	let num = id.replace(area, '');
 	return num;
 }
 
@@ -579,10 +597,10 @@ function calculatePermittedVertical() {
 	permittedVertical[DOWN] = permittedVertical[UP] = 0;
 	// We don't want to change centerX, so use xpos in this function
 	let xpos;
-	if (curArea == "main") {
+	if (XLOOP[curArea]) {
 		// Translate the current image closest to the center of the screen, and its center position, into the old-style centerX value
 		let centerImage = getCenterImage();
-		let centerImageNum = getMainImageNum(centerImage);
+		let centerImageNum = getLoopImageNum(curArea, centerImage);
 		let boundingRect = centerImage.getBoundingClientRect(); // This is relative to the viewport
 		let imageCenterXpos = Math.floor(boundingRect.right - STANDARD_IMAGE_WIDTH / 2);
 		// But the image position goes the opposite way than the x position we want, so we actually want screenwidth - centrexpos as the offset
@@ -630,13 +648,13 @@ function changeArea(destArea, destX) {
 	// Set location to the new area and pos
 	dbgout += "<br>Moving from " + curArea + ":" + centerX;
 	dbgout += "<br>to " + destArea + ":" + destX + "<br>";
-	if (curArea != "main" && destArea == "main") {
+	if (XLOOP[destArea]) {
 		// Can't easily move to a specific image, so we don't bother trying; the old centerX offset will work fine,
 		// BUT we must ensure the images are in their original order. So rotate left the correct number of times if necessary.
 		// The check that curArea is not main prevents this happening when we call changeArea on first load.
 		let images = elNewArea.querySelectorAll(".slider img");
-		for (let i = getMainImageNum(images[0]); i > 1; i--) {
-			rotateMainImagesRight(); // Obviously in some circumstances it would be quicker to go left by 1-i, but fuggit
+		for (let i = getLoopImageNum(destArea, images[0]); i > 1; i--) {
+			rotateLoopImagesRight(destArea); // Obviously in some circumstances it would be quicker to go left by 1-i, but fuggit
 		}
 	}
 
@@ -740,17 +758,17 @@ function easterEgg() {
 	}, 10000);
 }
 
-function rotateMainImagesRight() {
+function rotateLoopImagesRight(area) {
 	// Move the rightmost image to the left (thus doing a right-shift with wrap), and change centerX accordingly
-	let container = document.querySelector("#area-main .slider .flexbox");
+	let container = document.querySelector("#area-" + area + " .slider .flexbox");
 	let images = container.querySelectorAll("img");
 	container.insertBefore(images[images.length - 1], images[0]);
 	centerX += STANDARD_IMAGE_WIDTH;
 }
 
-function rotateMainImagesLeft() {
+function rotateLoopImagesLeft(area) {
 	// Move the leftmost image to the right (thus doing a left-shift with wrap) and change centerX accordingly
-	let container = document.querySelector("#area-main .slider .flexbox");
+	let container = document.querySelector("#area-" + area + " .slider .flexbox");
 	let images = container.querySelectorAll("img");
 	container.insertBefore(images[0], null); // null means insert at the end
 	centerX -= STANDARD_IMAGE_WIDTH;
@@ -762,15 +780,16 @@ function move() {
 	if (!slider) {
 		return;
 	}
-	if (curArea == "main") {
-		// If we are on main, we scroll forever. Ensure two images are present to the left and right of the currently-centred one.
-		let container = document.querySelector("#area-main .slider .flexbox");
+	if (XLOOP[curArea]) {
+		// If we are in a forever scrolling area, ensure two images are present to the left and right of the currently-centred one.
+		// (In the case of the sea areas, which only have 2 images per level, this requires having multiple copies of the images alternating in the HTML)
+		let container = document.querySelector("#area-" + curArea + " .slider .flexbox");
 		let images = container.querySelectorAll("img");
 		let centerImagePos = getCenterImagePos();
 		if (centerImagePos < 2) {
-			rotateMainImagesRight();
+			rotateLoopImagesRight(curArea);
 		} else if (centerImagePos > images.length - 3) {
-			rotateMainImagesLeft();
+			rotateLoopImagesLeft(curArea);
 		}
 	}
 	slider.style.marginLeft = -centerX + window.innerWidth / 2 + "px";
@@ -783,7 +802,7 @@ function moveLeft() {
 		return;
 	}
 	centerX -= scrollSpeed;
-	if (curArea != "main" && centerX - window.innerWidth / 2 < 0) {
+	if (!XLOOP[curArea] && centerX - window.innerWidth / 2 < 0) {
 		// Other areas must not scroll past the left edge
 		centerX = window.innerWidth / 2; 
 	}
@@ -799,7 +818,7 @@ function moveRight() {
 	// Right
 	centerX += scrollSpeed;
 	let maxScroll = WIDTH[curArea] - window.innerWidth / 2;
-	if (curArea != "main" && centerX > maxScroll) {
+	if (!XLOOP[curArea] && centerX > maxScroll) {
 		// Other areas must not scroll past the right edge
 		centerX = maxScroll;
 	}
@@ -961,5 +980,5 @@ document.getElementById("keyinput").focus();
 
 // As we have preloaded the "end" image to the left of the start image for wrapping purposes,
 // jump to the start position (and fade in)
-changeArea("main", 2000);
+changeArea("main", 1000);
 
