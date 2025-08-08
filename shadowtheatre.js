@@ -172,12 +172,20 @@ var rAF = window.requestAnimationFrame;
 // from https://dev.to/gnsp/making-the-matrix-effect-in-javascript-din
 const canvas = document.getElementById('canv');
 const ctx = canvas.getContext('2d');
-const cw = canvas.width = document.body.offsetWidth;
-const ch = canvas.height = document.body.offsetHeight;
+const cw = canvas.width = window.innerWidth; // document.body.offsetWidth;
+const ch = canvas.height = window.innerHeight; // document.body.offsetHeight;
 const cols = Math.floor(cw / 20) + 1;
 const ypos = Array(cols).fill(0);
 ctx.fillStyle = '#000';
 ctx.fillRect(0, 0, cw, ch);
+// Set text colours
+ctx.fillStyle = '#0f0';
+ctx.font = '15pt monospace';
+
+// Flip text horizontally
+ctx.translate(cw, 0);
+ctx.scale(-1, 1);
+
 // Motivational messages
 var nextMotivationalMessage = 0;
 const motivationalMessages = [
@@ -407,18 +415,40 @@ function showHud(text, fadeTime, flashing = false) {
 
 // The Konami Code victory dance
 function matrixLoop() {
+	// This needs to be done on every loop to fade out the chars
 	ctx.fillStyle = '#0001';
 	ctx.fillRect(0, 0, cw, ch);
+	ctx.fillStyle = '#0c0';
+	ctx.font = '16pt monospace';
 
-	ctx.fillStyle = '#0f0';
-	ctx.font = '15pt monospace';
+	let text = "";
+	if (Math.random() < 0.2) {
+		text = "QUEXTAL";
+	} else {
+		for (let i = 0; i < 7; i++) { 
+			// Use pages 0 to 36 of UTF16 for a reasonable variety of characters without
+			// ending up dominated by Chinese
+			let page = Math.random() * 36;
+			let cnum = Math.random() * 128 + 128 * page;
+			text += String.fromCharCode(cnum);
+		}
+	}
 
+	let i = 0;
 	ypos.forEach((y, ind) => {
-		const text = String.fromCharCode(Math.random() * 128);
+		let c = text.charAt(i);
 		const x = ind * 20;
-		ctx.fillText(text, x, y);
-		if (y > 100 + Math.random() * 10000) ypos[ind] = 0;
-		else ypos[ind] = y + 20;
+		ctx.fillText(c, x, y);
+		if (y > 100 + Math.random() * 10000) {
+			ypos[ind] = 0;
+		} else {
+			ypos[ind] = y + 20;
+		}
+		if (i < 7) {
+			i++;
+		} else {
+			i = 0;
+		}
 	});
 }
 
@@ -551,12 +581,12 @@ function party() {
 			imagesToAnimate.push(centerImagePos - 1);
 			console.log("Also animating the one to the left: " + (centerImagePos - 1));
 		}
-		// Doing the two to the right (if there are that many) should always be sufficient to cover 
-		// the whole screen. 
+		// Same with the right neighbour
 		if (centerImagePos < images.length - 1) {
 			imagesToAnimate.push(centerImagePos + 1);
 			console.log("Also animating the one to the right: " + (centerImagePos + 1));
 		}
+		// Animate the selected images
 		for (let i = 0; i < imagesToAnimate.length; i++) {
 			console.log("Animating: " + imagesToAnimate[i]);
 			images[imagesToAnimate[i]].animate(imageAnims, { duration: partyTime });
@@ -744,6 +774,7 @@ function changeArea(destArea, destX) {
 function easterEgg() {
 	let matrixTime = 15000;
 	let matrixFadeTime = 3000;
+
 	elPartyOverlay.animate([{ backgroundColor: "black", opacity: 0 }, { backgroundColor: "black", opacity: 1.0 }, { opacity: 0.5 }, { backgroundColor: "white" }], { duration: matrixTime, fill: 'forwards' });
 	canvas.animate([{ opacity: 0 }, { opacity: 1 }], { duration: matrixFadeTime, fill: 'forwards' });
 	let matrixHandle = setInterval(matrixLoop, 50);
