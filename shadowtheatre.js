@@ -104,14 +104,20 @@ const TRANSITIONS = {
 		[6000, 1, "main", 7420],
 	],
 	"sea-upper": [
-		[750, 1, "main", 25000],
-		[750, -1, "sea-lower", 750],
-		[1500, 1, "main", 25000],
-		[1500, -1, "sea-lower", 1500],
+		[1000, 1, "main", 25000],
+		[1000, -1, "sea-lower", 1000],
+		[2000, 1, "main", 25000],
+		[2000, -1, "sea-lower", 2000],
+		[3000, 1, "main", 25000],
+		[3000, -1, "sea-lower", 3000],
+		[4000, 1, "main", 25000],
+		[4000, -1, "sea-lower", 4000],
 	],
 	"sea-lower": [
-		[750, 1, "sea-upper", 750],
-		[1500, 1, "sea-upper", 1500],
+		[1000, 1, "sea-upper", 1000],
+		[2000, 1, "sea-upper", 2000],
+		[3000, 1, "sea-upper", 3000],
+		[4000, 1, "sea-upper", 4000],
 	],
 	"skyworld": [
 		[1240, -1, "main", 12240], // Goes back DOWN to main even though we came DOWN from there
@@ -830,14 +836,14 @@ function move() {
 		return;
 	}
 	if (XLOOP[curArea]) {
-		// If we are in a forever scrolling area, ensure two images are present to the left and right of the currently-centred one.
+		// If we are in a forever scrolling area, ensure at least one image is present to the left and right of the currently-centred one.
 		// (In the case of the sea areas, which only have 2 images per level, this requires having multiple copies of the images alternating in the HTML)
 		let container = document.querySelector("#area-" + curArea + " .slider .flexbox");
 		let images = container.querySelectorAll("img");
 		let centerImagePos = getCenterImagePos();
-		if (centerImagePos < 2) {
+		if (centerImagePos < 1) {
 			rotateLoopImagesRight(curArea);
-		} else if (centerImagePos > images.length - 3) {
+		} else if (centerImagePos > images.length - 2) {
 			rotateLoopImagesLeft(curArea);
 		}
 	}
