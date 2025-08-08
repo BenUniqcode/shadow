@@ -30,6 +30,7 @@ const KEYMAP = { // Keyboard control mapping to joystick equivalents
 	Digit2: BTN_B,
 };
 const KONAMI_CODE = [UP, UP, DOWN, DOWN, LEFT, RIGHT, LEFT, RIGHT, BTN_B, BTN_A];
+const PARTYTIME = 12000;
 
 const SCROLL_ANIMATION_OPTIONS = {
 	duration: 200,
@@ -138,7 +139,8 @@ var wasIdle = true; // Whether no inputs were read on the last run through - for
 // Whether to reverse left and right inputs. Press "X" on keyboard to toggle. Useful if the image 
 // is horizontally flipped for back-projection (didn't have to do that in 2023 because there was no text)
 var reverseLeftRight = true;
-var inputsBlocked = false; // Further inputs are ignored during a transition from one area to another
+var inputsBlocked = false; // Further inputs are ignored during a transition from one area to another, or during the easter egg party
+var easterEggMutex = false; // Prevent easter egg being triggered again while it's running
 var anyInputOn = false; // Is anything being pressed or the joystick being moved?
 var curArea = "main"; // Which area (contiguous left-right set of images) are we in?
 var permittedVertical = []; // Whether we can go up or down (or both) from the current location
@@ -501,23 +503,22 @@ function discoColors(partyTime, partyPlace) {
 }
 
 function party() {
-	let partyTime = 12000;
 	inputsBlocked = true;
 	setTimeout(function () {
 		inputsBlocked = false;
-	}, partyTime);
-	partyColors(partyTime);
+	}, PARTYTIME);
+	partyColors(PARTYTIME);
 	let imageAnims = [];
 	for (let i = 0; i < 50; i++) {
 		let theseanims = {};
 		let randomOpacity = Math.random() * 0.25 + 0.25; // From 0.25 to 0.5
 		theseanims["opacity"] = randomOpacity;
-		theseanims["transform"] = "";
+		let transform = "";
 		// Transforms become progressively more likely, and potentially larger, as we proceed
 		if (Math.random() * i > 5) {
 			let randomMoveX = Math.floor(Math.random() * i - i / 2); // From -i/2 to +i/2
 			let randomMoveY = Math.floor(Math.random() * i - i / 2);
-			theseanims["transform"] += " translate(" + randomMoveX + "px, " + randomMoveY + "px)";
+			transform += " translate(" + randomMoveX + "px, " + randomMoveY + "px)";
 		}
 		if (Math.random() * i > 10) {
 			let randomSizeX = Math.random() * i / 4 - i / 8 + 100; // From 100-i/4 to 100+i/4
@@ -526,21 +527,24 @@ function party() {
 			if (i > 30) {
 				randomSizeY = Math.random() * i / 4 - i / 8 + 100; // From 100-i/4 to 100+i/4
 			}
-			theseanims["transform"] += " scale(" + randomSizeX + "%, " + randomSizeY + "%)";
+			transform += " scale(" + randomSizeX + "%, " + randomSizeY + "%)";
 		}
 		if (Math.random() * i > 20) {
 			let randomSkewX = Math.random() * i / 5 - i / 10; // From -i/10 to +i/10
 			let randomSkewY = Math.random() * i / 5 - i / 10;
-			theseanims["transform"] += " skew(" + randomSkewX + "deg, " + randomSkewY + "deg)";
+			transform += " skew(" + randomSkewX + "deg, " + randomSkewY + "deg)";
 		}
 		if (Math.random() * i > 30) {
 			let randomAngle = Math.random() * 2 * i - i; // From -i to +i degrees
-			theseanims["transform"] += " rotate("  + randomAngle + "deg)";
+			transform += " rotate("  + randomAngle + "deg)";
 		}
-		theseanims["filter"] = "";
+		if (transform.length > 0) {
+			theseanims["transform"] = transform;
+		}
+		let filter = "";
 		if (Math.random() * i > 30) {
 			let randomInvert = Math.random() * 100;
-			theseanims["filter"] += " invert(" + randomInvert + "%)";
+			filter += " invert(" + randomInvert + "%)";
 		}
 		if (Math.random() * i > 20) {
 			let randomDS1 = Math.floor(Math.random() * 50);
@@ -549,15 +553,18 @@ function party() {
 			let randomDSR = Math.floor(Math.random() * 256);
 			let randomDSG = Math.floor(Math.random() * 256);
 			let randomDSB = Math.floor(Math.random() * 256);
-			theseanims["filter"] += " drop-shadow(" + randomDS1 + "px " + randomDS2 + "px " + randomDS3 + "px rgb(" + randomDSR + ", " + randomDSG + ", " + randomDSB + "))";
+			filter += " drop-shadow(" + randomDS1 + "px " + randomDS2 + "px " + randomDS3 + "px rgb(" + randomDSR + ", " + randomDSG + ", " + randomDSB + "))";
 		}
 		if (Math.random() * i > 20) {
 			let randomRot = Math.floor(Math.random() * 360);
-			theseanims["filter"] += " hue-rotate(" + randomRot + "deg)";
+			filter += " hue-rotate(" + randomRot + "deg)";
 		}
 		if (Math.random() * i > 30) {
 			let randomBlur = Math.floor(Math.random() * 30);
-			theseanims["filter"] += " blur(" + randomBlur + "px)";
+			filter += " blur(" + randomBlur + "px)";
+		}
+		if (filter.length > 0) {
+			theseanims["filter"] = filter;
 		}
 		imageAnims.push(theseanims);
 
@@ -569,7 +576,7 @@ function party() {
 	// Otherwise, try to only animate the main image that's on the screen, and its neighbours
 	if (images.length == 1) {
 		console.log("Only one image in this area");
-		images[0].animate(imageAnims, { duration: partyTime });
+		images[0].animate(imageAnims, { duration: PARTYTIME });
 	} else {
 		// When there are multiple images in a slider, assume they are all the same size (1351 wide)
 		// The index of the image at the centre of the screen will therefore be floor(centerX / 1351)
@@ -589,7 +596,7 @@ function party() {
 		// Animate the selected images
 		for (let i = 0; i < imagesToAnimate.length; i++) {
 			console.log("Animating: " + imagesToAnimate[i]);
-			images[imagesToAnimate[i]].animate(imageAnims, { duration: partyTime });
+			images[imagesToAnimate[i]].animate(imageAnims, { duration: PARTYTIME });
 		}
 	}
 	let selectedMessage = motivationalMessages[nextMotivationalMessage];
@@ -730,14 +737,13 @@ function changeArea(destArea, destX) {
 			lighthouse.classList.remove("zoomToLighthouse");
 			// Start the party now so that the colours fade up
 			// This value determines how rapidly the colours cycle - 30s gives a fairly slow one
-			let partyTime = 120000;
 			let partyPlace = document.getElementById("area-disco");
-			discoColors(partyTime, partyPlace);
+			discoColors(PARTYTIME, partyPlace);
 			discoColorsEvolve();
 			setInterval(discoColorsEvolve, 6000);
 			partyHandle = setInterval(function () {
-				discoColors(partyTime, partyPlace);
-			}, partyTime);
+				discoColors(PARTYTIME, partyPlace);
+			}, PARTYTIME);
 			elArrowDn.classList.add("moving");
 			arrowMoverHandle = setInterval(function () {
 				arrowMover();
@@ -772,7 +778,14 @@ function changeArea(destArea, destX) {
 }
 
 function easterEgg() {
-	let matrixTime = 15000;
+	// Prevent running more than once simultaneously
+	if (easterEggMutex) {
+		console.log("Easter egg is already running, will not run again");
+		return;
+	}
+	console.log("Easter Egg triggered");
+	easterEggMutex = true;
+	let matrixTime = 12000;
 	let matrixFadeTime = 3000;
 
 	elPartyOverlay.animate([{ backgroundColor: "black", opacity: 0 }, { backgroundColor: "black", opacity: 1.0 }, { opacity: 0.5 }, { backgroundColor: "white" }], { duration: matrixTime, fill: 'forwards' });
@@ -785,8 +798,13 @@ function easterEgg() {
 		clearInterval(matrixHandle);
 	}, matrixTime + matrixFadeTime);
 	setTimeout(function () {
+		console.log("Matrix ended - party time!");
 		party();
-	}, 10000);
+	}, matrixTime);
+	setTimeout(function() {
+		console.log("Releasing Easter Egg Mutex");
+		easterEggMutex = false;
+	}, matrixTime + PARTYTIME);
 }
 
 function rotateLoopImagesRight(area) {
