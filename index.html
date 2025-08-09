@@ -16,6 +16,7 @@
 
 		#everything {
 			z-index: 0;
+			width: 1920px;
 		}
 
 		.fadeIn {
@@ -44,13 +45,17 @@
 		}
 
 		.bar {
+			position: fixed;
 			width: 100%;
 			height: 160px;
+			left: 0;
 		}
 		#blackBarTop {
+			top: 0;
 			background-color: black;
 		}
 		#whiteBarBottom {
+			top: 920px;
 			background-color: white;
 		}
 
@@ -62,6 +67,7 @@
 			/* Crop any excess (mainly for 2D areas) */
 			height: 760px;
 			overflow: hidden;
+			margin-top: 160px;
 		}
 		
 		.discospace {
@@ -123,8 +129,8 @@
 			position: fixed;
 			top: 0;
 			left: 0;
-			bottom: 0;
-			right: 0;
+			width: 100%;
+			height: 1080px;
 			z-index: 10;
 			filter: blur(1px);
 		}
@@ -192,7 +198,7 @@
 	</div>
 	<div id="hud"></div>
 	<div id="partyOverlay">
-		<canvas id="canv"></canvas>
+		<canvas id="canv" width="1920" height="760" style="margin-top: 160px"></canvas>
 	</div>
 	<div id="everything" class="fadeOut">
 		<textarea id="keyinput"></textarea><!-- Offscreen; required for keyboard control -->

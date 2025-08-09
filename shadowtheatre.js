@@ -180,8 +180,8 @@ var rAF = window.requestAnimationFrame;
 // from https://dev.to/gnsp/making-the-matrix-effect-in-javascript-din
 const canvas = document.getElementById('canv');
 const ctx = canvas.getContext('2d');
-const cw = canvas.width = window.innerWidth; // document.body.offsetWidth;
-const ch = canvas.height = window.innerHeight; // document.body.offsetHeight;
+const cw = canvas.width;
+const ch = canvas.height;
 const cols = Math.floor(cw / 20) + 1;
 const ypos = Array(cols).fill(0);
 ctx.fillStyle = '#000';
