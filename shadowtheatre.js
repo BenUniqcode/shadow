@@ -5,6 +5,11 @@
  * Gamepad API Test
  * Written in 2013 by Ted Mielczarek <ted@mielczarek.org>
  */
+
+// Screen size
+const SCREEN_WIDTH = 1920;
+const SCREEN_HEIGHT = 760;
+
 // Meaning of button input numbers (i.e. which thing is plugged into which input on the controller PCB)
 const NUM_INPUTS = 12;
 const LEFT = 0;
@@ -31,6 +36,9 @@ const KEYMAP = { // Keyboard control mapping to joystick equivalents
 };
 const KONAMI_CODE = [UP, UP, DOWN, DOWN, LEFT, RIGHT, LEFT, RIGHT, BTN_B, BTN_A];
 const PARTYTIME = 12000;
+// Location of Black Hole
+const BLACKHOLEX = SCREEN_WIDTH / 2; // centerX value
+const BLACKHOLEY = 0; // scrollY value
 
 const SCROLL_ANIMATION_OPTIONS = {
 	duration: 200,
@@ -135,18 +143,20 @@ const TRANSITION_TIME = 1000;
 
 var isOn = []; // Map of button input number to true/false
 var scrollSpeed = 2;
-var centerX = Math.floor(window.innerWidth / 2);
+var centerX = Math.floor(SCREEN_WIDTH / 2);
 var scrollSpeedLimiter = false; // Is set to true when the scroll speed changes, which blocks further changes for a while, to reduce the speed at which it was changing
 var raftimer;
 var hudFader;
 var konamiPos = 0; // Current position in the Konami code
 var wasIdle = true; // Whether no inputs were read on the last run through - for Konami discretisation
+var gravityCounter = 0; // Amortise vertical movements in low gravity across multiple frames
 
 // Whether to reverse left and right inputs. Press "X" on keyboard to toggle. Useful if the image 
 // is horizontally flipped for back-projection (didn't have to do that in 2023 because there was no text)
 var reverseLeftRight = true;
 var inputsBlocked = false; // Further inputs are ignored during a transition from one area to another, or during the easter egg party
 var easterEggMutex = false; // Prevent easter egg being triggered again while it's running
+var teleportMutex = false; // Prevent teleport likewise
 var anyInputOn = false; // Is anything being pressed or the joystick being moved?
 var curArea = "main"; // Which area (contiguous left-right set of images) are we in?
 var permittedVertical = []; // Whether we can go up or down (or both) from the current location
@@ -331,6 +341,9 @@ function keydown(e) {
 	} else if (e.key == 'E' || e.key == 'e') {
 		e.preventDefault();
 		easterEgg();
+	} else if (e.key == 'Z' || e.key == 'z') {
+		e.preventDefault();
+		changeArea('space', 4800);
 	}
 }
 
@@ -369,6 +382,13 @@ function getCenterImage() {
 	let centerImagePos = getCenterImagePos();
 	let images = document.querySelectorAll("#area-" + curArea + " .slider img");
 	return images[centerImagePos];
+}
+
+// Get the image container of the center image
+function getCenterImageBox() {
+	let centerImagePos = getCenterImagePos();
+	let imageboxes = document.querySelectorAll("#area-" + curArea + " .slider .imgbox");
+	return imageboxes[centerImagePos];
 }
 
 // Get the ID number of the given loop area image - because their order in the DOM may have been rearranged
@@ -623,17 +643,6 @@ function party() {
 	nextMotivationalMessage = (nextMotivationalMessage + 1) % motivationalMessages.length;
 }
 
-function isVisibleInViewport(element) {
-    const rect = element.getBoundingClientRect()
-    return (
-        rect.top >= 0 &&
-        rect.left >= 0 &&
-        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-    )
-}
-
-
 function calculatePermittedVertical() {
 	let canMove = false;
 	let trans = TRANSITIONS[curArea];
@@ -724,6 +733,10 @@ function changeArea(destArea, destX) {
 	} else {
 		everything.classList.add("fadeOut");
 	}
+	// If the washing machine is showing, fade it out now
+	let washingMachine = document.querySelector('#washingMachine');
+	washingMachine.classList.replace("fadeIn", "fadeOut");
+
 	// everything.animate([{ opacity: 1 }, { opacity: 0 }, { opacity: 1 }], { duration: TRANSITION_TIME, follow: "forwards" });
 	// Halfway through the transition, swap over the images, scroll to the right place, and calculate the new exits
 	setTimeout(function () {
@@ -765,7 +778,7 @@ function changeArea(destArea, destX) {
   				document.body.clientHeight, document.documentElement.clientHeight
 			);
 			// console.log(scrollHeight);
-			window.scroll(0, scrollHeight - window.innerHeight);
+			window.scroll(0, scrollHeight - SCREEN_HEIGHT);
 		} else {
 			// Stop any ongoing party
 			if (partyHandle) {
@@ -777,9 +790,10 @@ function changeArea(destArea, destX) {
 			}
 		}
 	}, swapTime);
-	// Re-enable inputs once the transition is complete
+	// Re-enable inputs and run rAF once the transition is complete
 	setTimeout(function () {
 		inputsBlocked = false;
+		processActions(false, true);
 	}, endTime);
 }
 
@@ -816,16 +830,16 @@ function easterEgg() {
 function rotateLoopImagesRight(area) {
 	// Move the rightmost image to the left (thus doing a right-shift with wrap), and change centerX accordingly
 	let container = document.querySelector("#area-" + area + " .slider .flexbox");
-	let images = container.querySelectorAll("img");
-	container.insertBefore(images[images.length - 1], images[0]);
+	let imageboxes = container.querySelectorAll(".imgbox");
+	container.insertBefore(imageboxes[imageboxes.length - 1], imageboxes[0]);
 	centerX += STANDARD_IMAGE_WIDTH;
 }
 
 function rotateLoopImagesLeft(area) {
 	// Move the leftmost image to the right (thus doing a left-shift with wrap) and change centerX accordingly
 	let container = document.querySelector("#area-" + area + " .slider .flexbox");
-	let images = container.querySelectorAll("img");
-	container.insertBefore(images[0], null); // null means insert at the end
+	let imageboxes = container.querySelectorAll(".imgbox");
+	container.insertBefore(imageboxes[0], null); // null means insert at the end
 	centerX -= STANDARD_IMAGE_WIDTH;
 }
 
@@ -847,7 +861,7 @@ function move() {
 			rotateLoopImagesLeft(curArea);
 		}
 	}
-	slider.style.marginLeft = -centerX + window.innerWidth / 2 + "px";
+	slider.style.marginLeft = -centerX + SCREEN_WIDTH / 2 + "px";
 }
 
 function moveLeft() {
@@ -857,9 +871,9 @@ function moveLeft() {
 		return;
 	}
 	centerX -= scrollSpeed;
-	if (!XLOOP[curArea] && centerX - window.innerWidth / 2 < 0) {
+	if (!XLOOP[curArea] && centerX - SCREEN_WIDTH / 2 < 0) {
 		// Other areas must not scroll past the left edge
-		centerX = window.innerWidth / 2; 
+		centerX = SCREEN_WIDTH / 2; 
 	}
 	move();
 }
@@ -872,7 +886,7 @@ function moveRight() {
 	}
 	// Right
 	centerX += scrollSpeed;
-	let maxScroll = WIDTH[curArea] - window.innerWidth / 2;
+	let maxScroll = WIDTH[curArea] - SCREEN_WIDTH / 2;
 	if (!XLOOP[curArea] && centerX > maxScroll) {
 		// Other areas must not scroll past the right edge
 		centerX = maxScroll;
@@ -888,9 +902,85 @@ function moveDown() {
 	window.scrollBy(0, scrollSpeed);
 }
 
+function teleport() {
+	if (teleportMutex) {
+		return;
+	}
+	teleportMutex = true;
+	// Pick a random location on main
+	// The range of valid centerX values is the total width of the number of images -1 (because it's in the center, so half of the leftmost image
+	// and half of the rightmost image are outside the valid range. 
+	let images = document.querySelectorAll("#area-main .slider img");
+	let newLoc = Math.floor(Math.random() * (images.length - 1) * STANDARD_IMAGE_WIDTH); 
+	console.log("Random location chosen: " + newLoc);
+	changeArea("main", newLoc);
+	setTimeout(function() {
+		// Place the washing machine image in the center of the center imagebox, near the bottom
+		let imgbox = getCenterImageBox();
+		let washingMachine = document.querySelector('#washingMachine');
+		imgbox.insertBefore(washingMachine, null);
+		washingMachine.style.top = SCREEN_HEIGHT - 287 + "px"; // The image is 237px high
+		washingMachine.style.left = SCREEN_WIDTH / 2 - 94 + "px"; // The image is 189px wide
+		washingMachine.classList.replace("fadeOut", "fadeIn");
+		teleportMutex = false;
+	}, TRANSITION_TIME / 2 + 100);
+	setTimeout(function() {
+		washingMachine.classList.replace("fadeIn", "fadeOut");
+	}, TRANSITION_TIME + 10000);
+}
 
 // Respond to inputs. The arg is whether to call requestAnimationFrame - true for keyboard control, false for joystick because it's called from readGamePad
-function processActions(raf = true) {
+function processActions(raf = true, forceOutput = false) {
+	if (curArea == "space") {
+		if (centerX == BLACKHOLEX && window.scrollY == BLACKHOLEY) {
+			// Exit to a random location on main
+			teleport();
+			return;
+		}
+		// Apply Black Hole gravity to space
+		let distanceX = centerX - BLACKHOLEX;
+		let distanceY = window.scrollY - BLACKHOLEY;
+		console.log("DistanceX: " + distanceX + " DistanceY: " + distanceY);
+		let GRAVITATIONAL_CONSTANT = 10 ** 3;
+		let distanceToBlackHole = Math.sqrt(distanceX ** 2 + distanceY ** 2);
+		console.log("Distance to Black Hole: " + distanceToBlackHole);
+		// A 1/r^2 dropoff makes for very slow movement until you're very close, and then it's too fast. Plus, the X 
+		// scrolling works for any marginal values, whereas the Y scrolling doesn't scroll at all until it gets above 0.75.
+		// let gravityForce = GRAVITATIONAL_CONSTANT / (distanceToBlackHole ** 2);
+		// So try a linear
+		let gravityForce = GRAVITATIONAL_CONSTANT / distanceToBlackHole;
+		console.log("Gravity Force: " + gravityForce);
+		// Find the angle
+		let angle = Math.atan((window.scrollY - BLACKHOLEY) / (centerX - BLACKHOLEX)); // tantheta = O/A 
+		console.log("Angle: " + angle);
+		// Calculate X and Y components of the force
+		let gravityX = gravityForce * Math.cos(angle);
+		let gravityY = gravityForce * Math.sin(angle);
+		console.log("Gravity X: " + gravityX + " Y: " + gravityY);
+
+		// Scrolling by less than 0.75 doesn't do anything, which causes weak gravity only to act in the X direction until we hit that threshold
+		// So, need to amortise the movement across multiple frames. Using random is too jerky.
+		if (gravityY >= 0.75) {
+			window.scrollBy(0, -gravityY);
+		} else {
+			if (gravityCounter >= 0.75 / gravityY) {
+				window.scrollBy(0, -1);
+				gravityCounter = 0;
+			} else {
+				gravityCounter++;
+			}
+		}
+		if (window.scrollY < BLACKHOLEY) {
+			window.scrollTo(0, BLACKHOLEY);
+		}
+
+		centerX = centerX - gravityX;
+		if (centerX < BLACKHOLEX) {
+			centerX = BLACKHOLEX;
+		}
+		move();
+	}
+
 	if (inputsBlocked) {
 		if (raf) {
 			setTimeout(function () {
@@ -918,7 +1008,7 @@ function processActions(raf = true) {
 			konamiPos = 0;
 		}
 	}
-	if (!anyInputOn) {
+	if (!anyInputOn && !forceOutput) {
 		wasIdle = true;
 	} else {
 		// Handle left/right movement

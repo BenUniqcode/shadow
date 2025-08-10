@@ -84,6 +84,10 @@
 			height: 760px;
 		}
 
+		.slider .flexbox .imgbox {
+			position: relative; /* Allow fixed positioning of washing machine that will move when the background moves */
+		}
+
 		#debug {
 			xdisplay: none;
 			position: fixed;
@@ -190,6 +194,10 @@
 		#arrowDn img {
 			transform: rotate(180deg);
 		}
+		#washingMachine {
+			position: absolute;
+			z-index: 20;
+		}
 	</style>
 </head>
 
@@ -212,27 +220,71 @@
 		<div id="area-main">
 			<div class="slider">
 				<div class="flexbox">
-					<img id="main19" src="images/2025/main/19.png">
-					<img id="main20" src="images/2025/main/20.png">
-					<img id="main21" src="images/2025/main/21.png">
-					<img id="main1" src="images/2025/main/1.png">
-					<img id="main2" src="images/2025/main/2.png">
-					<img id="main3" src="images/2025/main/3.png">
-					<img id="main4" src="images/2025/main/4.png">
-					<img id="main5" src="images/2025/main/5.png">
-					<img id="main6" src="images/2025/main/6.png" class="lighthouse">
-					<img id="main7" src="images/2025/main/7.png">
-					<img id="main8" src="images/2025/main/8.png">
-					<img id="main9" src="images/2025/main/9.png">
-					<img id="main10" src="images/2025/main/10.png">
-					<img id="main11" src="images/2025/main/11.png">
-					<img id="main12" src="images/2025/main/12.png">
-					<img id="main13" src="images/2025/main/13.png">
-					<img id="main14" src="images/2025/main/14.png">
-					<img id="main15" src="images/2025/main/15.png">
-					<img id="main16" src="images/2025/main/16.png">
-					<img id="main17" src="images/2025/main/17.png">
-					<img id="main18" src="images/2025/main/18.png">
+					<!-- Main needs each image to have a container, so we can place the washing machine inside it to overlay 
+						it and have it scroll with the image -->
+					<div class="imgbox">
+						<img id="main19" src="images/2025/main/19.png">
+					</div>
+					<div class="imgbox">
+						<img id="main20" src="images/2025/main/20.png">
+					</div>
+					<div class="imgbox">
+						<img id="main21" src="images/2025/main/21.png">
+					</div>
+					<div class="imgbox">
+						<img id="main1" src="images/2025/main/1.png">
+					</div>
+					<div class="imgbox">
+						<img id="main2" src="images/2025/main/2.png">
+					</div>
+					<div class="imgbox">
+						<img id="main3" src="images/2025/main/3.png">
+					</div>
+					<div class="imgbox">
+						<img id="main4" src="images/2025/main/4.png">
+					</div>
+					<div class="imgbox">
+						<img id="main5" src="images/2025/main/5.png">
+					</div>
+					<div class="imgbox">
+						<img id="main6" src="images/2025/main/6.png" class="lighthouse">
+					</div>
+					<div class="imgbox">
+						<img id="main7" src="images/2025/main/7.png">
+					</div>
+					<div class="imgbox">
+						<img id="main8" src="images/2025/main/8.png">
+					</div>
+					<div class="imgbox">
+						<img id="main9" src="images/2025/main/9.png">
+					</div>
+					<div class="imgbox">
+						<img id="main10" src="images/2025/main/10.png">
+					</div>
+					<div class="imgbox">
+						<img id="main11" src="images/2025/main/11.png">
+					</div>
+					<div class="imgbox">
+						<img id="main12" src="images/2025/main/12.png">
+					</div>
+					<div class="imgbox">
+						<img id="main13" src="images/2025/main/13.png">
+					</div>
+					<div class="imgbox">
+						<img id="main14" src="images/2025/main/14.png">
+					</div>
+					<div class="imgbox">
+						<img id="main15" src="images/2025/main/15.png">
+					</div>
+					<div class="imgbox">
+						<img id="main16" src="images/2025/main/16.png">
+					</div>
+					<div class="imgbox">
+						<img id="main17" src="images/2025/main/17.png">
+					</div>
+					<div class="imgbox">
+						<img id="main18" src="images/2025/main/18.png">
+					</div>
 				</div>
 			</div>
 		</div>
@@ -321,6 +373,7 @@
 	</div>
 	<div id="whiteBarBottom" class="bar whiteBar">
 	</div>
+	<img id="washingMachine" src="images/2025/washingmachine.png" class="fadeOut">
 	<script src="shadowtheatre.js?34675712"></script>
 
 </body>
