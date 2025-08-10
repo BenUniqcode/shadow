@@ -19,14 +19,34 @@
 			width: 1920px;
 		}
 
+		#washingMachine {
+			position: absolute;
+			z-index: 20;
+			top: 473px;
+			left: calc(50vw - 94px);
+		}
+
+		#washingMachine.sink {
+			transition: top 5.0s ease-in !important; /* Prevent it being overridden by fadeIn/fadeOut */
+			top: 1080px !important;
+		}
+
 		.fadeIn {
 			transition: opacity 0.5s ease-in;
 			opacity: 1;
 		}
 
+		#washingMachine.fadeIn {
+			transition: opacity 2.0s ease-in;
+		}
+
 		.fadeOut {
 			transition: opacity 0.5s ease-out;
 			opacity: 0;
+		}
+
+		#washingMachine.fadeOut {
+			transition: opacity 2.0s ease-out;
 		}
 
 		/* This class is applied to the .lighthouse img to zoom into the right part of it */
@@ -194,10 +214,6 @@
 		#arrowDn img {
 			transform: rotate(180deg);
 		}
-		#washingMachine {
-			position: absolute;
-			z-index: 20;
-		}
 	</style>
 </head>
 
@@ -226,19 +242,19 @@
 					<!-- Images will be rotated into place by the js. Having them pre-rotated works, but it causes confusion about
 						the correct value for centerImagePos... -->
 					<div class="imgbox">
-						<img id="main1" src="images/2025/main/1.png">
+						<img id="main1" src="images/2025/main/1.png" class="water">
 					</div>
 					<div class="imgbox">
 						<img id="main2" src="images/2025/main/2.png">
 					</div>
 					<div class="imgbox">
-						<img id="main3" src="images/2025/main/3.png">
+						<img id="main3" src="images/2025/main/3.png" class="water">
 					</div>
 					<div class="imgbox">
-						<img id="main4" src="images/2025/main/4.png">
+						<img id="main4" src="images/2025/main/4.png" class="water">
 					</div>
 					<div class="imgbox">
-						<img id="main5" src="images/2025/main/5.png">
+						<img id="main5" src="images/2025/main/5.png" class="water">
 					</div>
 					<div class="imgbox">
 						<img id="main6" src="images/2025/main/6.png" class="lighthouse">
@@ -277,16 +293,16 @@
 						<img id="main17" src="images/2025/main/17.png">
 					</div>
 					<div class="imgbox">
-						<img id="main18" src="images/2025/main/18.png">
+						<img id="main18" src="images/2025/main/18.png" class="water">
 					</div>
 					<div class="imgbox">
-						<img id="main19" src="images/2025/main/19.png">
+						<img id="main19" src="images/2025/main/19.png" class="water">
 					</div>
 					<div class="imgbox">
-						<img id="main20" src="images/2025/main/20.png">
+						<img id="main20" src="images/2025/main/20.png" class="water">
 					</div>
 					<div class="imgbox">
-						<img id="main21" src="images/2025/main/21.png">
+						<img id="main21" src="images/2025/main/21.png" class="water">
 					</div>
 				</div>
 			</div>

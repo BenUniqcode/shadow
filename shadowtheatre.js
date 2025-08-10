@@ -392,6 +392,7 @@ function getCenterImagePos() {
 function getCenterImage() {
 	let centerImagePos = getCenterImagePos();
 	let images = document.querySelectorAll("#area-" + curArea + " .slider img");
+	console.log("Looking for image pos " + centerImagePos + " out of total " + images.length + " images");
 	return images[centerImagePos];
 }
 
@@ -941,21 +942,25 @@ function teleport() {
 		let imgbox = getCenterImageBox();
 		let washingMachine = document.querySelector('#washingMachine');
 		imgbox.insertBefore(washingMachine, null);
-		washingMachine.style.top = SCREEN_HEIGHT - WASHING_MACHINE_HEIGHT - 50 + "px"; 
-		washingMachine.style.left = STANDARD_IMAGE_WIDTH / 2 - WASHING_MACHINE_WIDTH / 2 + "px"; 
+		// Don't set the top in here, CSS needs to manage that for the transition
 		washingMachine.classList.replace("fadeOut", "fadeIn");
+		console.log("Applying fadeIn class");
+		// If the washing machine is on water, it starts sinking after the level appears
+		let image = imgbox.querySelector("img");
+		if (image.classList.contains("water")) {
+			setTimeout(function() {
+				console.log("Applying sink class");
+				washingMachine.classList.add("sink");
+			}, 3000);
+		} else {
+			washingMachine.classList.remove("sink");
+		}
+		setTimeout(function() {
+			console.log("Applying fadeOut class");
+			washingMachine.classList.replace("fadeIn", "fadeOut");
+		}, 10000);
 		teleportMutex = false;
 	}, TRANSITION_TIME / 2 + 100);
-	// If the washing machine is on water, it starts sinking 1s after the level appears
-	let image = getCenterImage();
-	if (image.classList.contains("water")) {
-		setTimeout(function() {
-			washingMachine.classList.add("sink");
-		}, TRANSITION_TIME + 1000);
-	}
-	setTimeout(function() {
-		washingMachine.classList.replace("fadeIn", "fadeOut");
-	}, TRANSITION_TIME + 10000);
 }
 
 // Respond to inputs. The arg is whether to call requestAnimationFrame - true for keyboard control, false for joystick because it's called from readGamePad
