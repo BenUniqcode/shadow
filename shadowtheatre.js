@@ -385,7 +385,6 @@ function keyup(e) {
 // and we're centred on the middle one, it will return 3
 function getCenterImagePos() {
 	let centerImagePos = Math.floor(centerX / STANDARD_IMAGE_WIDTH);
-	console.log("centerImagePos: " + centerImagePos);
 	return centerImagePos;
 }
 
@@ -868,12 +867,19 @@ function move() {
 		let container = document.querySelector("#area-" + curArea + " .slider .flexbox");
 		let images = container.querySelectorAll("img");
 		let centerImagePos = getCenterImagePos();
-		if (centerImagePos < 2) {
+		while (centerImagePos < 2) {
 			console.log("Rotate right to ensure 2 images on left");
 			rotateLoopImagesRight(curArea);
-		} else if (centerImagePos > images.length - 3) {
+			centerImagePos = getCenterImagePos();
+			images = container.querySelectorAll("img");
+			console.log("Centre Image is now position " + centerImagePos + " and is image number " + getLoopImageNum(curArea, images[centerImagePos]));
+		}
+		while (centerImagePos > images.length - 3) {
 			console.log("Rotate left to ensure 2 images on right");
 			rotateLoopImagesLeft(curArea);
+			centerImagePos = getCenterImagePos();
+			images = container.querySelectorAll("img");
+			console.log("Centre Image is now position " + centerImagePos + " and is image number " + getLoopImageNum(curArea, images[centerImagePos]));
 		}
 	}
 	// Don't set the marginLeft until after the images have been rearranged, to avoid jumping around

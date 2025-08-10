@@ -222,12 +222,9 @@
 				<div class="flexbox">
 					<!-- Main needs each image to have a container, so we can place the washing machine inside it to overlay 
 						it and have it scroll with the image -->
-					<div class="imgbox">
-						<img id="main20" src="images/2025/main/20.png">
-					</div>
-					<div class="imgbox">
-						<img id="main21" src="images/2025/main/21.png">
-					</div>
+					<!-- Although we want to have images to the left, centerX is calculated based on image #1 being position 0 -->
+					<!-- Images will be rotated into place by the js. Having them pre-rotated works, but it causes confusion about
+						the correct value for centerImagePos... -->
 					<div class="imgbox">
 						<img id="main1" src="images/2025/main/1.png">
 					</div>
@@ -284,6 +281,12 @@
 					</div>
 					<div class="imgbox">
 						<img id="main19" src="images/2025/main/19.png">
+					</div>
+					<div class="imgbox">
+						<img id="main20" src="images/2025/main/20.png">
+					</div>
+					<div class="imgbox">
+						<img id="main21" src="images/2025/main/21.png">
 					</div>
 				</div>
 			</div>
