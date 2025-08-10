@@ -9,6 +9,8 @@
 // Screen size
 const SCREEN_WIDTH = 1920;
 const SCREEN_HEIGHT = 760;
+const HALF_SCREEN_WIDTH = SCREEN_WIDTH / 2;
+const HALF_SCREEN_HEIGHT = SCREEN_HEIGHT / 2;
 const PROJECTION_WIDTH = 1920;
 const PROJECTION_HEIGHT = 1080;
 const BAR_HEIGHT = (PROJECTION_HEIGHT - SCREEN_HEIGHT) / 2; // The upper and lower bars that are projected but sit above and below the screen
@@ -40,8 +42,8 @@ const KEYMAP = { // Keyboard control mapping to joystick equivalents
 const KONAMI_CODE = [UP, UP, DOWN, DOWN, LEFT, RIGHT, LEFT, RIGHT, BTN_B, BTN_A];
 const PARTYTIME = 12000;
 // Location and gravity strength of Black Hole
-const BLACKHOLEX = SCREEN_WIDTH / 2; // centerX value
-const BLACKHOLEY = SCREEN_HEIGHT / 2; // centerY value
+const BLACKHOLEX = HALF_SCREEN_WIDTH; // centerX value
+const BLACKHOLEY = HALF_SCREEN_HEIGHT; // centerY value
 const BLACKHOLE_GRAVITY = 10 ** 3;
 // Size of washing machine
 const WASHING_MACHINE_WIDTH = 189;
@@ -157,14 +159,14 @@ const TRANSITION_TIME = 1000;
 
 var isOn = []; // Map of button input number to true/false
 var scrollSpeed = 2;
-var centerX = Math.floor(SCREEN_WIDTH / 2);
-var centerY; // Only matters for xy areas, and will be set on entry to such an area
+var centerX = HALF_SCREEN_WIDTH;
+var centerY = HALF_SCREEN_HEIGHT;  // Only matters for xy areas, and will be set on entry to such an area
 var scrollSpeedLimiter = false; // Is set to true when the scroll speed changes, which blocks further changes for a while, to reduce the speed at which it was changing
 var raftimer;
 var hudFader;
 var konamiPos = 0; // Current position in the Konami code
 var wasIdle = true; // Whether no inputs were read on the last run through - for Konami discretisation
-var gravityCounter = 0; // Amortise vertical movements in low gravity across multiple frames
+var gravityEnabled = true; // Whether gravity is enabled in space
 
 // Whether to reverse left and right inputs. Press "X" on keyboard to toggle. Useful if the image 
 // is horizontally flipped for back-projection (didn't have to do that in 2023 because there was no text)
@@ -172,6 +174,7 @@ var reverseLeftRight = true;
 var inputsBlocked = false; // Further inputs are ignored during a transition from one area to another, or during the easter egg party
 var easterEggMutex = false; // Prevent easter egg being triggered again while it's running
 var teleportMutex = false; // Prevent teleport likewise
+var processActionsMutex = false; // Likewise ensure only one copy of processActions runs at a time
 var anyInputOn = false; // Is anything being pressed or the joystick being moved?
 var curArea = "main"; // Which area (contiguous left-right set of images) are we in?
 var permittedVertical = []; // Whether we can go up or down (or both) from the current location
@@ -180,7 +183,8 @@ var haveEvents = 'GamepadEvent' in window;
 var haveWebkitEvents = 'WebKitGamepadEvent' in window;
 var controller;
 
-var dbgout = "";
+var dbgOut = "";
+var lastDbgOut = "";
 var elDbg = document.getElementById("debug");
 var elArrowDn = document.getElementById("arrowDn");
 var elArrowUp = document.getElementById("arrowUp");
@@ -265,7 +269,6 @@ function disconnecthandler(e) {
 }
 
 function readGamepad() {
-	//dbgout = "";
 	const gamepads = navigator.getGamepads();
 	controller = gamepads[0];
 
@@ -277,7 +280,7 @@ function readGamepad() {
 	anyInputOn = false;
 
 	for (var i = 0; i < controller.axes.length; i++) {
-		//dbgout += "Axis " + i + " value " + controller.axes[i] + "<br>";
+		//dbgOut += "Axis " + i + " value " + controller.axes[i] + "<br>";
 	}
 	if (controller.axes[0] > 0.5) {
 		isOn[DOWN] = 1;
@@ -314,7 +317,7 @@ function readGamepad() {
 		} else {
 			isPressed = val == 1.0;
 		}
-		//dbgout += i + ": " + (isPressed ? "pressed " : "") + (isTouched ? "touched" : "") + "<br>";
+		//dbgOut += i + ": " + (isPressed ? "pressed " : "") + (isTouched ? "touched" : "") + "<br>";
 		// Store the button state in its own slot first
 		isOn[i + 4] = isPressed | isTouched;
 		anyInputOn |= isOn[i + 4];
@@ -363,6 +366,17 @@ function keydown(e) {
 			teleport();
 		} else {
 			changeArea("space", 4800);
+		}
+	} else if (e.key == 'G' || e.key == 'g') {
+		e.preventDefault();
+		if (curArea == "space") {
+			if (gravityEnabled) {
+				console.log("Switching gravity OFF");
+				gravityEnabled = false;
+			} else {
+				console.log("Switching gravity ON");
+				gravityEnabled = true;
+			}
 		}
 	}
 }
@@ -680,7 +694,7 @@ function calculatePermittedVertical() {
 		xpos = (centerImageNum - 1) * STANDARD_IMAGE_WIDTH + imageCenterXrev;
 		// But it needs a fudge because something about the maths isn't quite right
 		xpos -= 250;
-		dbgout += "<br>Image #" + centerImageNum + " is at position " + imageCenterXpos + " = revpos " + imageCenterXrev + " = old centerX of " + xpos;
+		dbgOut += "<br>Image #" + centerImageNum + " is at position " + imageCenterXpos + " = revpos " + imageCenterXrev + " = old centerX of " + xpos;
 	} else {
 		xpos = centerX;
 	}
@@ -692,11 +706,11 @@ function calculatePermittedVertical() {
 			let destX = trans[i][3];
 			canMove = true;
 			if (direction < 0) {
-				dbgout += "<br>Transition Point " + i + " in range - can go DOWN to " + destArea + ":" + destX + "<br>";
+				dbgOut += "<br>Transition Point " + i + " in range - can go DOWN to " + destArea + ":" + destX + "<br>";
 				elArrowDn.classList.remove("hidden");
 				permittedVertical[DOWN] = [destArea, destX];
 			} else if (direction > 0) {
-				dbgout += "<br>Transition Point " + i + " in range - can go UP to " + destArea + ":" + destX + "<br>";
+				dbgOut += "<br>Transition Point " + i + " in range - can go UP to " + destArea + ":" + destX + "<br>";
 				elArrowUp.classList.remove("hidden");
 				permittedVertical[UP] = [destArea, destX];
 			} else {
@@ -718,8 +732,8 @@ function changeArea(destArea, destX) {
 	let elCurArea = document.getElementById("area-" + curArea);
 	let elNewArea = document.getElementById("area-" + destArea);
 	// Set location to the new area and pos
-	dbgout += "<br>Moving from " + curArea + ":" + centerX;
-	dbgout += "<br>to " + destArea + ":" + destX + "<br>";
+	dbgOut += "<br>Moving from " + curArea + ":" + centerX;
+	dbgOut += "<br>to " + destArea + ":" + destX + "<br>";
 	if (XLOOP[destArea]) {
 		// Can't easily move to a specific image, so we don't bother trying; the old centerX offset will work fine,
 		// BUT we must ensure the images are in their original order. So rotate left the correct number of times if necessary.
@@ -764,6 +778,12 @@ function changeArea(destArea, destX) {
 		elNewArea.style.display = "block";
 		curArea = destArea;
 		centerX = destX;
+		if (destArea == "space") {
+			// Space is 2D. As we're coming in from the bottom, we need to start at the bottom of the image.
+			centerY = HEIGHT["space"] - HALF_SCREEN_HEIGHT;
+		} else {
+			centerY = HALF_SCREEN_HEIGHT; // Ignored, but set it to what it should be
+		}
 		move();
 		calculatePermittedVertical();
 		everything.classList.replace("fadeOut", "fadeIn");
@@ -787,9 +807,6 @@ function changeArea(destArea, destX) {
 			arrowMoverHandle = setInterval(function () {
 				arrowMover();
 			}, 30000);
-		} else if (destArea == "space") {
-			// Space is 2D. As we're coming in from the bottom, we need to start at the bottom of the image.
-			centerY = HEIGHT["space"] - SCREEN_HEIGHT / 2;
 		} else {
 			// Stop any ongoing party
 			if (partyHandle) {
@@ -883,10 +900,10 @@ function move() {
 		}
 	}
 	// Don't set the marginLeft until after the images have been rearranged, to avoid jumping around
-	slider.style.marginLeft = -centerX + SCREEN_WIDTH / 2 + "px";
+	slider.style.marginLeft = -centerX + HALF_SCREEN_WIDTH + "px";
 	let xyslider = document.querySelector("#area-" + curArea + " .xyslider");
 	if (xyslider) {
-		xyslider.style.marginTop = -centerY + SCREEN_HEIGHT / 2 + BAR_HEIGHT + "px";
+		xyslider.style.marginTop = -centerY + HALF_SCREEN_HEIGHT + BAR_HEIGHT + "px";
 	}
 }
 
@@ -897,9 +914,9 @@ function moveLeft() {
 		return;
 	}
 	centerX -= scrollSpeed;
-	if (!XLOOP[curArea] && centerX - SCREEN_WIDTH / 2 < 0) {
+	if (!XLOOP[curArea] && centerX - HALF_SCREEN_WIDTH < 0) {
 		// Other areas must not scroll past the left edge
-		centerX = SCREEN_WIDTH / 2; 
+		centerX = HALF_SCREEN_WIDTH; 
 	}
 	move();
 }
@@ -912,7 +929,7 @@ function moveRight() {
 	}
 	// Right
 	centerX += scrollSpeed;
-	let maxScroll = WIDTH[curArea] - SCREEN_WIDTH / 2;
+	let maxScroll = WIDTH[curArea] - HALF_SCREEN_WIDTH;
 	if (!XLOOP[curArea] && centerX > maxScroll) {
 		// Other areas must not scroll past the right edge
 		centerX = maxScroll;
@@ -928,11 +945,10 @@ function moveUp() {
 	}
 	// Up
 	centerY -= scrollSpeed;
-	let minScroll = SCREEN_HEIGHT / 2;
+	let minScroll = HALF_SCREEN_HEIGHT;
 	if (centerY < minScroll) {
 		centerY = minScroll;
 	}
-	console.log(centerY);
 	move();
 }
 
@@ -944,11 +960,10 @@ function moveDown() {
 	}
 	// Down
 	centerY += scrollSpeed;
-	let maxScroll = HEIGHT[curArea] - SCREEN_HEIGHT / 2;
+	let maxScroll = HEIGHT[curArea] - HALF_SCREEN_HEIGHT;
 	if (centerY > maxScroll) {
 		centerY = maxScroll;
 	}
-	console.log(centerY);
 	move();
 }
 
@@ -992,7 +1007,11 @@ function teleport() {
 
 // Respond to inputs. The arg is whether to call requestAnimationFrame - true for keyboard control, false for joystick because it's called from readGamePad
 function processActions(raf = true, forceOutput = false) {
-	if (curArea == "space") {
+	if (processActionsMutex) {
+		return;
+	}
+	processActionsMutex = true;
+	if (curArea == "space" && gravityEnabled) {
 		if (centerX == BLACKHOLEX && centerY == BLACKHOLEY) {
 			// Exit to a random location on main
 			teleport();
@@ -1030,15 +1049,19 @@ function processActions(raf = true, forceOutput = false) {
 		move();
 	}
 
+	// If inputs are currently blocked there won't be anything else to do, so set raf if required and return
 	if (inputsBlocked) {
 		if (raf) {
 			setTimeout(function () {
 				rAF(processActions);
 			}, 20);
 		}
+		processActionsMutex = false;
 		return;
 	}
-	dbgout = "";
+
+	lastDbgOut = dbgOut;
+	dbgOut = "";
 	// Keep track of progress through Konami. To ensure that only discrete movements advance the pattern,
 	// we only step to the next one when entering the correct state from a "nothing pressed" state
 	if (wasIdle) {
@@ -1057,6 +1080,11 @@ function processActions(raf = true, forceOutput = false) {
 			konamiPos = 0;
 		}
 	}
+
+	dbgOut += "Area: " + curArea + "<br>";
+	dbgOut += "centerX: " + centerX + "<br>";
+	dbgOut += "centerY: " + centerY + "<br>";
+
 	if (!anyInputOn && !forceOutput) {
 		wasIdle = true;
 	} else {
@@ -1079,13 +1107,8 @@ function processActions(raf = true, forceOutput = false) {
 			}
 		}
 		if (reverseLeftRight) {
-			dbgout += "<em>L/R Reversed</em><br>";
+			dbgOut += "<em>L/R Reversed</em><br>";
 		}
-
-
-		dbgout += "Area: " + curArea + "<br>";
-		dbgout += "centerX: " + centerX + "<br>";
-		dbgout += "centerY: " + centerY + "<br>";
 
 		if (curArea == "space") {
 			// space allows up/down movement within the area
@@ -1117,13 +1140,16 @@ function processActions(raf = true, forceOutput = false) {
 			}
 			if (direction != 0) {
 				// Clear any previous dbg messages
-				dbgout = "<b>Going " + (direction > 0 ? "UP" : "DOWN") + "</b>";
+				dbgOut = "<b>Going " + (direction > 0 ? "UP" : "DOWN") + "</b>";
 				changeArea(destArea, destX);
 			}
 		}
-		// Output the debug messages only if they've changed
-		dbg(dbgout);
 		wasIdle = false;
+	}
+
+	// Output the debug messages only if they've changed
+	if (dbgOut != lastDbgOut) {
+		dbg(dbgOut);
 	}
 
 	// If using only keyboard control, we need to loop this function so that holding a key down has the right effect
@@ -1142,6 +1168,7 @@ function processActions(raf = true, forceOutput = false) {
 			rAF(processActions);
 		}, 20); // It loops too fast otherwise
 	}
+	processActionsMutex = false;
 }
 
 function scangamepads() {
