@@ -712,7 +712,6 @@ function calculatePermittedVertical() {
 					// Some slop is needed for the value of centerY anyway, as it never quite reaches 1620
 					// So we make the exit  available within 5px of the bottom, but show the arrow for 25px
 					let proximityToBottom = HEIGHT["space"] - HALF_SCREEN_HEIGHT - centerY;
-					console.log(proximityToBottom);
 					if (proximityToBottom < 25) {
 						elArrowDn.classList.remove("hidden");
 						spaceProximityArrow = true; // Prevent it from being rehidden if the movement is not actually allowed yet
@@ -1013,6 +1012,7 @@ function teleport() {
 				washingMachine.classList.add("sink");
 			}, 3000);
 		} else {
+			console.log("Removing sink class");
 			washingMachine.classList.remove("sink");
 		}
 		setTimeout(function() {
