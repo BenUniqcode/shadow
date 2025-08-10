@@ -41,7 +41,7 @@ const KONAMI_CODE = [UP, UP, DOWN, DOWN, LEFT, RIGHT, LEFT, RIGHT, BTN_B, BTN_A]
 const PARTYTIME = 12000;
 // Location and gravity strength of Black Hole
 const BLACKHOLEX = SCREEN_WIDTH / 2; // centerX value
-const BLACKHOLEY = 0; // scrollY value
+const BLACKHOLEY = SCREEN_HEIGHT / 2; // centerY value
 const BLACKHOLE_GRAVITY = 10 ** 3;
 // Size of washing machine
 const WASHING_MACHINE_WIDTH = 189;
@@ -55,6 +55,9 @@ const SCROLL_ANIMATION_OPTIONS = {
 // Width of each image in multi-image areas like main, dragon, giant, and pirate
 const STANDARD_IMAGE_WIDTH = 1351;
 
+// Height of space image
+const SPACE_IMAGE_HEIGHT = 2000;
+
 // Total widths of each Area
 const WIDTH = {
 	"main": 21 * STANDARD_IMAGE_WIDTH,
@@ -65,6 +68,10 @@ const WIDTH = {
 	"pirate": 5 * STANDARD_IMAGE_WIDTH,
 	"skyworld": 7853,
 	"space": 5760,
+};
+
+const HEIGHT = {
+	"space": 2000,
 };
 
 // Which areas loop around horizontally?
@@ -151,6 +158,7 @@ const TRANSITION_TIME = 1000;
 var isOn = []; // Map of button input number to true/false
 var scrollSpeed = 2;
 var centerX = Math.floor(SCREEN_WIDTH / 2);
+var centerY; // Only matters for xy areas, and will be set on entry to such an area
 var scrollSpeedLimiter = false; // Is set to true when the scroll speed changes, which blocks further changes for a while, to reduce the speed at which it was changing
 var raftimer;
 var hudFader;
@@ -723,11 +731,11 @@ function changeArea(destArea, destX) {
 	}
 
 	// I tried to do something fancier with the images overlaid, but it's problematic because they don't line up - you can
-	// see the jump when we scroll to the right place on the new image. So it's easier to just fade everything to black 
+	// see the jump when we scroll to the right place on the new image. So it's easier to just fade everything on the screen to black 
 	// (including the arrows because they change too) while the changeover happens.
 	// The exception is going from the lighthouse into the disco, which I felt would be clearer
 	// what's going on if we zoom in to the top of it...
-	let everything = document.getElementById("everything");
+	let everything = document.getElementById("screen");
 	let lighthouse = document.querySelector(".lighthouse"); // Had to use a class here because we need IDs for the numbering
 	let swapTime = TRANSITION_TIME / 2;
 	let endTime = TRANSITION_TIME;
@@ -780,17 +788,8 @@ function changeArea(destArea, destX) {
 				arrowMover();
 			}, 30000);
 		} else if (destArea == "space") {
-			// Space is 2D. Unlike X scrolling, we handle the Y scrolling by simply showing the full height of the image,
-			// and using window scrolling. As we're coming in from the bottom, we need to scroll to the bottom of the image.
-			// First figure out how tall the document is. Taking the maximum of all of these may not really be necessary, 
-			// but it ensures it will work in all circumstances.
-			let scrollHeight = Math.max(
-				document.body.scrollHeight, document.documentElement.scrollHeight,
-  				document.body.offsetHeight, document.documentElement.offsetHeight,
-  				document.body.clientHeight, document.documentElement.clientHeight
-			);
-			// console.log(scrollHeight);
-			window.scroll(0, scrollHeight - PROJECTION_HEIGHT - BAR_HEIGHT);
+			// Space is 2D. As we're coming in from the bottom, we need to start at the bottom of the image.
+			centerY = HEIGHT["space"] - SCREEN_HEIGHT / 2;
 		} else {
 			// Stop any ongoing party
 			if (partyHandle) {
@@ -885,6 +884,10 @@ function move() {
 	}
 	// Don't set the marginLeft until after the images have been rearranged, to avoid jumping around
 	slider.style.marginLeft = -centerX + SCREEN_WIDTH / 2 + "px";
+	let xyslider = document.querySelector("#area-" + curArea + " .xyslider");
+	if (xyslider) {
+		xyslider.style.marginTop = -centerY + SCREEN_HEIGHT / 2 + BAR_HEIGHT + "px";
+	}
 }
 
 function moveLeft() {
@@ -917,12 +920,36 @@ function moveRight() {
 	move();
 }
 
-// Up and Down movement (only within Space) use window scrolling rather than margin shifting, because it's easier
 function moveUp() {
-	window.scrollBy(0, -scrollSpeed);
+	// Only allow for xy areas
+	let slider = document.querySelector("#area-" + curArea + " .xyslider");
+	if (!slider) {
+		return;
+	}
+	// Up
+	centerY -= scrollSpeed;
+	let minScroll = SCREEN_HEIGHT / 2;
+	if (centerY < minScroll) {
+		centerY = minScroll;
+	}
+	console.log(centerY);
+	move();
 }
+
 function moveDown() {
-	window.scrollBy(0, scrollSpeed);
+	// Only allow for xy areas
+	let slider = document.querySelector("#area-" + curArea + " .xyslider"); // Apparently can't use .slider.xy to match on two classes: "not a valid selector!"
+	if (!slider) {
+		return;
+	}
+	// Down
+	centerY += scrollSpeed;
+	let maxScroll = HEIGHT[curArea] - SCREEN_HEIGHT / 2;
+	if (centerY > maxScroll) {
+		centerY = maxScroll;
+	}
+	console.log(centerY);
+	move();
 }
 
 function teleport() {
@@ -966,14 +993,14 @@ function teleport() {
 // Respond to inputs. The arg is whether to call requestAnimationFrame - true for keyboard control, false for joystick because it's called from readGamePad
 function processActions(raf = true, forceOutput = false) {
 	if (curArea == "space") {
-		if (centerX == BLACKHOLEX && window.scrollY == BLACKHOLEY) {
+		if (centerX == BLACKHOLEX && centerY == BLACKHOLEY) {
 			// Exit to a random location on main
 			teleport();
 			return;
 		}
 		// Apply Black Hole gravity to space
 		let distanceX = centerX - BLACKHOLEX;
-		let distanceY = window.scrollY - BLACKHOLEY;
+		let distanceY = centerY - BLACKHOLEY;
 		//console.log("DistanceX: " + distanceX + " DistanceY: " + distanceY);
 		let distanceToBlackHole = Math.sqrt(distanceX ** 2 + distanceY ** 2);
 		//console.log("Distance to Black Hole: " + distanceToBlackHole);
@@ -983,7 +1010,7 @@ function processActions(raf = true, forceOutput = false) {
 		let gravityForce = BLACKHOLE_GRAVITY / distanceToBlackHole;
 		//console.log("Gravity Force: " + gravityForce);
 		// Find the angle
-		let angle = Math.atan((window.scrollY - BLACKHOLEY) / (centerX - BLACKHOLEX)); // tantheta = O/A 
+		let angle = Math.atan((centerY - BLACKHOLEY) / (centerX - BLACKHOLEX)); // tantheta = O/A 
 		//console.log("Angle: " + angle);
 		// Calculate X and Y components of the force
 		let gravityX = gravityForce * Math.cos(angle);
@@ -992,21 +1019,11 @@ function processActions(raf = true, forceOutput = false) {
 
 		// Scrolling by less than 0.75 doesn't do anything, which causes weak gravity only to act in the X direction until we hit that threshold
 		// So, need to amortise the movement across multiple frames. Using random is too jerky.
-		if (gravityY >= 0.75) {
-			window.scrollBy(0, -gravityY);
-		} else {
-			if (gravityCounter >= 0.75 / gravityY) {
-				window.scrollBy(0, -1);
-				gravityCounter = 0;
-			} else {
-				gravityCounter++;
-			}
+		centerY -= gravityY;
+		if (centerY < BLACKHOLEY) {
+			centerY = BLACKHOLEY;
 		}
-		if (window.scrollY < BLACKHOLEY) {
-			window.scrollTo(0, BLACKHOLEY);
-		}
-
-		centerX = centerX - gravityX;
+		centerX -= gravityX;
 		if (centerX < BLACKHOLEX) {
 			centerX = BLACKHOLEX;
 		}
@@ -1068,6 +1085,7 @@ function processActions(raf = true, forceOutput = false) {
 
 		dbgout += "Area: " + curArea + "<br>";
 		dbgout += "centerX: " + centerX + "<br>";
+		dbgout += "centerY: " + centerY + "<br>";
 
 		if (curArea == "space") {
 			// space allows up/down movement within the area

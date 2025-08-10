@@ -15,6 +15,11 @@
 		}
 
 		#everything {
+			height: 1080px;
+			overflow: hidden;
+		}
+
+		#screen {
 			z-index: 0;
 			width: 1920px;
 		}
@@ -218,13 +223,14 @@
 </head>
 
 <body>
+	<div id="everything">
 	<div id="blackBarTop" class="bar blackBar">
 	</div>
 	<div id="hud"></div>
 	<div id="partyOverlay">
 		<canvas id="canv" width="1920" height="760" style="margin-top: 160px"></canvas>
 	</div>
-	<div id="everything" class="fadeOut">
+	<div id="screen" class="fadeOut">
 		<textarea id="keyinput"></textarea><!-- Offscreen; required for keyboard control -->
 		<div id="debug"></div>
 		<div id="arrowDn" class="arrow hidden">
@@ -357,8 +363,8 @@
 			</div>
 		</div>
 		<div id="area-space" style="display: none">
-			<div class="slider">
-				<img src="images/2025/space/space2.3.5.png" style="vertical-align: bottom">
+			<div class="slider xyslider">
+				<img src="images/2025/space/space2.3.5.png">
 			</div>
 		</div>
 		<div id="area-hug" style="display: none">
@@ -409,8 +415,8 @@
 	<div id="whiteBarBottom" class="bar whiteBar">
 	</div>
 	<img id="washingMachine" src="images/2025/washingmachine.png" class="fadeOut">
+	</div>
 	<script src="shadowtheatre.js?34675712"></script>
-
 </body>
 
 </html>
