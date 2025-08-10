@@ -9,6 +9,9 @@
 // Screen size
 const SCREEN_WIDTH = 1920;
 const SCREEN_HEIGHT = 760;
+const PROJECTION_WIDTH = 1920;
+const PROJECTION_HEIGHT = 1080;
+const BAR_HEIGHT = (PROJECTION_HEIGHT - SCREEN_HEIGHT) / 2; // The upper and lower bars that are projected but sit above and below the screen
 
 // Meaning of button input numbers (i.e. which thing is plugged into which input on the controller PCB)
 const NUM_INPUTS = 12;
@@ -36,9 +39,13 @@ const KEYMAP = { // Keyboard control mapping to joystick equivalents
 };
 const KONAMI_CODE = [UP, UP, DOWN, DOWN, LEFT, RIGHT, LEFT, RIGHT, BTN_B, BTN_A];
 const PARTYTIME = 12000;
-// Location of Black Hole
+// Location and gravity strength of Black Hole
 const BLACKHOLEX = SCREEN_WIDTH / 2; // centerX value
 const BLACKHOLEY = 0; // scrollY value
+const BLACKHOLE_GRAVITY = 10 ** 3;
+// Size of washing machine
+const WASHING_MACHINE_WIDTH = 189;
+const WASHING_MACHINE_HEIGHT = 237;
 
 const SCROLL_ANIMATION_OPTIONS = {
 	duration: 200,
@@ -342,8 +349,13 @@ function keydown(e) {
 		e.preventDefault();
 		easterEgg();
 	} else if (e.key == 'Z' || e.key == 'z') {
+		// Debugging for space and teleportation
 		e.preventDefault();
-		changeArea('space', 4800);
+		if (curArea == "space") {
+			teleport();
+		} else {
+			changeArea("space", 4800);
+		}
 	}
 }
 
@@ -370,7 +382,7 @@ function keyup(e) {
 
 // Get the offset of the image currently closest to the center of the screen, according to the current DOM order
 // Say there are three images, currently in this order: <img id="2"> <img id="3"> <img id="1">
-// and we're centred on the middle one, it will return the element object for the middle one.
+// and we're centred on the middle one, it will return 3
 function getCenterImagePos() {
 	let centerImagePos = Math.floor(centerX / STANDARD_IMAGE_WIDTH);
 	console.log("centerImagePos: " + centerImagePos);
@@ -778,7 +790,7 @@ function changeArea(destArea, destX) {
   				document.body.clientHeight, document.documentElement.clientHeight
 			);
 			// console.log(scrollHeight);
-			window.scroll(0, scrollHeight - SCREEN_HEIGHT);
+			window.scroll(0, scrollHeight - PROJECTION_HEIGHT - BAR_HEIGHT);
 		} else {
 			// Stop any ongoing party
 			if (partyHandle) {
@@ -849,19 +861,19 @@ function move() {
 	if (!slider) {
 		return;
 	}
+	slider.style.marginLeft = -centerX + SCREEN_WIDTH / 2 + "px";
 	if (XLOOP[curArea]) {
-		// If we are in a forever scrolling area, ensure at least one image is present to the left and right of the currently-centred one.
+		// If we are in a forever scrolling area, ensure at least two images are present to the left and right of the currently-centred one.
 		// (In the case of the sea areas, which only have 2 images per level, this requires having multiple copies of the images alternating in the HTML)
 		let container = document.querySelector("#area-" + curArea + " .slider .flexbox");
 		let images = container.querySelectorAll("img");
 		let centerImagePos = getCenterImagePos();
-		if (centerImagePos < 1) {
+		if (centerImagePos < 2) {
 			rotateLoopImagesRight(curArea);
-		} else if (centerImagePos > images.length - 2) {
+		} else if (centerImagePos > images.length - 3) {
 			rotateLoopImagesLeft(curArea);
 		}
 	}
-	slider.style.marginLeft = -centerX + SCREEN_WIDTH / 2 + "px";
 }
 
 function moveLeft() {
@@ -919,11 +931,18 @@ function teleport() {
 		let imgbox = getCenterImageBox();
 		let washingMachine = document.querySelector('#washingMachine');
 		imgbox.insertBefore(washingMachine, null);
-		washingMachine.style.top = SCREEN_HEIGHT - 287 + "px"; // The image is 237px high
-		washingMachine.style.left = SCREEN_WIDTH / 2 - 94 + "px"; // The image is 189px wide
+		washingMachine.style.top = SCREEN_HEIGHT - WASHING_MACHINE_HEIGHT - 50 + "px"; 
+		washingMachine.style.left = STANDARD_IMAGE_WIDTH / 2 - WASHING_MACHINE_WIDTH / 2 + "px"; 
 		washingMachine.classList.replace("fadeOut", "fadeIn");
 		teleportMutex = false;
 	}, TRANSITION_TIME / 2 + 100);
+	// If the washing machine is on water, it starts sinking 1s after the level appears
+	let image = getCenterImage();
+	if (image.classList.contains("water")) {
+		setTimeout(function() {
+			washingMachine.classList.add("sink");
+		}, TRANSITION_TIME + 1000);
+	}
 	setTimeout(function() {
 		washingMachine.classList.replace("fadeIn", "fadeOut");
 	}, TRANSITION_TIME + 10000);
@@ -940,23 +959,21 @@ function processActions(raf = true, forceOutput = false) {
 		// Apply Black Hole gravity to space
 		let distanceX = centerX - BLACKHOLEX;
 		let distanceY = window.scrollY - BLACKHOLEY;
-		console.log("DistanceX: " + distanceX + " DistanceY: " + distanceY);
-		let GRAVITATIONAL_CONSTANT = 10 ** 3;
+		//console.log("DistanceX: " + distanceX + " DistanceY: " + distanceY);
 		let distanceToBlackHole = Math.sqrt(distanceX ** 2 + distanceY ** 2);
-		console.log("Distance to Black Hole: " + distanceToBlackHole);
-		// A 1/r^2 dropoff makes for very slow movement until you're very close, and then it's too fast. Plus, the X 
-		// scrolling works for any marginal values, whereas the Y scrolling doesn't scroll at all until it gets above 0.75.
-		// let gravityForce = GRAVITATIONAL_CONSTANT / (distanceToBlackHole ** 2);
-		// So try a linear
-		let gravityForce = GRAVITATIONAL_CONSTANT / distanceToBlackHole;
-		console.log("Gravity Force: " + gravityForce);
+		//console.log("Distance to Black Hole: " + distanceToBlackHole);
+		// A 1/r^2 dropoff makes for very slow movement until you're very close, and then it's too fast. 
+		// let gravityForce = BLACKHOLE_GRAVITY / (distanceToBlackHole ** 2);
+		// Linear looks better
+		let gravityForce = BLACKHOLE_GRAVITY / distanceToBlackHole;
+		//console.log("Gravity Force: " + gravityForce);
 		// Find the angle
 		let angle = Math.atan((window.scrollY - BLACKHOLEY) / (centerX - BLACKHOLEX)); // tantheta = O/A 
-		console.log("Angle: " + angle);
+		//console.log("Angle: " + angle);
 		// Calculate X and Y components of the force
 		let gravityX = gravityForce * Math.cos(angle);
 		let gravityY = gravityForce * Math.sin(angle);
-		console.log("Gravity X: " + gravityX + " Y: " + gravityY);
+		//console.log("Gravity X: " + gravityX + " Y: " + gravityY);
 
 		// Scrolling by less than 0.75 doesn't do anything, which causes weak gravity only to act in the X direction until we hit that threshold
 		// So, need to amortise the movement across multiple frames. Using random is too jerky.
@@ -1037,7 +1054,7 @@ function processActions(raf = true, forceOutput = false) {
 		dbgout += "Area: " + curArea + "<br>";
 		dbgout += "centerX: " + centerX + "<br>";
 
-		if (curArea == 'space') {
+		if (curArea == "space") {
 			// space allows up/down movement within the area
 			if (isOn[UP]) {
 				moveUp();
