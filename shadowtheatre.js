@@ -149,7 +149,8 @@ const TRANSITIONS = {
 		[6900, 1, "space", 4800],
 	],
 	"space": [
-		// Exit from space is via the Black Hole, not up/down
+		[4800, -1, "skyworld", 6900],
+		// Space can also be exited via Black Hole
 	],
 
 };
@@ -699,6 +700,7 @@ function calculatePermittedVertical() {
 		xpos = centerX;
 	}
 
+	let spaceProximityArrow = false;
 	for (let i = 0; i < trans.length; i++) {
 		if (Math.abs(xpos - trans[i][0]) < TRANSITION_RANGE) {
 			let direction = trans[i][1];
@@ -706,9 +708,24 @@ function calculatePermittedVertical() {
 			let destX = trans[i][3];
 			canMove = true;
 			if (direction < 0) {
-				dbgOut += "<br>Transition Point " + i + " in range - can go DOWN to " + destArea + ":" + destX + "<br>";
-				elArrowDn.classList.remove("hidden");
-				permittedVertical[DOWN] = [destArea, destX];
+				if (curArea == "space") {
+					// Some slop is needed for the value of centerY anyway, as it never quite reaches 1620
+					// So we make the exit  available within 5px of the bottom, but show the arrow for 25px
+					let proximityToBottom = HEIGHT["space"] - HALF_SCREEN_HEIGHT - centerY;
+					console.log(proximityToBottom);
+					if (proximityToBottom < 25) {
+						elArrowDn.classList.remove("hidden");
+						spaceProximityArrow = true; // Prevent it from being rehidden if the movement is not actually allowed yet
+					}
+					if (proximityToBottom < 5) {
+						dbgOut += "<br>Transition Point " + i + " in range - can go DOWN to " + destArea + ":" + destX + "<br>";
+						permittedVertical[DOWN] = [destArea, destX];
+					}
+				} else {
+					dbgOut += "<br>Transition Point " + i + " in range - can go DOWN to " + destArea + ":" + destX + "<br>";
+					elArrowDn.classList.remove("hidden");
+					permittedVertical[DOWN] = [destArea, destX];
+				}
 			} else if (direction > 0) {
 				dbgOut += "<br>Transition Point " + i + " in range - can go UP to " + destArea + ":" + destX + "<br>";
 				elArrowUp.classList.remove("hidden");
@@ -719,7 +736,7 @@ function calculatePermittedVertical() {
 		}
 	}
 	// Hide the arrows that do not apply
-	if (!permittedVertical[DOWN]) {
+	if (!permittedVertical[DOWN] && !spaceProximityArrow) {
 		elArrowDn.classList.add("hidden");
 	}
 	if (!permittedVertical[UP]) {
@@ -1109,38 +1126,41 @@ function processActions(raf = true, forceOutput = false) {
 			dbgOut += "<em>L/R Reversed</em><br>";
 		}
 
-		if (curArea == "space") {
-			// space allows up/down movement within the area
+		// No else here, because we can also exit from space via the DOWN direction, if we are 
+		// at the bottom (and it's in horizontal range)
+		// other areas use up/down for transitions to other areas
+		// Find out if we are near a transition point
+		calculatePermittedVertical();
+		// Are we actually moving up or down?
+		let destArea, destX;
+		let direction = 0;
+		// Because exiting from space requires holding DOWN to get to the bottom of the image first, we can't require wasIdle
+		if (permittedVertical[DOWN] && isOn[DOWN] && (curArea == "space" || wasIdle)) {
+			console.log("Going down");
+			destArea = permittedVertical[DOWN][0];
+			destX = permittedVertical[DOWN][1];
+			direction -= 1;
+		}
+		// No else here, so that simultaneous up and down cancel
+		// instead of down dominating
+		if (wasIdle && permittedVertical[UP] && isOn[UP]) {
+			console.log("Going up");
+			destArea = permittedVertical[UP][0];
+			destX = permittedVertical[UP][1];
+			direction += 1;
+		}
+		if (direction != 0) {
+			// Clear any previous dbg messages
+			dbgOut = "<b>Going " + (direction > 0 ? "UP" : "DOWN") + "</b>";
+			changeArea(destArea, destX);
+		} else if (curArea == "space") {
+			// space also allows up/down movement within the area. Do this only if no exit was taken.
 			if (isOn[UP]) {
 				moveUp();
 			}
 			// No else here, so that simultaneous up and down cancel instead of down dominating
 			if (isOn[DOWN]) {
 				moveDown();
-			}
-		} else {
-			// other areas use up/down for transitions to other areas
-			// Find out if we are near a transition point
-			calculatePermittedVertical();
-			// Are we actually moving up or down?
-			let destArea, destX;
-			let direction = 0;
-			if (wasIdle && permittedVertical[DOWN] && isOn[DOWN]) {
-				destArea = permittedVertical[DOWN][0];
-				destX = permittedVertical[DOWN][1];
-				direction -= 1;
-			}
-			// No else here, so that simultaneous up and down cancel
-			// instead of down dominating
-			if (wasIdle && permittedVertical[UP] && isOn[UP]) {
-				destArea = permittedVertical[UP][0];
-				destX = permittedVertical[UP][1];
-				direction += 1;
-			}
-			if (direction != 0) {
-				// Clear any previous dbg messages
-				dbgOut = "<b>Going " + (direction > 0 ? "UP" : "DOWN") + "</b>";
-				changeArea(destArea, destX);
 			}
 		}
 		wasIdle = false;
