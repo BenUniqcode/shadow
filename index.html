@@ -96,7 +96,7 @@
 		}
 		
 		.discospace {
-			height: 760px;
+			height: 1080px; /* Full projection height so it lights trees and controls too */
 		}
 
 		#area-space .slider {
@@ -202,13 +202,12 @@
 		}
 
 		#arrowUp {
-			/* It's a 1080px screen but a 760px image, so bars of 160px top and bottom */
-			top: 220px;
+			top: 170px;
 			left: calc(50vw - 25px); /* Image is 50px wide */
 		}
 
 		#arrowDn {
-			bottom: 220px;
+			top: 850px;
 			left: calc(50vw - 25px); /* Image is 50px wide */
 		}
 		#arrowDn.moving {
@@ -325,6 +324,7 @@
 			</div>
 		</div>
 		<div id="area-disco" style="display: none">
+			<!-- No slider in here, we want it to be the full projection height so it does funky colours on the trees and controls too -->
 			<div class="discospace">
 				<!-- Nothing here, it's done in JS -->
 				<!-- discospace instead of slider ensures no movement, but right height -->

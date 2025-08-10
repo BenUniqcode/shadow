@@ -184,7 +184,6 @@ var haveWebkitEvents = 'WebKitGamepadEvent' in window;
 var controller;
 
 var dbgOut = "";
-var lastDbgOut = "";
 var elDbg = document.getElementById("debug");
 var elArrowDn = document.getElementById("arrowDn");
 var elArrowUp = document.getElementById("arrowUp");
@@ -200,6 +199,7 @@ if (elDbg.style.display == "none") {
 		if (elDbg.innerHTML != str) {
 			elDbg.innerHTML = str;
 		}
+		dbgOut = "";
 	}
 };
 
@@ -787,7 +787,7 @@ function changeArea(destArea, destX) {
 		move();
 		calculatePermittedVertical();
 		everything.classList.replace("fadeOut", "fadeIn");
-		if (destArea == "hell") {
+		if (destArea == "hell" || destArea == "disco") {
 			hideBars();
 		} else {
 			showBars();
@@ -815,6 +815,7 @@ function changeArea(destArea, destX) {
 				elArrowDn.classList.remove("moving");
 				elArrowDn.style.bottom = "220px";
 				elArrowDn.style.left = "50vw";
+				showBars();
 			}
 		}
 	}, swapTime);
@@ -1060,8 +1061,6 @@ function processActions(raf = true, forceOutput = false) {
 		return;
 	}
 
-	lastDbgOut = dbgOut;
-	dbgOut = "";
 	// Keep track of progress through Konami. To ensure that only discrete movements advance the pattern,
 	// we only step to the next one when entering the correct state from a "nothing pressed" state
 	if (wasIdle) {
@@ -1148,9 +1147,7 @@ function processActions(raf = true, forceOutput = false) {
 	}
 
 	// Output the debug messages only if they've changed
-	if (dbgOut != lastDbgOut) {
-		dbg(dbgOut);
-	}
+	dbg(dbgOut);
 
 	// If using only keyboard control, we need to loop this function so that holding a key down has the right effect
 	// but with a delay or it moves much faster than the joystick. 
