@@ -861,19 +861,23 @@ function move() {
 	if (!slider) {
 		return;
 	}
-	slider.style.marginLeft = -centerX + SCREEN_WIDTH / 2 + "px";
 	if (XLOOP[curArea]) {
 		// If we are in a forever scrolling area, ensure at least two images are present to the left and right of the currently-centred one.
+		// (It may not yet be actually centred on the screen, but it's the one that *will* be when we set the margin, because centerX points to it)
 		// (In the case of the sea areas, which only have 2 images per level, this requires having multiple copies of the images alternating in the HTML)
 		let container = document.querySelector("#area-" + curArea + " .slider .flexbox");
 		let images = container.querySelectorAll("img");
 		let centerImagePos = getCenterImagePos();
 		if (centerImagePos < 2) {
+			console.log("Rotate right to ensure 2 images on left");
 			rotateLoopImagesRight(curArea);
 		} else if (centerImagePos > images.length - 3) {
+			console.log("Rotate left to ensure 2 images on right");
 			rotateLoopImagesLeft(curArea);
 		}
 	}
+	// Don't set the marginLeft until after the images have been rearranged, to avoid jumping around
+	slider.style.marginLeft = -centerX + SCREEN_WIDTH / 2 + "px";
 }
 
 function moveLeft() {
