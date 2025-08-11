@@ -49,6 +49,10 @@ const BLACKHOLE_GRAVITY = 10 ** 3;
 const WASHING_MACHINE_WIDTH = 189;
 const WASHING_MACHINE_HEIGHT = 237;
 
+// How close do we need to be to the edge of an XY area that has an exit, to see the arrow, and then to actually take the exit
+const XY_ARROW_PROXIMITY = 25;
+const XY_EXIT_PROXIMITY = 2;
+
 const SCROLL_ANIMATION_OPTIONS = {
 	duration: 200,
 	fill: 'forwards', // Stay in the final position instead of springing back
@@ -56,9 +60,6 @@ const SCROLL_ANIMATION_OPTIONS = {
 
 // Width of each image in multi-image areas like main, dragon, giant, and pirate
 const STANDARD_IMAGE_WIDTH = 1351;
-
-// Height of space image
-const SPACE_IMAGE_HEIGHT = 2000;
 
 // Total widths of each Area
 const WIDTH = {
@@ -70,18 +71,27 @@ const WIDTH = {
 	"pirate": 5 * STANDARD_IMAGE_WIDTH,
 	"skyworld": 7853,
 	"space": 5760,
+	"undersea": 2400, // Although undersea is nominally only one screen width, it needs to be wider so that images don't suddenly appear on the right as we move because they can't appear until their own width will fit
 };
 
+// Heights of areas with XY movement
 const HEIGHT = {
 	"space": 2000,
+	"undersea": 2280,
 };
 
 // Which areas loop around horizontally?
+// undersea doesn't count as we don't actually move horizontally at all, we just move its overlaid images
 const XLOOP = {
 	"main": true,
-	"sea-upper": true,
-	"sea-lower": true,
 };
+
+// Undersea objects and their starting offset X positions relative to the middle of the screen.
+// These will change mod SCREEN_WIDTH as we move left and right
+const UNDERSEA_OBJECTS = {
+	"chain": -100,
+	"crab": 600,
+}
 
 // These are the horizontal positions in each Area from where we can go up (1) or down (-1) to a different Area (or both)
 // If our position is within a certain distance of such a place, the arrow will appear and going up/down is allowed.
@@ -94,9 +104,6 @@ const XLOOP = {
 // Better to explicitly state all transitions in all directions.
 const TRANSITIONS = {
 	"main": [
-		// Because of main's looping, these will not be used as actual centerX values, but translated into imagenum,offset
-		// Same goes for re-entry points to main.
-		// Other levels aren't affected and the number is just the centerX value.
 		[2500, -1, "pirate", 3400],
 		[7420, -1, "pirate", 5795],
 		[7420, 1, "disco", 675],
@@ -105,7 +112,7 @@ const TRANSITIONS = {
 		[13850, 1, "giant", 2000],
 		[16680, -1, "dragon", 2040],
 		[18200, 1, "skyworld", 6700],
-		[23800, -1, "sea-upper", 750],
+		[23800, -1, "undersea", 960],
 	],
 	"disco": [
 		[675, -1, "main", 7420],
@@ -127,22 +134,6 @@ const TRANSITIONS = {
 		[3400, 1, "main", 2500],
 		[6000, 1, "main", 7420],
 	],
-	"sea-upper": [
-		[1000, 1, "main", 23800],
-		[1000, -1, "sea-lower", 1000],
-		[2000, 1, "main", 23800],
-		[2000, -1, "sea-lower", 2000],
-		[3000, 1, "main", 23800],
-		[3000, -1, "sea-lower", 3000],
-		[4000, 1, "main", 23800],
-		[4000, -1, "sea-lower", 4000],
-	],
-	"sea-lower": [
-		[1000, 1, "sea-upper", 1000],
-		[2000, 1, "sea-upper", 2000],
-		[3000, 1, "sea-upper", 3000],
-		[4000, 1, "sea-upper", 4000],
-	],
 	"skyworld": [
 		[1240, -1, "main", 12240], // Goes back DOWN to main even though we came DOWN from there
 		[6700, -1, "main", 18200],
@@ -151,6 +142,9 @@ const TRANSITIONS = {
 	"space": [
 		[4800, -1, "skyworld", 6700],
 		// Space can also be exited via Black Hole
+	],
+	"undersea": [
+		[960, 1, "main", 23800],
 	],
 
 };
@@ -374,6 +368,11 @@ function keydown(e) {
 			} else {
 				changeArea("space", 4800);
 			}
+			break;
+		case 'u':
+			// Debugging for undersea
+			e.preventDefault();
+			changeArea("undersea", 960);
 			break;
 		case 'g':
 			e.preventDefault();
@@ -732,17 +731,18 @@ function calculatePermittedVertical() {
 			canMove = true;
 			if (direction < 0) {
 				if (curArea == "space") {
+					// Need to be close to the bottom of the image in order to exit
 					// Some slop is needed for the value of centerY anyway, as it never quite reaches 1620
-					// So we make the exit  available within 5px of the bottom, but show the arrow for 25px
+					// So we make the exit take effect within 2px of the bottom, but show the arrow for 25px
 					let proximityToBottom = HEIGHT["space"] - HALF_SCREEN_HEIGHT - centerY;
-					if (proximityToBottom < 25) {
+					if (proximityToBottom <= XY_ARROW_PROXIMITY) {
 						elArrowDn.classList.remove("hidden");
 						spaceProximityArrow = true; // Prevent it from being rehidden if the movement is not actually allowed yet
-						if (proximityToBottom >= 5) {
+						if (proximityToBottom >= XY_EXIT_PROXIMITY) {
 							dbgOut += "<br>Transition Point " + i + " vertical proximity is within arrow range but not exit range";
 						}
 					} 
-					if (proximityToBottom < 5) {
+					if (proximityToBottom <= XY_EXIT_PROXIMITY) {
 						dbgOut += "<br>Transition Point " + i + " in range - can go DOWN to " + destArea + ":" + destX + "<br>";
 						permittedVertical[DOWN] = [destArea, destX];
 					}
@@ -752,9 +752,25 @@ function calculatePermittedVertical() {
 					permittedVertical[DOWN] = [destArea, destX];
 				}
 			} else if (direction > 0) {
-				dbgOut += "<br>Transition Point " + i + " in range - can go UP to " + destArea + ":" + destX + "<br>";
-				elArrowUp.classList.remove("hidden");
-				permittedVertical[UP] = [destArea, destX];
+				if (curArea == "undersea") {
+					// Similar to space, but the exit is at the top
+					let proximityToTop = centerY - HALF_SCREEN_HEIGHT;
+					if (proximityToTop <= XY_ARROW_PROXIMITY) {
+						elArrowUp.classList.remove("hidden");
+						underseaProximityArrow = true; // Prevent it from being rehidden if the movement is not actually allowed yet
+						if (proximityToTop > XY_EXIT_PROXIMITY) {
+							dbgOut += "<br>Transition Point " + i + " vertical proximity is within arrow range but not exit range";
+						}
+					}
+					if (proximityToTop <= XY_EXIT_PROXIMITY) {
+						dbgOut += "<br>Transition Point " + i + " in range - can go DOWN to " + destArea + ":" + destX + "<br>";
+						permittedVertical[UP] = [destArea, destX];
+					}
+				} else {
+					dbgOut += "<br>Transition Point " + i + " in range - can go UP to " + destArea + ":" + destX + "<br>";
+					elArrowUp.classList.remove("hidden");
+					permittedVertical[UP] = [destArea, destX];
+				}
 			} else {
 				console.log("Invalid direction value");
 			}
@@ -823,6 +839,10 @@ function changeArea(destArea, destX) {
 		if (destArea == "space") {
 			// Space is 2D. As we're coming in from the bottom, we need to start at the bottom of the image.
 			centerY = HEIGHT["space"] - HALF_SCREEN_HEIGHT;
+		} else if (destArea == "undersea") {
+			// Also 2D but we come in from the top
+			centerY = HALF_SCREEN_HEIGHT;
+			moveUnderseaObjects();
 		} else {
 			centerY = HALF_SCREEN_HEIGHT; // Ignored, but set it to what it should be
 		}
@@ -914,6 +934,13 @@ function rotateLoopImagesLeft(area) {
 	centerX -= STANDARD_IMAGE_WIDTH;
 }
 
+// Place the undersea objects based on the current value of centerX
+function moveUnderseaObjects() {
+	for (const [key, value] of Object.entries(UNDERSEA_OBJECTS)) {
+		document.getElementById(key).style.left = ((value + centerX) % WIDTH["undersea"]) + "px";
+	}
+}
+
 function move() {
 	// Not all areas have a slider; if not, it's a full-screen level with no left/right movement allowed
 	let slider = document.querySelector("#area-" + curArea + " .slider");
@@ -942,10 +969,13 @@ function move() {
 			console.log("Centre Image is now position " + centerImagePos + " and is image number " + getLoopImageNum(curArea, images[centerImagePos]));
 		}
 	}
-	// Don't set the marginLeft until after the images have been rearranged, to avoid jumping around
-	slider.style.marginLeft = -centerX + HALF_SCREEN_WIDTH + "px";
+	// Don't set the margins until after the images have been rearranged, to avoid jumping around
+	if (curArea != "undersea") {
+		slider.style.marginLeft = -centerX + HALF_SCREEN_WIDTH + "px";
+	}
 	let xyslider = document.querySelector("#area-" + curArea + " .xyslider");
 	if (xyslider) {
+		console.log("Setting xyslider");
 		xyslider.style.marginTop = -centerY + HALF_SCREEN_HEIGHT + BAR_HEIGHT + "px";
 	}
 }
@@ -957,6 +987,15 @@ function moveLeft() {
 		return;
 	}
 	centerX -= scrollSpeed;
+	// Special handling for undersea
+	if (curArea == "undersea") {
+		// Wrap around if we hit the left edge
+		if (centerX < 0) {
+			centerX = WIDTH["undersea"] - centerX;
+		}
+		moveUnderseaObjects();
+		return;
+	} 
 	if (!XLOOP[curArea] && centerX - HALF_SCREEN_WIDTH < 0) {
 		// Other areas must not scroll past the left edge
 		centerX = HALF_SCREEN_WIDTH; 
@@ -972,6 +1011,15 @@ function moveRight() {
 	}
 	// Right
 	centerX += scrollSpeed;
+	// Special handling for undersea
+	if (curArea == "undersea") {
+		// Wrap around if we hit the right edge
+		if (centerX > WIDTH["undersea"]) {
+			centerX -= WIDTH["undersea"];
+		}
+		moveUnderseaObjects();
+		return;
+	} 
 	let maxScroll = WIDTH[curArea] - HALF_SCREEN_WIDTH;
 	if (!XLOOP[curArea] && centerX > maxScroll) {
 		// Other areas must not scroll past the right edge
@@ -982,6 +1030,7 @@ function moveRight() {
 
 function moveUp() {
 	// Only allow for xy areas
+	// Apparently can't use .slider.xy to match on two classes: "not a valid selector!"
 	let slider = document.querySelector("#area-" + curArea + " .xyslider");
 	if (!slider) {
 		return;
@@ -997,7 +1046,7 @@ function moveUp() {
 
 function moveDown() {
 	// Only allow for xy areas
-	let slider = document.querySelector("#area-" + curArea + " .xyslider"); // Apparently can't use .slider.xy to match on two classes: "not a valid selector!"
+	let slider = document.querySelector("#area-" + curArea + " .xyslider"); 
 	if (!slider) {
 		return;
 	}
@@ -1182,8 +1231,8 @@ function processActions(raf = true, forceOutput = false) {
 			// Clear any previous dbg messages
 			dbgOut = "<b>Going " + (direction > 0 ? "UP" : "DOWN") + "</b>";
 			changeArea(destArea, destX);
-		} else if (curArea == "space") {
-			// space also allows up/down movement within the area. Do this only if no exit was taken.
+		} else if (HEIGHT[curArea]) {
+			// XY areas also allow up/down movement within the area. Do this only if no exit was taken.
 			if (isOn[UP]) {
 				moveUp();
 			}
@@ -1202,7 +1251,7 @@ function processActions(raf = true, forceOutput = false) {
 	// but with a delay or it moves much faster than the joystick. 
 	if (raf) {
 		clearTimeout(raftimer);
-		if (curArea != "space") {
+		if (!HEIGHT[curArea]) {
 			// When using up and down for area transitions, we don't want them to repeat, so inject a keyup.
 			if (isOn[UP]) {
 				keyup({ code: "ArrowUp", preventDefault: () => { } });

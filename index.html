@@ -197,6 +197,26 @@
 
 		}
 
+		#undersea-container {
+			width: 2400px; 
+			height: 2280px; 
+			background: linear-gradient(0deg, rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 35%, rgba(0, 157, 255, 1) 100%);
+		}
+
+		#area-undersea img {
+			position: absolute;
+		}
+
+		/* Each object has it's top specified here, but left is handled dynamically in the script as it will move as we move left and right */
+		#area-undersea #crab {
+			top: 500px;
+		}
+
+		#area-undersea #chain {
+			top: 10px;
+			height: 2200px;
+		}
+
 		@keyframes arrowpulse {
 			0% {
 				transform-origin: center;
@@ -389,39 +409,11 @@
 				</div>
 			</div>
 		</div>
-		<div id="area-sea-upper" style="display: none">
-			<div class="slider">
-				<div class="flexbox">
-					<div class="imgbox"><!-- The sea needs imgbox because looping needs it, and we might want to overlay creatures -->
-						<img id="sea-upper1" src="images/2025/sea_upper/1.png">
-					</div>
-					<div class="imgbox">
-						<img id="sea-upper2" src="images/2025/sea_upper/2.png">
-					</div>
-					<div class="imgbox">
-						<img id="sea-upper3" src="images/2025/sea_upper/1.png">
-					</div>
-					<div class="imgbox">
-						<img id="sea-upper4" src="images/2025/sea_upper/2.png">
-					</div>
-				</div>
-			</div>
-		</div>
-		<div id="area-sea-lower" style="display: none">
-			<div class="slider">
-				<div class="flexbox">
-					<div class="imgbox">
-						<img id="sea-lower1" src="images/2025/sea_lower/1.png">
-					</div>
-					<div class="imgbox">
-						<img id="sea-lower2" src="images/2025/sea_lower/2.png">
-					</div>
-					<div class="imgbox">
-						<img id="sea-lower3" src="images/2025/sea_lower/1.png">
-					</div>
-					<div class="imgbox">
-						<img id="sea-lower4" src="images/2025/sea_lower/2.png">
-					</div>
+		<div id="area-undersea" style="display: none">
+			<div class="slider xyslider">
+				<div id="undersea-container">
+					<img id="crab" src="images/2025/undersea/crab.png">
+					<img id="chain" src="images/2025/undersea/chain_and_anchor.png"<
 				</div>
 			</div>
 		</div>
