@@ -201,7 +201,6 @@ if (elDbg.style.display == "none") {
 		if (elDbg.innerHTML != str) {
 			elDbg.innerHTML = str;
 		}
-		dbgOut = "";
 	}
 };
 
@@ -739,7 +738,10 @@ function calculatePermittedVertical() {
 					if (proximityToBottom < 25) {
 						elArrowDn.classList.remove("hidden");
 						spaceProximityArrow = true; // Prevent it from being rehidden if the movement is not actually allowed yet
-					}
+						if (proximityToBottom >= 5) {
+							dbgOut += "<br>Transition Point " + i + " vertical proximity is within arrow range but not exit range";
+						}
+					} 
 					if (proximityToBottom < 5) {
 						dbgOut += "<br>Transition Point " + i + " in range - can go DOWN to " + destArea + ":" + destX + "<br>";
 						permittedVertical[DOWN] = [destArea, destX];
@@ -1089,6 +1091,7 @@ function processActions(raf = true, forceOutput = false) {
 			centerX = BLACKHOLEX;
 		}
 		move();
+		forceOutput = true; // Ensure exit arrows are updated as we move
 	}
 
 	// If inputs are currently blocked there won't be anything else to do, so set raf if required and return
@@ -1121,13 +1124,15 @@ function processActions(raf = true, forceOutput = false) {
 		}
 	}
 
-	dbgOut += "Area: " + curArea + "<br>";
-	dbgOut += "centerX: " + centerX + "<br>";
-	dbgOut += "centerY: " + centerY + "<br>";
-
-	if (!anyInputOn && !forceOutput) {
+	if (!anyInputOn) {
 		wasIdle = true;
-	} else {
+	}
+	if (anyInputOn || forceOutput) {
+		dbgOut = "";
+		dbgOut += "Area: " + curArea + "<br>";
+		dbgOut += "centerX: " + centerX + "<br>";
+		dbgOut += "centerY: " + centerY + "<br>";
+
 		// Handle left/right movement
 		if (isOn[LEFT]) {
 			// Left (or is it right?)
@@ -1188,10 +1193,10 @@ function processActions(raf = true, forceOutput = false) {
 			}
 		}
 		wasIdle = false;
-	}
+		// Output the debug messages only if they've changed
+		dbg(dbgOut);
 
-	// Output the debug messages only if they've changed
-	dbg(dbgOut);
+	}
 
 	// If using only keyboard control, we need to loop this function so that holding a key down has the right effect
 	// but with a delay or it moves much faster than the joystick. 
