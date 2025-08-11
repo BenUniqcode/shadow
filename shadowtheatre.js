@@ -98,14 +98,14 @@ const TRANSITIONS = {
 		// Same goes for re-entry points to main.
 		// Other levels aren't affected and the number is just the centerX value.
 		[2500, -1, "pirate", 3400],
-		[7420, -1, "pirate", 6000],
+		[7420, -1, "pirate", 5795],
 		[7420, 1, "disco", 675],
 		[11000, 1, "hug", 1200],
 		[12240, -1, "skyworld", 1240], // NB Mario tube, goes DOWN but to a world that is UP from elsewhere in the map
 		[13850, 1, "giant", 2000],
 		[16680, -1, "dragon", 2040],
-		[18200, 1, "skyworld", 6900],
-		[25000, -1, "sea-upper", 750],
+		[18200, 1, "skyworld", 6700],
+		[23800, -1, "sea-upper", 750],
 	],
 	"disco": [
 		[675, -1, "main", 7420],
@@ -128,13 +128,13 @@ const TRANSITIONS = {
 		[6000, 1, "main", 7420],
 	],
 	"sea-upper": [
-		[1000, 1, "main", 25000],
+		[1000, 1, "main", 23800],
 		[1000, -1, "sea-lower", 1000],
-		[2000, 1, "main", 25000],
+		[2000, 1, "main", 23800],
 		[2000, -1, "sea-lower", 2000],
-		[3000, 1, "main", 25000],
+		[3000, 1, "main", 23800],
 		[3000, -1, "sea-lower", 3000],
-		[4000, 1, "main", 25000],
+		[4000, 1, "main", 23800],
 		[4000, -1, "sea-lower", 4000],
 	],
 	"sea-lower": [
@@ -145,11 +145,11 @@ const TRANSITIONS = {
 	],
 	"skyworld": [
 		[1240, -1, "main", 12240], // Goes back DOWN to main even though we came DOWN from there
-		[6900, -1, "main", 18200],
-		[6900, 1, "space", 4800],
+		[6700, -1, "main", 18200],
+		[6700, 1, "space", 4800],
 	],
 	"space": [
-		[4800, -1, "skyworld", 6900],
+		[4800, -1, "skyworld", 6700],
 		// Space can also be exited via Black Hole
 	],
 
