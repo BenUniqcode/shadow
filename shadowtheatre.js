@@ -168,6 +168,7 @@ var hudFader;
 var konamiPos = 0; // Current position in the Konami code
 var wasIdle = true; // Whether no inputs were read on the last run through - for Konami discretisation
 var gravityEnabled = true; // Whether gravity is enabled in space
+var animationEnabled = true; // Whether animations such as spinning cogs are enabled
 
 // Whether to reverse left and right inputs. Press "X" on keyboard to toggle. Useful if the image 
 // is horizontally flipped for back-projection (didn't have to do that in 2023 because there was no text)
@@ -344,40 +345,63 @@ function keydown(e) {
 		isOn[i] = 1;
 		anyInputOn |= isOn[i];
 		rAF(processActions);
-	} else if (e.key == 'X' || e.key == 'x') {
-		e.preventDefault();
-		console.log("Reversing the polarity");
-		reverseLeftRight = !reverseLeftRight;
-		console.log(reverseLeftRight);
-	} else if (e.key == 'S' || e.key == 's') {
-		e.preventDefault();
-		scrollSpeed = Math.max(SCROLLSPEED_MIN, --scrollSpeed);
-		showHud("Scroll speed: " + scrollSpeed, 500);
-	} else if (e.key == 'F' || e.key == 'f') {
-		e.preventDefault();
-		scrollSpeed = Math.min(SCROLLSPEED_MAX, ++scrollSpeed);
-		showHud("Scroll speed: " + scrollSpeed, 500);
-	} else if (e.key == 'E' || e.key == 'e') {
-		e.preventDefault();
-		easterEgg();
-	} else if (e.key == 'Z' || e.key == 'z') {
-		// Debugging for space and teleportation
-		e.preventDefault();
-		if (curArea == "space") {
-			teleport();
-		} else {
-			changeArea("space", 4800);
-		}
-	} else if (e.key == 'G' || e.key == 'g') {
-		e.preventDefault();
-		if (curArea == "space") {
-			if (gravityEnabled) {
-				console.log("Switching gravity OFF");
-				gravityEnabled = false;
+	} else {
+		switch(e.key.toLowerCase()) {
+		case 'x':
+			e.preventDefault();
+			console.log("Reversing the polarity");
+			reverseLeftRight = !reverseLeftRight;
+			console.log(reverseLeftRight);
+			break;
+		case 's':
+			e.preventDefault();
+			scrollSpeed = Math.max(SCROLLSPEED_MIN, --scrollSpeed);
+			showHud("Scroll speed: " + scrollSpeed, 500);
+			break;
+		case 'f':
+			e.preventDefault();
+			scrollSpeed = Math.min(SCROLLSPEED_MAX, ++scrollSpeed);
+			showHud("Scroll speed: " + scrollSpeed, 500);
+			break;
+		case 'e':
+			e.preventDefault();
+			easterEgg();
+			break;
+		case 'z':
+			// Debugging for space and teleportation
+			e.preventDefault();
+			if (curArea == "space") {
+				teleport();
 			} else {
-				console.log("Switching gravity ON");
-				gravityEnabled = true;
+				changeArea("space", 4800);
 			}
+			break;
+		case 'g':
+			e.preventDefault();
+			if (curArea == "space") {
+				if (gravityEnabled) {
+					console.log("Switching gravity OFF");
+					gravityEnabled = false;
+				} else {
+					console.log("Switching gravity ON");
+					gravityEnabled = true;
+				}
+			}
+			break;
+		case 'a':
+			e.preventDefault();
+			if (animationEnabled) {
+				document.querySelectorAll('img.spin').forEach((el) => {
+					el.classList.replace("spin", "canSpin");
+				});
+				animationEnabled = false;
+			} else {
+				document.querySelectorAll("img.canSpin").forEach((el) => {
+					el.classList.replace("canSpin", "spin");
+				});
+				animationEnabled = true;
+			}
+			break;
 		}
 	}
 }

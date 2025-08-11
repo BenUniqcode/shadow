@@ -24,6 +24,25 @@
 			width: 1920px;
 		}
 
+		#cog {
+			position: absolute;
+			z-index: 20;
+			/* Must be positioned from top left in order to stay in the same place relative to background. bottom/right makes it stay
+			   in one place relative to the screen */
+			top: 1480px;
+			left: 3500px;
+		}
+
+		.spin {
+			animation: spin 4s linear infinite;
+		}
+
+		@keyframes spin {
+			100% {
+				transform: rotate(360deg);
+			}
+		}
+
 		#washingMachine {
 			position: absolute;
 			z-index: 20;
@@ -74,6 +93,7 @@
 			width: 100%;
 			height: 160px;
 			left: 0;
+			z-index: 50;
 		}
 		#blackBarTop {
 			top: 0;
@@ -99,18 +119,17 @@
 			height: 1080px; /* Full projection height so it lights trees and controls too */
 		}
 
-		#area-space .slider {
-			overflow-y: visible;
-			height: auto;
-		}
-
 		.slider .flexbox {
 			display: flex;
 			height: 760px;
 		}
 
-		.slider .flexbox .imgbox {
-			position: relative; /* Allow fixed positioning of washing machine that will move when the background moves */
+		.slider .flexbox .imgbox, .xyslider {
+			position: relative; /* Allow fixed positioning of overlaid images that will stay in the same position relative to the background as it moves */
+		}
+
+		.xyslider {
+			height: auto !important;
 		}
 
 		#debug {
@@ -139,7 +158,7 @@
 			font-size: 48px;
 			text-align: center;
 			font-weight: bold;
-			z-index: 11;
+			z-index: 40;
 			box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);
 		}
 
@@ -365,7 +384,8 @@
 		</div>
 		<div id="area-space" style="display: none">
 			<div class="slider xyslider">
-				<img src="images/2025/space/space2.3.5.png">
+				<img src="images/2025/space/space.png">
+				<img id="cog" src="images/2025/space/cog.png" class="spin">
 			</div>
 		</div>
 		<div id="area-hug" style="display: none">
