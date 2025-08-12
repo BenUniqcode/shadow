@@ -284,7 +284,7 @@ function readGamepad() {
 	anyInputOn = false;
 
 	for (var i = 0; i < controller.axes.length; i++) {
-		//dbgOut += "Axis " + i + " value " + controller.axes[i] + "<br>";
+		//dbgOut += "<br>Axis " + i + " value " + controller.axes[i];
 	}
 	if (controller.axes[0] > 0.5) {
 		isOn[DOWN] = 1;
@@ -321,7 +321,7 @@ function readGamepad() {
 		} else {
 			isPressed = val == 1.0;
 		}
-		//dbgOut += i + ": " + (isPressed ? "pressed " : "") + (isTouched ? "touched" : "") + "<br>";
+		//dbgOut += "<br>" + i + ": " + (isPressed ? "pressed " : "") + (isTouched ? "touched" : "");
 		// Store the button state in its own slot first
 		isOn[i + 4] = isPressed | isTouched;
 		anyInputOn |= isOn[i + 4];
@@ -754,11 +754,11 @@ function calculatePermittedVertical() {
 						}
 					} 
 					if (proximityToBottom <= XY_EXIT_PROXIMITY) {
-						dbgOut += "<br>Exit " + i + " in range - can go DOWN to " + destArea + ":" + destX + "<br>";
+						dbgOut += "<br>Exit " + i + " in range - can go DOWN to " + destArea + ":" + destX;
 						permittedVertical[DOWN] = [destArea, destX];
 					}
 				} else {
-					dbgOut += "<br>Exit " + i + " in range - can go DOWN to " + destArea + ":" + destX + "<br>";
+					dbgOut += "<br>Exit " + i + " in range - can go DOWN to " + destArea + ":" + destX;
 					elArrowDn.classList.remove("hidden");
 					permittedVertical[DOWN] = [destArea, destX];
 				}
@@ -774,11 +774,11 @@ function calculatePermittedVertical() {
 						}
 					}
 					if (proximityToTop <= XY_EXIT_PROXIMITY) {
-						dbgOut += "<br>Exit " + i + " in range - can go UP to " + destArea + ":" + destX + "<br>";
+						dbgOut += "<br>Exit " + i + " in range - can go UP to " + destArea + ":" + destX;
 						permittedVertical[UP] = [destArea, destX];
 					}
 				} else {
-					dbgOut += "<br>Exit " + i + " in range - can go UP to " + destArea + ":" + destX + "<br>";
+					dbgOut += "<br>Exit " + i + " in range - can go UP to " + destArea + ":" + destX;
 					elArrowUp.classList.remove("hidden");
 					permittedVertical[UP] = [destArea, destX];
 				}
@@ -802,7 +802,7 @@ function changeArea(destArea, destX) {
 	let elNewArea = document.getElementById("area-" + destArea);
 	// Set location to the new area and pos
 	dbgOut += "<br>Moving from " + curArea + ":" + centerX;
-	dbgOut += "<br>to " + destArea + ":" + destX + "<br>";
+	dbgOut += "<br>to " + destArea + ":" + destX;
 	if (XLOOP[destArea]) {
 		// Can't easily move to a specific image, so we don't bother trying; the old centerX offset will work fine,
 		// BUT we must ensure the images are in their original order. So rotate left the correct number of times if necessary.
