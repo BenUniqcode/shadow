@@ -202,7 +202,7 @@ if (elDbg.style.display == "none") {
 } else {
 	dbg = (str) => {
 		if (elDbg.innerHTML != str) {
-			elDbg.innerHTML = str;
+			elDbg.innerHTML = str + (inputsBlocked ? "<br>inputsBlocked" : "");
 		}
 	}
 };
@@ -1119,6 +1119,7 @@ function processActions(raf = true, forceOutput = false) {
 		if (centerX == BLACKHOLEX && centerY == BLACKHOLEY) {
 			// Exit to a random location on main
 			teleport();
+			processActionsMutex = false;
 			return;
 		}
 		// Apply Black Hole gravity to space
