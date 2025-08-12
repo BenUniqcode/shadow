@@ -50,7 +50,7 @@ const WASHING_MACHINE_WIDTH = 189;
 const WASHING_MACHINE_HEIGHT = 237;
 
 // How close do we need to be to the edge of an XY area that has an exit, to see the arrow, and then to actually take the exit
-const XY_ARROW_PROXIMITY = 25;
+const XY_ARROW_PROXIMITY = 150;
 const XY_EXIT_PROXIMITY = 2;
 
 const SCROLL_ANIMATION_OPTIONS = {
@@ -713,8 +713,9 @@ function calculatePermittedVertical() {
 	let canMove = false;
 	let trans = TRANSITIONS[curArea];
 	permittedVertical[DOWN] = permittedVertical[UP] = 0;
-	// We don't want to change centerX, so use xpos in this function
-	let xpos;
+	// We don't want to change centerX (or use it) for XLOOP levels as it's relative to the current DOM image order, which might have changed
+	// What we care about here is the "old" or "true" centerX value  
+	let trueCenterX;
 	if (XLOOP[curArea]) {
 		// Translate the current image closest to the center of the screen, and its center position, into the old-style centerX value
 		let centerImage = getCenterImage();
@@ -723,17 +724,18 @@ function calculatePermittedVertical() {
 		let imageCenterXpos = Math.floor(boundingRect.right - STANDARD_IMAGE_WIDTH / 2);
 		// But the image position goes the opposite way than the x position we want, so we actually want screenwidth - centrexpos as the offset
 		let imageCenterXrev = 1920 - imageCenterXpos;
-		xpos = (centerImageNum - 1) * STANDARD_IMAGE_WIDTH + imageCenterXrev;
+		trueCenterX = (centerImageNum - 1) * STANDARD_IMAGE_WIDTH + imageCenterXrev;
 		// But it needs a fudge because something about the maths isn't quite right
-		xpos -= 250;
-		dbgOut += "<br>Image #" + centerImageNum + " is at position " + imageCenterXpos + " = revpos " + imageCenterXrev + " = old centerX of " + xpos;
+		trueCenterX -= 250;
+		dbgOut += "<br>Image #" + centerImageNum + "'s centerXpos " + imageCenterXpos + " = Xrev " + imageCenterXrev + " = centerX " + trueCenterX;
 	} else {
-		xpos = centerX;
+		trueCenterX = centerX;
 	}
 
 	let spaceProximityArrow = false;
+	let underseaProximityArrow = false;
 	for (let i = 0; i < trans.length; i++) {
-		if (Math.abs(xpos - trans[i][0]) < TRANSITION_RANGE) {
+		if (Math.abs(trueCenterX - trans[i][0]) < TRANSITION_RANGE) {
 			let direction = trans[i][1];
 			let destArea = trans[i][2];
 			let destX = trans[i][3];
@@ -748,15 +750,15 @@ function calculatePermittedVertical() {
 						elArrowDn.classList.remove("hidden");
 						spaceProximityArrow = true; // Prevent it from being rehidden if the movement is not actually allowed yet
 						if (proximityToBottom >= XY_EXIT_PROXIMITY) {
-							dbgOut += "<br>Transition Point " + i + " vertical proximity is within arrow range but not exit range";
+							dbgOut += "<br>Exit " + i + " vertical proximity is within arrow range but not exit range";
 						}
 					} 
 					if (proximityToBottom <= XY_EXIT_PROXIMITY) {
-						dbgOut += "<br>Transition Point " + i + " in range - can go DOWN to " + destArea + ":" + destX + "<br>";
+						dbgOut += "<br>Exit " + i + " in range - can go DOWN to " + destArea + ":" + destX + "<br>";
 						permittedVertical[DOWN] = [destArea, destX];
 					}
 				} else {
-					dbgOut += "<br>Transition Point " + i + " in range - can go DOWN to " + destArea + ":" + destX + "<br>";
+					dbgOut += "<br>Exit " + i + " in range - can go DOWN to " + destArea + ":" + destX + "<br>";
 					elArrowDn.classList.remove("hidden");
 					permittedVertical[DOWN] = [destArea, destX];
 				}
@@ -768,15 +770,15 @@ function calculatePermittedVertical() {
 						elArrowUp.classList.remove("hidden");
 						underseaProximityArrow = true; // Prevent it from being rehidden if the movement is not actually allowed yet
 						if (proximityToTop > XY_EXIT_PROXIMITY) {
-							dbgOut += "<br>Transition Point " + i + " vertical proximity is within arrow range but not exit range";
+							dbgOut += "<br>Exit " + i + " vertical proximity is within arrow range but not exit range";
 						}
 					}
 					if (proximityToTop <= XY_EXIT_PROXIMITY) {
-						dbgOut += "<br>Transition Point " + i + " in range - can go UP to " + destArea + ":" + destX + "<br>";
+						dbgOut += "<br>Exit " + i + " in range - can go UP to " + destArea + ":" + destX + "<br>";
 						permittedVertical[UP] = [destArea, destX];
 					}
 				} else {
-					dbgOut += "<br>Transition Point " + i + " in range - can go UP to " + destArea + ":" + destX + "<br>";
+					dbgOut += "<br>Exit " + i + " in range - can go UP to " + destArea + ":" + destX + "<br>";
 					elArrowUp.classList.remove("hidden");
 					permittedVertical[UP] = [destArea, destX];
 				}
@@ -789,7 +791,7 @@ function calculatePermittedVertical() {
 	if (!permittedVertical[DOWN] && !spaceProximityArrow) {
 		elArrowDn.classList.add("hidden");
 	}
-	if (!permittedVertical[UP]) {
+	if (!permittedVertical[UP] && !underseaProximityArrow) {
 		elArrowUp.classList.add("hidden");
 	}
 }
@@ -1187,9 +1189,9 @@ function processActions(raf = true, forceOutput = false) {
 	}
 	if (anyInputOn || forceOutput) {
 		dbgOut = "";
-		dbgOut += "Area: " + curArea + "<br>";
-		dbgOut += "centerX: " + centerX + "<br>";
-		dbgOut += "centerY: " + centerY + "<br>";
+		dbgOut += "Area: " + curArea;
+		dbgOut += "<br>centerX: " + centerX;
+		dbgOut += "<br>centerY: " + centerY;
 
 		// Handle left/right movement
 		if (isOn[LEFT]) {
@@ -1210,7 +1212,7 @@ function processActions(raf = true, forceOutput = false) {
 			}
 		}
 		if (reverseLeftRight) {
-			dbgOut += "<em>L/R Reversed</em><br>";
+			dbgOut += "<br><em>L/R Reversed</em>";
 		}
 
 		// No else here, because we can also exit from space via the DOWN direction, if we are 
@@ -1230,15 +1232,14 @@ function processActions(raf = true, forceOutput = false) {
 		}
 		// No else here, so that simultaneous up and down cancel
 		// instead of down dominating
-		if (wasIdle && permittedVertical[UP] && isOn[UP]) {
+		// Again, undersea doesn't require being idle because we want to exit from holding up
+		if (permittedVertical[UP] && isOn[UP] && (curArea == "undersea" || wasIdle)) {
 			console.log("Going up");
 			destArea = permittedVertical[UP][0];
 			destX = permittedVertical[UP][1];
 			direction += 1;
 		}
 		if (direction != 0) {
-			// Clear any previous dbg messages
-			dbgOut = "<b>Going " + (direction > 0 ? "UP" : "DOWN") + "</b>";
 			changeArea(destArea, destX);
 		} else if (HEIGHT[curArea]) {
 			// XY areas also allow up/down movement within the area. Do this only if no exit was taken.
