@@ -71,7 +71,7 @@ const WIDTH = {
 	"pirate": 5 * STANDARD_IMAGE_WIDTH,
 	"skyworld": 7853,
 	"space": 5760,
-	"undersea": 2400, // Although undersea is nominally only one screen width, it needs to be wider so that images don't suddenly appear on the right as we move because they can't appear until their own width will fit
+	"undersea": 3840, // Although undersea is nominally only one screen width, it needs to be wider so that images don't suddenly appear on the right as we move because they can't appear until their own width will fit
 };
 
 // Heights of areas with XY movement
@@ -87,10 +87,19 @@ const XLOOP = {
 };
 
 // Undersea objects and their starting offset X positions relative to the middle of the screen.
-// These will change mod SCREEN_WIDTH as we move left and right
+// These will change mod the area width as we move left and right.
+// Their initial positions need to be within -960 to 960 to prevent them from disappearing or appearing while on screen
 const UNDERSEA_OBJECTS = {
 	"chain": -100,
-	"crab": 600,
+	"crab1": 200,
+	"crab2": -200,
+	"crab3": 400,
+	"crab4": -400,
+	"crab5": 600,
+	"crab6": -600,
+	"crab7": 800,
+	"crab8": -960,
+	"crab9": 960,
 }
 
 // These are the horizontal positions in each Area from where we can go up (1) or down (-1) to a different Area (or both)
@@ -112,7 +121,7 @@ const TRANSITIONS = {
 		[13850, 1, "giant", 2000],
 		[16680, -1, "dragon", 2040],
 		[18200, 1, "skyworld", 6700],
-		[23800, -1, "undersea", 960],
+		[23800, -1, "undersea", 1920],
 	],
 	"disco": [
 		[675, -1, "main", 7420],
@@ -144,7 +153,7 @@ const TRANSITIONS = {
 		// Space can also be exited via Black Hole
 	],
 	"undersea": [
-		[960, 1, "main", 23800],
+		[1920, 1, "main", 23800],
 	],
 
 };
@@ -372,7 +381,7 @@ function keydown(e) {
 		case 'u':
 			// Debugging for undersea
 			e.preventDefault();
-			changeArea("undersea", 960);
+			changeArea("undersea", 1920);
 			break;
 		case 'g':
 			e.preventDefault();
@@ -504,10 +513,10 @@ function matrixLoop() {
 	ctx.fillStyle = '#0001';
 	ctx.fillRect(0, 0, cw, ch);
 	ctx.fillStyle = '#0c0';
-	ctx.font = '16pt monospace';
+	ctx.font = '18pt monospace';
 
 	let text = "";
-	if (Math.random() < 0.2) {
+	if (Math.random() < 0.05) {
 		text = "QUEXTAL";
 	} else {
 		for (let i = 0; i < 7; i++) { 
@@ -522,7 +531,7 @@ function matrixLoop() {
 	let i = 0;
 	ypos.forEach((y, ind) => {
 		let c = text.charAt(i);
-		const x = ind * 20;
+		const x = ind * 35;
 		ctx.fillText(c, x, y);
 		if (y > 100 + Math.random() * 10000) {
 			ypos[ind] = 0;

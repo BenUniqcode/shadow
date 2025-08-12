@@ -197,9 +197,14 @@
 
 		}
 
+		#area-undersea .xyslider {
+			margin-left: -960px; // Ensure disappearances happen offscreen
+		}
 		#undersea-container {
-			width: 2400px; 
+			/* It needs to be wider than the screen on both sides to prevent objects appearing and disappearing when they get near the screen edge */
+			width: 3840px; 
 			height: 2280px; 
+			overflow: hidden;
 			background: linear-gradient(0deg, rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 35%, rgba(0, 157, 255, 1) 100%);
 		}
 
@@ -208,8 +213,32 @@
 		}
 
 		/* Each object has it's top specified here, but left is handled dynamically in the script as it will move as we move left and right */
-		#area-undersea #crab {
+		#area-undersea #crab1 {
+			top: 200px;
+		}
+		#area-undersea #crab2 {
+			top: 400px;
+		}
+		#area-undersea #crab3 {
+			top: 300px;
+		}
+		#area-undersea #crab4 {
 			top: 500px;
+		}
+		#area-undersea #crab5 {
+			top: 400px;
+		}
+		#area-undersea #crab6 {
+			top: 600px;
+		}
+		#area-undersea #crab7 {
+			top: 400px;
+		}
+		#area-undersea #crab8 {
+			top: 300px;
+		}
+		#area-undersea #crab9 {
+			top: 200px;
 		}
 
 		#area-undersea #chain {
@@ -412,7 +441,15 @@
 		<div id="area-undersea" style="display: none">
 			<div class="slider xyslider">
 				<div id="undersea-container">
-					<img id="crab" src="images/2025/undersea/crab.png">
+					<img id="crab1" src="images/2025/undersea/crab.png">
+					<img id="crab2" src="images/2025/undersea/crab.png">
+					<img id="crab3" src="images/2025/undersea/crab.png">
+					<img id="crab4" src="images/2025/undersea/crab.png">
+					<img id="crab5" src="images/2025/undersea/crab.png">
+					<img id="crab6" src="images/2025/undersea/crab.png">
+					<img id="crab7" src="images/2025/undersea/crab.png">
+					<img id="crab8" src="images/2025/undersea/crab.png">
+					<img id="crab9" src="images/2025/undersea/crab.png">
 					<img id="chain" src="images/2025/undersea/chain_and_anchor.png"<
 				</div>
 			</div>
