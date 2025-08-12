@@ -171,7 +171,7 @@ var hudFader;
 var konamiPos = 0; // Current position in the Konami code
 var wasIdle = true; // Whether no inputs were read on the last run through - for Konami discretisation
 var gravityEnabled = true; // Whether gravity is enabled in space
-var animationEnabled = true; // Whether animations such as spinning cogs are enabled
+var animationEnabled = true; // Whether animations such as spinning cogs and moving creatures are enabled
 
 // Whether to reverse left and right inputs. Press "X" on keyboard to toggle. Useful if the image 
 // is horizontally flipped for back-projection (didn't have to do that in 2023 because there was no text)
@@ -398,13 +398,13 @@ function keydown(e) {
 		case 'a':
 			e.preventDefault();
 			if (animationEnabled) {
-				document.querySelectorAll('img.spin').forEach((el) => {
-					el.classList.replace("spin", "canSpin");
+				document.querySelectorAll('img.animate').forEach((el) => {
+					el.classList.replace("animate", "canAnimate");
 				});
 				animationEnabled = false;
 			} else {
-				document.querySelectorAll("img.canSpin").forEach((el) => {
-					el.classList.replace("canSpin", "spin");
+				document.querySelectorAll("img.canAnimate").forEach((el) => {
+					el.classList.replace("canAnimate", "animate");
 				});
 				animationEnabled = true;
 			}

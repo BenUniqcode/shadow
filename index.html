@@ -33,13 +33,14 @@
 			left: 3500px;
 		}
 
+		/* Objects that can be continously animated must have the "animate" class, as well as a class to define the type of animation */
+		/* This allows all animations to be switched on or off by swapping out one class */
 		@keyframes spin {
 			100% {
 				transform: rotate(360deg);
 			}
 		}
-
-		.spin {
+		.animate.spin {
 			animation: spin 4s linear infinite;
 		}
 
@@ -60,16 +61,13 @@
 				transform: translate(0px, 10px) rotate(10deg);
 			}
 		}
-		
-		.moveAround1 {
-			animation: moveAround 4s linear infinite;
+		.animate.moveAround1 {
+			animation: moveAround 4s ease-in-out infinite;
 		}
-
-		.moveAround2 {
+		.animate.moveAround2 {
 			animation: moveAround 6s linear infinite;
 		}
-
-		.moveAround3 {
+		.animate.moveAround3 {
 			animation: moveAround 2s linear infinite;
 		}
 
@@ -458,7 +456,7 @@
 		<div id="area-space" style="display: none">
 			<div class="slider xyslider">
 				<img src="images/2025/space/space.png">
-				<img id="cog" src="images/2025/space/cog.png" class="spin">
+				<img id="cog" src="images/2025/space/cog.png" class="animate spin">
 			</div>
 		</div>
 		<div id="area-hug" style="display: none">
@@ -471,11 +469,11 @@
 		<div id="area-undersea" style="display: none">
 			<div class="slider xyslider">
 				<div id="undersea-container">
-					<img id="crab1" src="images/2025/undersea/crab.png" class="moveAround1">
-					<img id="crab2" src="images/2025/undersea/crab.png" class="moveAround2">
-					<img id="crab3" src="images/2025/undersea/crab.png" class="moveAround3">
-					<img id="crab4" src="images/2025/undersea/crab.png" class="moveAround1">
-					<img id="crab5" src="images/2025/undersea/crab.png" class="moveAround2">
+					<img id="crab1" src="images/2025/undersea/crab.png" class="animate moveAround1">
+					<img id="crab2" src="images/2025/undersea/crab.png" class="animate moveAround2">
+					<img id="crab3" src="images/2025/undersea/crab.png" class="animate moveAround3">
+					<img id="crab4" src="images/2025/undersea/crab.png">
+					<img id="crab5" src="images/2025/undersea/crab.png">
 					<img id="crab6" src="images/2025/undersea/crab.png">
 					<img id="crab7" src="images/2025/undersea/crab.png">
 					<img id="crab8" src="images/2025/undersea/crab.png">
