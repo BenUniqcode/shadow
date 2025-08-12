@@ -772,7 +772,7 @@ function calculatePermittedVertical() {
 						}
 					}
 					if (proximityToTop <= XY_EXIT_PROXIMITY) {
-						dbgOut += "<br>Transition Point " + i + " in range - can go DOWN to " + destArea + ":" + destX + "<br>";
+						dbgOut += "<br>Transition Point " + i + " in range - can go UP to " + destArea + ":" + destX + "<br>";
 						permittedVertical[UP] = [destArea, destX];
 					}
 				} else {

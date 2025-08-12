@@ -33,14 +33,44 @@
 			left: 3500px;
 		}
 
-		.spin {
-			animation: spin 4s linear infinite;
-		}
-
 		@keyframes spin {
 			100% {
 				transform: rotate(360deg);
 			}
+		}
+
+		.spin {
+			animation: spin 4s linear infinite;
+		}
+
+		@keyframes moveAround {
+			0% {
+				transform: translate(0px, 10px) rotate(10deg);
+			}
+			25% {
+				transform: translate(10px, 0px) rotate(-5deg);
+			}
+			50% {
+				transform: translate(0px, -10px) rotate(5deg);
+			}
+			75% {
+				transform: translate(-10px, 0px) rotate(-10deg);
+			}
+			100% {
+				transform: translate(0px, 10px) rotate(10deg);
+			}
+		}
+		
+		.moveAround1 {
+			animation: moveAround 4s linear infinite;
+		}
+
+		.moveAround2 {
+			animation: moveAround 6s linear infinite;
+		}
+
+		.moveAround3 {
+			animation: moveAround 2s linear infinite;
 		}
 
 		#washingMachine {
@@ -441,15 +471,15 @@
 		<div id="area-undersea" style="display: none">
 			<div class="slider xyslider">
 				<div id="undersea-container">
-					<img id="crab1" src="images/2025/undersea/crab.png">
-					<img id="crab2" src="images/2025/undersea/crab.png">
-					<img id="crab3" src="images/2025/undersea/crab.png">
-					<img id="crab4" src="images/2025/undersea/crab.png">
-					<img id="crab5" src="images/2025/undersea/crab.png">
-					<img id="crab6" src="images/2025/undersea/crab.png">
-					<img id="crab7" src="images/2025/undersea/crab.png">
-					<img id="crab8" src="images/2025/undersea/crab.png">
-					<img id="crab9" src="images/2025/undersea/crab.png">
+					<img id="crab1" src="images/2025/undersea/crab.png" class="moveAround1">
+					<img id="crab2" src="images/2025/undersea/crab.png" class="moveAround2">
+					<img id="crab3" src="images/2025/undersea/crab.png" class="moveAround3">
+					<img id="crab4" src="images/2025/undersea/crab.png" class="moveAround1">
+					<img id="crab5" src="images/2025/undersea/crab.png" class="moveAround2">
+					<img id="crab6" src="images/2025/undersea/crab.png" class="moveAround3">
+					<img id="crab7" src="images/2025/undersea/crab.png" class="moveAround1">
+					<img id="crab8" src="images/2025/undersea/crab.png" class="moveAround2">
+					<img id="crab9" src="images/2025/undersea/crab.png" class="moveAround3">
 					<img id="chain" src="images/2025/undersea/chain_and_anchor.png"<
 				</div>
 			</div>
