@@ -71,7 +71,8 @@ const WIDTH = {
 	"pirate": 5 * STANDARD_IMAGE_WIDTH,
 	"skyworld": 7853,
 	"space": 5760,
-	"undersea": 5760, // It's really only 1920 wide but pretends to be wider by moving objects around. Having it 3 screens wide gives us a 2 screen range of movement, which ensures all objects will wrap
+	"undersea": 5760, // It's really only 1920 wide but pretends to be wider by moving objects around. 
+	// To avoid blipping in and out of existence, we need at least the width of the widest object to be offscreen. Seems to work best if it's a whole number of screens
 };
 
 // Heights of areas with XY movement
@@ -86,23 +87,38 @@ const XLOOP = {
 	"main": true,
 };
 
-// Undersea objects and their starting offset X positions relative to the middle of the screen, and their widths.
-// These will change mod the area width as we move left and right.
-const UNDERSEA_OBJECTS = {
-	"chain": [-100, 1297],
-	"crab1": [200, 178],
-	"crab2": [-200, 178],
-	"crab3": [400, 178],
-	"crab4": [-400, 178],
-	"crab5": [600, 178],
-	"crab6": [-600, 178],
-	"crab7": [800, 178],
-	"crab8": [-900, 178],
-	"crab9": [900, 178],
-}
+// Undersea objects, their starting position, and their widths.
+// These will be loaded into a mutable array on entry to this area
+// These will change mod the area width as we "move" left and right.
+// Unlike normal levels, these positions are not "centerX", but can be any valid X value within the range, i.e. 0 to WIDTH["undersea"] - 1 - objectWidth
+// (the position is to the top left of the object)
+// I originally had position and width as arrays inside a single object, but I found that they were not getting reset properly. This works better.
 const UNDERSEA_ENTRY_POS = WIDTH["undersea"] / 2;
-const UNDERSEA_RIGHT_WRAP_CENTERX = WIDTH["undersea"] - HALF_SCREEN_WIDTH - 1;
-const UNDERSEA_LEFT_WRAP_CENTERX = -UNDERSEA_RIGHT_WRAP_CENTERX;
+const UNDERSEA_OBJECT_POS = {
+	"chain": UNDERSEA_ENTRY_POS,
+	"crab1": 1,
+	"crab2": 400,
+	"crab3": 800,
+	"crab4": 1000,
+	"crab5": 2000,
+	"crab6": 3000,
+	"crab7": 4000,
+	"crab8": 5000,
+	"crab9": WIDTH["undersea"] - 179,
+};
+var underseaObjects = {};
+const UNDERSEA_OBJECT_WIDTH = {
+	"chain": 1297,
+	"crab1": 178,
+	"crab2": 178,
+	"crab3": 178,
+	"crab4": 178,
+	"crab5": 178,
+	"crab6": 178,
+	"crab7": 178,
+	"crab8": 178,
+	"crab9": 178,
+};
 
 // These are the horizontal positions in each Area from where we can go up (1) or down (-1) to a different Area (or both)
 // If our position is within a certain distance of such a place, the arrow will appear and going up/down is allowed.
@@ -855,7 +871,8 @@ function changeArea(destArea, destX) {
 		} else if (destArea == "undersea") {
 			// Also 2D but we come in from the top
 			centerY = HALF_SCREEN_HEIGHT;
-			moveUnderseaObjects();
+			populateUnderseaObjects(); // Make sure all objects start in their initial locations
+			moveUnderseaObjects(0); // Draw them in their right places
 		} else {
 			centerY = HALF_SCREEN_HEIGHT; // Ignored, but set it to what it should be
 		}
@@ -947,28 +964,44 @@ function rotateLoopImagesLeft(area) {
 	centerX -= STANDARD_IMAGE_WIDTH;
 }
 
-// Place the undersea objects based on the current value of centerX
-function moveUnderseaObjects() {
-	for (const [key, info] of Object.entries(UNDERSEA_OBJECTS)) {
-		const [objectOffsetPos, objectWidth] = info;
-		dbgOut += "<br>" + key + ": ";
-		let newPos = (objectOffsetPos + centerX) % UNDERSEA_RIGHT_WRAP_CENTERX;
-		if (newPos < UNDERSEA_LEFT_WRAP_CENTERX) {
-			newPos -= UNDERSEA_RIGHT_WRAP_CENTERX;
+function populateUnderseaObjects() {
+	underseaObjectPos = {};
+	for (var key in UNDERSEA_OBJECT_POS) {
+		underseaObjectPos[key] = UNDERSEA_OBJECT_POS[key];
+	}
+}
+
+// Place the undersea objects based on the current value of centerX - bearing in mind that their movement is in the opposite
+// direction than the movement of a background.
+function moveUnderseaObjects(pixels) {
+	for (var key in underseaObjectPos) {
+		const oldPos = underseaObjectPos[key];
+		const objectWidth = UNDERSEA_OBJECT_WIDTH[key];
+		let newPos = oldPos;
+		if (pixels > 0) {
+			newPos = (newPos + pixels) % WIDTH["undersea"]; // right wrap
+		} else {
+			newPos += pixels;
+			if (newPos < 0) {
+				newPos += WIDTH["undersea"]; // left wrap
+			}
 		}
+		dbgOut += "<br>" + key + ": " + oldPos + " -> " + newPos + " ";
 		let el = document.getElementById(key);
 		// Because we are really moving objects, not the background, the visible area doesn't change - it's always
 		// half a screen each side of the entry point. But because the position is the left of the object, we must take account
 		// of the object's width when deciding whether to hide it on the left, otherwise it will vanish as soon as its left side touches the
-		// screen edge.
-		if (newPos < UNDERSEA_ENTRY_POS - HALF_SCREEN_WIDTH - objectWidth || newPos > UNDERSEA_ENTRY_POS + HALF_SCREEN_WIDTH) {
+		// screen edge. 
+		const viewportL = UNDERSEA_ENTRY_POS - HALF_SCREEN_WIDTH - objectWidth;
+		const viewportR = UNDERSEA_ENTRY_POS + HALF_SCREEN_WIDTH;
+		// dbgOut += "<br>Viewport L:" + viewportL + " R:" + viewportR + " / ";
+		if (newPos < viewportL || newPos > viewportR) {
 			if (!el.classList.contains("hidden")) {
 				dbgOut += "HIDE";
 				el.classList.add("hidden");
 			} else {
 				dbgOut += "hidden";
 			}
-			dbgOut += "(" + newPos + ")";
 		} else {
 			if (el.classList.contains("hidden")) {
 				dbgOut += "SHOW";
@@ -976,11 +1009,13 @@ function moveUnderseaObjects() {
 			} else {
 				dbgOut += "visible";
 			}
-			// Remember the left position is relative to the div, while our pos values are centerX based
-			let leftVal = newPos - SCREEN_WIDTH + "px";
+			// Remember the left position is relative to the div, which does not move
+			let leftVal = newPos - SCREEN_WIDTH + "px"; // I don't really understand why this is correct, but it is
 			el.style.left = leftVal;
-			dbgOut += " " + newPos + " = left:" + leftVal;
+			dbgOut += " left:" + leftVal;
 		}
+		// Update it
+		underseaObjectPos[key] = newPos;
 	}
 }
 
@@ -1018,7 +1053,7 @@ function move() {
 	}
 	let xyslider = document.querySelector("#area-" + curArea + " .xyslider");
 	if (xyslider) {
-		console.log("Setting xyslider");
+		// console.log("Setting xyslider marginTop");
 		xyslider.style.marginTop = -centerY + HALF_SCREEN_HEIGHT + BAR_HEIGHT + "px";
 	}
 }
@@ -1030,16 +1065,17 @@ function moveLeft() {
 		return;
 	}
 	centerX -= scrollSpeed;
-	let minScroll = HALF_SCREEN_WIDTH;
-	// Special handling for undersea
+	// Special handling for undersea - still do centerX because that's needed for the exits, but don't use it for movement -
+	// each object must be moved individually so that they wrap around correctly with no jumps
 	if (curArea == "undersea") {
-		// Wrap around if we hit the left edge
-		if (centerX < minScroll) {
-			centerX += (WIDTH["undersea"] - SCREEN_WIDTH); // There's a half screen width at each end
+		// Wrap around if we hit the left edge. For this area, the left edge is zero, not HALF_SCREEN_WIDTH
+		if (centerX < 0) {
+			centerX += WIDTH["undersea"];
 		}
-		moveUnderseaObjects();
+		// The objects move in the opposite direction than the background would
+		moveUnderseaObjects(scrollSpeed);
 		return;
-	} else if (!XLOOP[curArea] && centerX < minScroll) {
+	} else if (!XLOOP[curArea] && centerX < HALF_SCREEN_WIDTH) {
 		// Stop at the left edge
 		centerX = HALF_SCREEN_WIDTH; 
 	}
@@ -1054,18 +1090,18 @@ function moveRight() {
 	}
 	// Right
 	centerX += scrollSpeed;
-	let maxScroll = WIDTH[curArea] - HALF_SCREEN_WIDTH;
 	// Special handling for undersea
 	if (curArea == "undersea") {
-		// Wrap around if we hit the right edge
-		if (centerX > maxScroll ) {
-			centerX -= (WIDTH["undersea"] - SCREEN_WIDTH); // There's a half screen width at each end
+		// Wrap around if we hit the right edge. For this area, that's the full width.
+		if (centerX > WIDTH["undersea"]) {
+			centerX -= WIDTH["undersea"]; 
 		}
-		moveUnderseaObjects();
+		// The objects move in the opposite direction than the background would
+		moveUnderseaObjects(-scrollSpeed);
 		return;
-	} else if (!XLOOP[curArea] && centerX > maxScroll) {
+	} else if (!XLOOP[curArea] && centerX > WIDTH[curArea] - HALF_SCREEN_WIDTH - 1) {
 		// Stop at the right edge
-		centerX = maxScroll;
+		centerX = WIDTH[curArea] - HALF_SCREEN_WIDTH - 1;
 	}
 	move();
 }
