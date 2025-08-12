@@ -42,8 +42,8 @@ const KEYMAP = { // Keyboard control mapping to joystick equivalents
 const KONAMI_CODE = [UP, UP, DOWN, DOWN, LEFT, RIGHT, LEFT, RIGHT, BTN_B, BTN_A];
 const PARTYTIME = 12000;
 // Location and gravity strength of Black Hole
-const BLACKHOLEX = HALF_SCREEN_WIDTH; // centerX value
-const BLACKHOLEY = HALF_SCREEN_HEIGHT; // centerY value
+const BLACKHOLEX = 960; // centerX value
+const BLACKHOLEY = 600; // centerY value
 const BLACKHOLE_GRAVITY = 10 ** 3;
 // Size of washing machine
 const WASHING_MACHINE_WIDTH = 189;
@@ -70,7 +70,7 @@ const WIDTH = {
 	"hug": 3407,
 	"pirate": 5 * STANDARD_IMAGE_WIDTH,
 	"skyworld": 7853,
-	"space": 5760,
+	"space": 7680,
 	"undersea": 5760, // It's really only 1920 wide but pretends to be wider by moving objects around. 
 	// To avoid blipping in and out of existence, we need at least the width of the widest object to be offscreen. Seems to work best if it's a whole number of screens
 };
@@ -164,10 +164,10 @@ const TRANSITIONS = {
 	"skyworld": [
 		[1240, -1, "main", 12240], // Goes back DOWN to main even though we came DOWN from there
 		[6700, -1, "main", 18200],
-		[6700, 1, "space", 4800],
+		[6700, 1, "space", 6695],
 	],
 	"space": [
-		[4800, -1, "skyworld", 6700],
+		[6695, -1, "skyworld", 6700],
 		// Space can also be exited via Black Hole
 	],
 	"undersea": [
@@ -393,7 +393,7 @@ function keydown(e) {
 			if (curArea == "space") {
 				teleport();
 			} else {
-				changeArea("space", 4800);
+				changeArea("space", 6695);
 			}
 			break;
 		case 'u':
@@ -1183,12 +1183,6 @@ function processActions(raf = true, forceOutput = false) {
 	}
 	processActionsMutex = true;
 	if (curArea == "space" && gravityEnabled) {
-		if (centerX == BLACKHOLEX && centerY == BLACKHOLEY) {
-			// Exit to a random location on main
-			teleport();
-			processActionsMutex = false;
-			return;
-		}
 		// Apply Black Hole gravity to space
 		let distanceX = centerX - BLACKHOLEX;
 		let distanceY = centerY - BLACKHOLEY;
@@ -1207,18 +1201,25 @@ function processActions(raf = true, forceOutput = false) {
 		let gravityX = gravityForce * Math.cos(angle);
 		let gravityY = gravityForce * Math.sin(angle);
 		//console.log("Gravity X: " + gravityX + " Y: " + gravityY);
-
-		// Scrolling by less than 0.75 doesn't do anything, which causes weak gravity only to act in the X direction until we hit that threshold
-		// So, need to amortise the movement across multiple frames. Using random is too jerky.
-		centerY -= gravityY;
-		if (centerY < BLACKHOLEY) {
-			centerY = BLACKHOLEY;
-		}
 		centerX -= gravityX;
+		// The blackhole is as far left as we can go anyway
 		if (centerX < BLACKHOLEX) {
 			centerX = BLACKHOLEX;
 		}
+		// However, it's somewhere in the middle Y-wise. We want to grab it if we're close *and* at the right X value,
+		// so we don't go shooting past it.
+		if (centerX == BLACKHOLEX && centerY > BLACKHOLEY && centerY - gravityY < BLACKHOLEY) {
+			centerY = BLACKHOLEY;
+		} else {
+			centerY -= gravityY;
+		}
 		move();
+		if (Math.abs(centerX - BLACKHOLEX) < 2 && Math.abs(centerY - BLACKHOLEY) < 2) {
+			// Exit to a random location on main
+			teleport();
+			processActionsMutex = false;
+			return;
+		}
 		forceOutput = true; // Ensure exit arrows are updated as we move
 	}
 
