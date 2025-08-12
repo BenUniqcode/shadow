@@ -226,11 +226,10 @@
 		}
 
 		#area-undersea .xyslider {
-			margin-left: -960px; // Ensure disappearances happen offscreen
+			xmargin-left: -960px; /* Ensure disappearances happen offscreen */
 		}
 		#undersea-container {
-			/* It needs to be wider than the screen on both sides to prevent objects appearing and disappearing when they get near the screen edge */
-			width: 3840px; 
+			width: 1920px; /* It pretends to be wider, but this is the visible width */
 			height: 2280px; 
 			overflow: hidden;
 			background: linear-gradient(0deg, rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 35%, rgba(0, 157, 255, 1) 100%);
