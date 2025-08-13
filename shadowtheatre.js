@@ -1030,22 +1030,22 @@ function moveUnderseaObjects(pixels) {
 		if (newPos < viewportL || newPos > viewportR) {
 			if (!el.classList.contains("hidden")) {
 				dbgOut += "HIDE";
-				el.classList.add("hidden");
+				//el.classList.add("hidden");
 			} else {
 				dbgOut += "hidden";
 			}
 		} else {
 			if (el.classList.contains("hidden")) {
 				dbgOut += "SHOW";
-				el.classList.remove("hidden");
+				//el.classList.remove("hidden");
 			} else {
 				dbgOut += "visible";
 			}
-			// Remember the left position is relative to the div, which does not move
-			let leftVal = newPos - SCREEN_WIDTH + "px"; // I don't really understand why this is correct, but it is
-			el.style.left = leftVal;
-			dbgOut += " left:" + leftVal;
 		}
+		// Remember the left position is relative to the div, which does not move
+		let leftVal = newPos - SCREEN_WIDTH + "px"; // I don't really understand why this is correct, but it is
+		el.style.left = leftVal;
+		dbgOut += " left:" + leftVal;
 		// Update it
 		underseaObjectPos[key] = newPos;
 	}
