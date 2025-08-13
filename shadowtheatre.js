@@ -859,6 +859,8 @@ function changeArea(destArea, destX) {
 	// If the washing machine is showing, fade it out now
 	let washingMachine = document.querySelector('#washingMachine');
 	washingMachine.classList.replace("fadeIn", "fadeOut");
+	washingMachine.classList.remove("zoomOut");
+	washingMachine.classList.remove("sink");
 
 	// everything.animate([{ opacity: 1 }, { opacity: 0 }, { opacity: 1 }], { duration: TRANSITION_TIME, follow: "forwards" });
 	// Halfway through the transition, swap over the images, scroll to the right place, and calculate the new exits
@@ -1158,6 +1160,7 @@ function teleport() {
 		imgbox.insertBefore(washingMachine, null);
 		// Don't set the top in here, CSS needs to manage that for the transition
 		washingMachine.classList.replace("fadeOut", "fadeIn");
+		washingMachine.classList.add("zoomOut");
 		console.log("Applying fadeIn class");
 		// If the washing machine is on water, it starts sinking after the level appears
 		let image = imgbox.querySelector("img");
@@ -1166,9 +1169,6 @@ function teleport() {
 				console.log("Applying sink class");
 				washingMachine.classList.add("sink");
 			}, 3000);
-		} else {
-			console.log("Removing sink class");
-			washingMachine.classList.remove("sink");
 		}
 		setTimeout(function() {
 			console.log("Applying fadeOut class");

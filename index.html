@@ -71,6 +71,18 @@
 			animation: blackholezoom 5s cubic-bezier(1,0,.96,.64) forwards; /* Exponential acceleration */
 		}
 
+		@keyframes zoomOut {
+			0% {
+				transform: scale(50);
+			}
+			100% {
+				transform: scale(1);
+			}
+		}
+		#washingMachine.zoomOut {
+			animation: zoomOut 1s ease-out forwards;
+		}
+
 		@keyframes moveAround {
 			0% {
 				transform: translate(0px, 10px) rotate(10deg);
