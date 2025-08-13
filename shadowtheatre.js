@@ -1178,6 +1178,24 @@ function teleport() {
 	}, TRANSITION_TIME / 2 + 100);
 }
 
+function speedUpBlackHoleSpin() {
+	let blackhole = document.getElementById("blackhole");
+	if (!blackhole.anim) {
+		return;
+	}
+	const startTime = blackhole.anim.startTime;
+	console.log(blackhole.style.animationDuration);
+	let duration = parseInt(blackhole.style.animationDuration);
+	console.log(blackhole.style.animationDuration);
+	duration --;
+	blackhole.style.animationDuration = duration + "s";
+	blackhole.anim.startTime = startTime;
+	// Do it again for as long as the zoom class is present
+	if (blackhole.classList.contains("zoom")) {
+		setTimeout(speedUpBlackHoleSpin, 200);
+	}
+}
+
 // Respond to inputs. The arg is whether to call requestAnimationFrame - true for keyboard control, false for joystick because it's called from readGamePad
 function processActions(raf = true, forceOutput = false) {
 	if (processActionsMutex) {
@@ -1217,10 +1235,30 @@ function processActions(raf = true, forceOutput = false) {
 		}
 		move();
 		if (Math.abs(centerX - BLACKHOLEX) < 2 && Math.abs(centerY - BLACKHOLEY) < 2) {
-			// Zoom into black hole - need to remove animation first as that stops it from working
-			let blackhole = document.querySelector('#blackhole');
-			blackhole.classList.remove('blackholespin');
-			blackhole.classList.add('zoom'); // It's nuts that you can't chain these
+			// Zoom into black hole
+			let blackhole = document.getElementById("blackhole");
+			blackhole.classList.add('zoom'); 
+			// The zoom effect is done in JS instead of CSS, so that it doesn't interfere with the rotation
+			// The CSS 
+			// 	animation-composition: add 
+			// didn't seem to work. Changing the class does work, if you include the rotation effect as well,
+			// but all the parameters need to be the same. I wanted to try speeding up the rotation - though
+			// that has its own problems.
+			blackhole.anim = blackhole.animate([
+				{ transform: "scale(1)", }, { transform: "scale(12)", } 
+			], {
+				duration: 5000,
+				easing: "cubic-bezier(1,0,.96,.64)",
+				fill: "forwards",
+				composite: "add", // add to the rotation effect instead of overriding it
+			});
+				
+			// Gradually speed up the rotation without restarting the animation, until the zoom class is removed
+			// This doesn't work of course because it makes the rotation jump to where it would have been if it
+			// had had this duration all along. We'd need to do maths to try to figure out which frame we're supposed
+			// to be on. Never mind.
+			//setTimeout(speedUpBlackHoleSpin, 200);
+
 			setTimeout(function() {
 				// Exit to a random location on main
 				teleport();
@@ -1229,8 +1267,10 @@ function processActions(raf = true, forceOutput = false) {
 			setTimeout(function() {
 				// Reset the black hole
 				blackhole.classList.remove('zoom'); 
-				blackhole.classList.add('blackholespin');
-			}, 10000);
+				if (blackhole.anim) {
+					blackhole.anim.cancel();
+				}
+			}, 8000);
 				
 			return;
 		}

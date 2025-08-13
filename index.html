@@ -55,20 +55,21 @@
 				transform: rotate(-360deg);
 			}
 		}
-		.animate.blackholespin {
-			animation: blackholespin 60s linear infinite;
-		}
-
-		/* I couldn't make this work as a 'transition' property. Like, it works if I add the class manually, but when the script did it,
-		   nothing happened. Even tried removing animation as that seemed to interfere when doing it manually, but no dice. */
 		@keyframes blackholezoom {
 			100% {
-				transform-origin: 700px 700px;
-				transform: scale(10) rotate(-360deg);
+				transform: scale(12);
 			}
 		}
-		#blackhole.zoom {
-			animation: blackholezoom 5s cubic-bezier(1,0,.96,.64) forwards; /* Exponential acceleration */
+		.animate.blackholespin {
+			animation: blackholespin 30s linear infinite forwards; /* Duration is set in element style attr so it can be overridden from js */
+		}
+		.animate.blackholespin.zoom {
+			/* Now done from JS so that it doesn't interfere with the spin */
+			/* In theory this should work but animation-composition: add doesn't seem to work from here */
+			/*
+			animation: blackholezoom 5s cubic-bezier(1,0,.96,.64) forwards; 
+			animation-composition: add;
+			*/
 		}
 
 		@keyframes zoomOut {
@@ -499,6 +500,7 @@
 				<img src="images/2025/space/space.png">
 				<img id="cog" src="images/2025/space/cog.png" class="animate spin">
 				<img id="blackhole" src="images/2025/space/blackhole.png" class="animate blackholespin">
+				<div class="hyperspaceCircle"></div>
 			</div>
 		</div>
 		<div id="area-hug" style="display: none">

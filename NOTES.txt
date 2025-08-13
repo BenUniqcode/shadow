@@ -1,0 +1,23 @@
+Things I tried that didn't work:
+Blackhole Zoom (trying to avoid the jump in the rotation animation when switching from one animation definition to another):
+	- Zooming the whole of #screen, or #area-space, or just space.png, instead of just the black hole. If the transform-origin is set to correctly end the zoom at the black hole, the intervening zoom goes to a part of the image some distance away before curving back into it. Whether or not rotation is also done.
+	- Using scale(var(--black-hole-zoom)) in the default spin animation keyframe, then setting that var to 10, and using a different class to change the animation but keeping the same keyframe. It zooms instantly to 10 instead of animating it. Because it doesn't reset the animation timer, so it's already reached the end of the new one. If I keep the same class/animation setting, it's clear that it works but it's partway through when applied. Which is what I *want* for the rotation - to continue from its current position. What I actually need is to have two separate animations, one of which (rotation) continues from where it left off (with perhaps a speedup), the other starts from scratch. Which I think I can do, by specifying animation: anim1, anim2;
+	- This works if you don't change the first animation
+                .animate.blackholespin {
+                        animation: blackholespin 60s linear infinite;
+                }
+                .animate.blackholespin.zoom {
+                        animation: blackholespin 60s linear infinite, blackholezoom 5s cubic-bezier(1,0,.96,.64) forwards;
+                }
+	- If you change any of the parameters of blackholespin, it restarts that animation.
+	- Even if you don't change them, the rotation slows to a stop and then goes backwards!
+
+	To achieve more control I probably need to use the JS animation API.
+
+	This from https://stackoverflow.com/questions/69875391/any-way-to-update-the-duration-of-an-animation-set-via-element-animate-without-r:
+	To change the animation's duration without restarting it, all you have to do is set the value of anim.startTime to what it was before. For example:
+		const startTime = anim.startTime;
+		el.style.animationDuration = new_duration;
+		anim.startTime = startTime;
+
+
