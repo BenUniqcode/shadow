@@ -98,26 +98,28 @@ const UNDERSEA_OBJECT_POS = {
 	"chain": UNDERSEA_ENTRY_POS,
 	"crab1": 1,
 	"crab2": 400,
-	"crab3": 800,
-	"crab4": 1000,
-	"crab5": 2000,
-	"crab6": 3000,
-	"crab7": 4000,
-	"crab8": 5000,
-	"crab9": WIDTH["undersea"] - 179,
+	"fish1": 800,
+	"fish2": 1000,
+	"shoal": 2000,
+	"jellyfish": 3000,
+	"anglerfish": 4000,
+	"seafloor1": 1500,
+	"seafloor2": 3000,
+	"seafloor3": 4500,
 };
 var underseaObjects = {};
 const UNDERSEA_OBJECT_WIDTH = {
 	"chain": 1297,
 	"crab1": 178,
-	"crab2": 178,
-	"crab3": 178,
-	"crab4": 178,
-	"crab5": 178,
-	"crab6": 178,
-	"crab7": 178,
-	"crab8": 178,
-	"crab9": 178,
+	"crab2": 596,
+	"fish1": 624,
+	"fish2": 660,
+	"shoal": 357,
+	"jellyfish": 544,
+	"anglerfish": 1068,
+	"seafloor1": 1403,
+	"seafloor2": 2206,
+	"seafloor3": 2206,
 };
 
 // These are the horizontal positions in each Area from where we can go up (1) or down (-1) to a different Area (or both)
@@ -1215,9 +1217,21 @@ function processActions(raf = true, forceOutput = false) {
 		}
 		move();
 		if (Math.abs(centerX - BLACKHOLEX) < 2 && Math.abs(centerY - BLACKHOLEY) < 2) {
-			// Exit to a random location on main
-			teleport();
-			processActionsMutex = false;
+			// Zoom into black hole - need to remove animation first as that stops it from working
+			let blackhole = document.querySelector('#blackhole');
+			blackhole.classList.remove('blackholespin');
+			blackhole.classList.add('zoom'); // It's nuts that you can't chain these
+			setTimeout(function() {
+				// Exit to a random location on main
+				teleport();
+				processActionsMutex = false;
+			}, 5000);
+			setTimeout(function() {
+				// Reset the black hole
+				blackhole.classList.remove('zoom'); 
+				blackhole.classList.add('blackholespin');
+			}, 10000);
+				
 			return;
 		}
 		forceOutput = true; // Ensure exit arrows are updated as we move

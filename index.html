@@ -33,6 +33,13 @@
 			left: 5350px;
 		}
 
+		#blackhole {
+			position: absolute;
+			z-index: 20;
+			top: -50px;
+			left: 200px;
+		}
+
 		/* Objects that can be continously animated must have the "animate" class, as well as a class to define the type of animation */
 		/* This allows all animations to be switched on or off by swapping out one class */
 		@keyframes spin {
@@ -42,6 +49,26 @@
 		}
 		.animate.spin {
 			animation: spin 4s linear infinite;
+		}
+		@keyframes blackholespin {
+			100% {
+				transform: rotate(-360deg);
+			}
+		}
+		.animate.blackholespin {
+			animation: blackholespin 60s linear infinite;
+		}
+
+		/* I couldn't make this work as a 'transition' property. Like, it works if I add the class manually, but when the script did it,
+		   nothing happened. Even tried removing animation as that seemed to interfere when doing it manually, but no dice. */
+		@keyframes blackholezoom {
+			100% {
+				transform-origin: 700px 700px;
+				transform: scale(10) rotate(-360deg);
+			}
+		}
+		#blackhole.zoom {
+			animation: blackholezoom 5s cubic-bezier(1,0,.96,.64) forwards; /* Exponential acceleration */
 		}
 
 		@keyframes moveAround {
@@ -246,26 +273,29 @@
 		#area-undersea #crab2 {
 			top: 400px;
 		}
-		#area-undersea #crab3 {
+		#area-undersea #fish1 {
 			top: 300px;
 		}
-		#area-undersea #crab4 {
+		#area-undersea #fish2 {
 			top: 500px;
 		}
-		#area-undersea #crab5 {
-			top: 400px;
+		#area-undersea #shoal {
+			top: 800px;
 		}
-		#area-undersea #crab6 {
-			top: 600px;
+		#area-undersea #jellyfish {
+			top: 1300px;
 		}
-		#area-undersea #crab7 {
-			top: 400px;
+		#area-undersea #anglerfish {
+			top: 1500px;
 		}
-		#area-undersea #crab8 {
-			top: 300px;
+		#area-undersea #seafloor1 {
+			bottom: 0px;
 		}
-		#area-undersea #crab9 {
-			top: 200px;
+		#area-undersea #seafloor2 {
+			bottom: 0px;
+		}
+		#area-undersea #seafloor3 {
+			bottom: 0px;
 		}
 
 		#area-undersea #chain {
@@ -456,6 +486,7 @@
 			<div class="slider xyslider">
 				<img src="images/2025/space/space.png">
 				<img id="cog" src="images/2025/space/cog.png" class="animate spin">
+				<img id="blackhole" src="images/2025/space/blackhole.png" class="animate blackholespin">
 			</div>
 		</div>
 		<div id="area-hug" style="display: none">
@@ -468,16 +499,17 @@
 		<div id="area-undersea" style="display: none">
 			<div class="slider xyslider">
 				<div id="undersea-container">
+					<img id="chain" src="images/2025/undersea/chain_and_anchor.png">
 					<img id="crab1" src="images/2025/undersea/crab.png" class="animate moveAround1">
-					<img id="crab2" src="images/2025/undersea/crab.png" class="animate moveAround2">
-					<img id="crab3" src="images/2025/undersea/crab.png" class="animate moveAround3">
-					<img id="crab4" src="images/2025/undersea/crab.png">
-					<img id="crab5" src="images/2025/undersea/crab.png">
-					<img id="crab6" src="images/2025/undersea/crab.png" class="animate moveAround2">
-					<img id="crab7" src="images/2025/undersea/crab.png" class="animate moveAround3">
-					<img id="crab8" src="images/2025/undersea/crab.png" class="animate moveAround1">
-					<img id="crab9" src="images/2025/undersea/crab.png">
-					<img id="chain" src="images/2025/undersea/chain_and_anchor.png"<
+					<img id="crab2" src="images/2025/undersea/A crab 1.jpg" class="animate moveAround2">
+					<img id="fish1" src="images/2025/undersea/A fish 1.jpg" class="animate moveAround3">
+					<img id="fish2" src="images/2025/undersea/A fish 2.jpg" class="animate moveAround1">
+					<img id="shoal" src="images/2025/undersea/shoal of fish 1.jpg" class="animate moveAround1">
+					<img id="jellyfish" src="images/2025/undersea/A jelly fish 1.jpg" class="animate moveAround2">
+					<img id="anglerfish" src="images/2025/undersea/angler fish 1.jpg" class="animate moveAround3">
+					<img id="seafloor1" src="images/2025/undersea/sea floor.jpg">
+					<img id="seafloor2" src="images/2025/undersea/sea floor 2.png">
+					<img id="seafloor3" src="images/2025/undersea/sea floor 3.png">
 				</div>
 			</div>
 		</div>
@@ -485,7 +517,8 @@
 	</div>
 	<div id="whiteBarBottom" class="bar whiteBar">
 	</div>
-	<img id="washingMachine" src="images/2025/washingmachine.png" class="fadeOut">
+	<!-- <img id="washingMachine" src="images/2025/washingmachine.png" class="fadeOut"> -->
+	<img id="washingMachine" src="images/2025/washing machine 2.png" class="fadeOut">
 	</div>
 	<script src="shadowtheatre.js?34675712"></script>
 </body>
