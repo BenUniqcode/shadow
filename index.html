@@ -84,33 +84,6 @@
 			animation: zoomOut 1s ease-out forwards;
 		}
 
-		@keyframes moveAround {
-			0% {
-				transform: translate(0px, 10px) rotate(10deg);
-			}
-			25% {
-				transform: translate(10px, 0px) rotate(-5deg);
-			}
-			50% {
-				transform: translate(0px, -10px) rotate(5deg);
-			}
-			75% {
-				transform: translate(-10px, 0px) rotate(-10deg);
-			}
-			100% {
-				transform: translate(0px, 10px) rotate(10deg);
-			}
-		}
-		.animate.moveAround1 {
-			animation: moveAround 4s ease-in-out infinite;
-		}
-		.animate.moveAround2 {
-			animation: moveAround 6s linear infinite;
-		}
-		.animate.moveAround3 {
-			animation: moveAround 2s linear infinite;
-		}
-
 		#washingMachine {
 			position: absolute;
 			z-index: 20;
@@ -265,6 +238,73 @@
 
 		}
 
+		/* Undersea */
+
+		@keyframes swimCycle {
+			0% {
+				transform: translate(-10px, 0px) scaleX(1);
+			}
+			45% {
+				transform: translate(-510px, 0px) scaleX(1);
+			}
+			55% {
+				transform: translate(-490px, 0px) scaleX(-1);
+			}
+			90% {
+				transform: translate(10px, 0px) scaleX(-1);
+			}
+		}
+		.animate.swimCycle {
+			animation: swimCycle 5s linear infinite;
+		}
+		@keyframes moveXY {
+			0% {
+				transform: translate(0px, 10px);
+			}
+			25% {
+				transform: translate(10px, 0px);
+			}
+			50% {
+				transform: translate(0px, -10px);
+			}
+			75% {
+				transform: translate(-10px, 0px);
+			}
+			100% {
+				transform: translate(0px, 10px);
+			}
+		}
+		.animate.moveXY {
+			animation: moveXY 10s linear infinite;
+		}
+		@keyframes moveAround {
+			0% {
+				transform: translate(0px, 10px) rotate(10deg);
+			}
+			25% {
+				transform: translate(10px, 0px) rotate(-5deg);
+			}
+			50% {
+				transform: translate(0px, -10px) rotate(5deg);
+			}
+			75% {
+				transform: translate(-10px, 0px) rotate(-10deg);
+			}
+			100% {
+				transform: translate(0px, 10px) rotate(10deg);
+			}
+		}
+
+		.animate.moveAround1 {
+			animation: moveAround 4s ease-in-out infinite;
+		}
+		.animate.moveAround2 {
+			animation: moveAround 6s linear infinite;
+		}
+		.animate.moveAround3 {
+			animation: moveAround 2s linear infinite;
+		}
+
 		#area-undersea .xyslider {
 			xmargin-left: -960px; /* Ensure disappearances happen offscreen */
 		}
@@ -280,26 +320,66 @@
 		}
 
 		/* Each object has it's top specified here, but left is handled dynamically in the script as it will move as we move left and right */
-		#area-undersea #crab1 {
-			top: 200px;
-		}
-		#area-undersea #crab2 {
-			top: 400px;
-		}
 		#area-undersea #fish1 {
 			top: 300px;
 		}
 		#area-undersea #fish2 {
 			top: 500px;
 		}
-		#area-undersea #shoal {
-			top: 800px;
-		}
 		#area-undersea #jellyfish {
 			top: 1300px;
 		}
 		#area-undersea #anglerfish {
 			top: 1500px;
+		}
+		#area-undersea #crab {
+			top: 200px;
+		}
+		#area-undersea #jellyfishes {
+			top: 800px;
+		}
+		#area-undersea #nemo {
+			top: 100px;
+		}
+		#area-undersea #petunias {
+			top: 1000px;
+		}
+		#area-undersea #seahorses {
+			top: 50px;
+		}
+		/* Shoal of Moorish Idols */
+		#area-undersea #moorishidol1 {
+			top: 400px;
+			animation-delay: 0.3s;
+		}
+		#area-undersea #moorishidol2 {
+			top: 310px;
+			animation-delay: 0.25s;
+		}
+		#area-undersea #moorishidol3 {
+			top: 480px;
+			animation-delay: 0.2s;
+		}
+		#area-undersea #moorishidol4 {
+			top: 390px;
+			animation-delay: 0.15s;
+		}
+		#area-undersea #moorishidol5 {
+			top: 320px;
+			animation-delay: 0.1s;
+		}
+		#area-undersea #moorishidol6 {
+			top: 420px;
+			animation-delay: 0.05s;
+		}
+		#area-undersea #starfish {
+			top: 100px;
+		}
+		#area-undersea #turtle {
+			top: 75px;
+		}
+		#area-undersea #whale {
+			top: 500px;
 		}
 		#area-undersea #seafloor1 {
 			bottom: 0px;
@@ -308,6 +388,9 @@
 			bottom: 0px;
 		}
 		#area-undersea #seafloor3 {
+			bottom: 0px;
+		}
+		#area-undersea #seafloor4 {
 			bottom: 0px;
 		}
 
@@ -514,16 +597,30 @@
 			<div class="slider xyslider">
 				<div id="undersea-container">
 					<img id="chain" src="images/2025/undersea/chain_and_anchor.png">
-					<img id="crab1" src="images/2025/undersea/crab.png" class="animate moveAround1">
-					<img id="crab2" src="images/2025/undersea/A crab 1.jpg" class="animate moveAround2">
-					<img id="fish1" src="images/2025/undersea/A fish 1.jpg" class="animate moveAround3">
-					<img id="fish2" src="images/2025/undersea/A fish 2.jpg" class="animate moveAround1">
-					<img id="shoal" src="images/2025/undersea/shoal of fish 1.jpg" class="animate moveAround1">
-					<img id="jellyfish" src="images/2025/undersea/A jelly fish 1.jpg" class="animate moveAround2">
-					<img id="anglerfish" src="images/2025/undersea/angler fish 1.jpg" class="animate moveAround3">
-					<img id="seafloor1" src="images/2025/undersea/sea floor.jpg">
+
+					<img id="fish1" src="images/2025/undersea/A fish 1.png" class="animate moveAround3">
+					<img id="fish2" src="images/2025/undersea/A fish 2.png" class="animate moveAround1">
+					<img id="jellyfish" src="images/2025/undersea/A jelly fish 1.png" class="animate moveAround2">
+					<img id="anglerfish" src="images/2025/undersea/angler fish 1.png" class="animate moveAround3">
+					<img id="crab" src="images/2025/undersea/crab.png" class="animate moveAround1">
+					<img id="jellyfishes" src="images/2025/undersea/jelly fishes.png" class="animate moveAround3">
+					<img id="nemo" src="images/2025/undersea/nemo.png" class="animate moveAround3">
+					<img id="petunias" src="images/2025/undersea/petunias.png" class="animate moveAround3">
+					<img id="seahorses" src="images/2025/undersea/sea horses.png" class="animate moveXY">
+					<img id="moorishidol1" src="images/2025/undersea/moorishidol.png" class="animate swimCycle">
+					<img id="moorishidol2" src="images/2025/undersea/moorishidol.png" class="animate swimCycle">
+					<img id="moorishidol3" src="images/2025/undersea/moorishidol.png" class="animate swimCycle">
+					<img id="moorishidol4" src="images/2025/undersea/moorishidol.png" class="animate swimCycle">
+					<img id="moorishidol5" src="images/2025/undersea/moorishidol.png" class="animate swimCycle">
+					<img id="moorishidol6" src="images/2025/undersea/moorishidol.png" class="animate swimCycle">
+					<img id="starfish" src="images/2025/undersea/starfish.png" class="animate moveAround1">
+					<img id="turtle" src="images/2025/undersea/turtle.png" class="animate moveAround3">
+					<img id="whale" src="images/2025/undersea/whale.png" class="animate moveAround3">
+
+					<img id="seafloor1" src="images/2025/undersea/sea floor.png">
 					<img id="seafloor2" src="images/2025/undersea/sea floor 2.png">
 					<img id="seafloor3" src="images/2025/undersea/sea floor 3.png">
+					<img id="seafloor4" src="images/2025/undersea/sea floor 4.png">
 				</div>
 			</div>
 		</div>
