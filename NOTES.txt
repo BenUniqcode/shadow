@@ -21,3 +21,6 @@ Blackhole Zoom (trying to avoid the jump in the rotation animation when switchin
 		anim.startTime = startTime;
 
 
+I probably need to animate the left property instead of using translate, and have js read the current position from the DOM instead of tracking it internally, 
+because using translate means that creatures may be in a very different position on screen than I think they are, and they can end up disappearing on screen.
+Or, see if performance is ok without the auto-hiding.
