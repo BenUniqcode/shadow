@@ -1196,7 +1196,9 @@ function teleport() {
 		if (image.classList.contains("water")) {
 			setTimeout(function() {
 				console.log("Applying sink class");
-				washingMachine.classList.replace("zoomOut", "sink");
+				// I found replace("zoomOut", "sink") did not work reliably
+				washingMachine.classList.remove("zoomOut");
+				washingMachine.classList.add("sink");
 			}, 4000);
 		}
 		setTimeout(function() {
