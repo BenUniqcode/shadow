@@ -1280,6 +1280,24 @@ function processActions(raf = true, forceOutput = false) {
 				fill: "forwards",
 				composite: "add", // add to the rotation effect instead of overriding it
 			});
+			let hyperspaceCircle = document.getElementById('hyperspaceCircle');
+			let slider = document.querySelector('#area-space .xyslider');
+			for (let i = 3; i < 17; i++) {
+				let el = hyperspaceCircle.cloneNode();
+				el.id = "";
+				slider.insertBefore(el, null);
+				setTimeout(function() {
+					el.style.transform = "scale(" + 2/i + ")";
+					el.classList.add("hyperspaceCircle");
+					el.classList.add("zoom");
+					el.classList.remove("hidden");
+				}, 3400 + 50 * (20-i));
+			}
+			setTimeout(function() {
+				// Remove the copies, which have class hyperspaceCircle rather than id hyperspaceCircle 
+				document.querySelectorAll(".hyperspaceCircle").forEach((el) => { el.remove(); });
+			}, 6000);
+
 				
 			// Gradually speed up the rotation without restarting the animation, until the zoom class is removed
 			// This doesn't work of course because it makes the rotation jump to where it would have been if it

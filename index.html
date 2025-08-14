@@ -40,6 +40,17 @@
 			left: 200px;
 		}
 
+		.hyperspaceCircle {
+			position: absolute;
+			top: 597px;
+			left: 846px;
+			width: 105px;
+			height: 105px;
+			border: 0.05px solid #ccc;
+			border-radius: 50%;
+			z-index: 30;
+		}
+
 		/* Objects that can be continously animated must have the "animate" class, as well as a class to define the type of animation */
 		/* This allows all animations to be switched on or off by swapping out one class */
 		@keyframes spin {
@@ -63,13 +74,21 @@
 		.animate.blackholespin {
 			animation: blackholespin 30s linear infinite forwards; /* Duration is set in element style attr so it can be overridden from js */
 		}
-		.animate.blackholespin.zoom {
+		.blackholespin.zoom {
 			/* Now done from JS so that it doesn't interfere with the spin */
 			/* In theory this should work but animation-composition: add doesn't seem to work from here */
 			/*
 			animation: blackholezoom 5s cubic-bezier(1,0,.96,.64) forwards; 
 			animation-composition: add;
 			*/
+		}
+		@keyframes hyperspacezoom {
+			100% {
+				transform: scale(25);
+			}
+		}
+		.hyperspaceCircle.zoom {
+			animation: hyperspacezoom 1.5s cubic-bezier(1,0,.96,.64) forwards; 
 		}
 
 		@keyframes zoomOut {
@@ -781,10 +800,10 @@
 		</div>
 		<div id="area-space" style="display: none">
 			<div class="slider xyslider">
-				<img src="images/2025/space/space.png">
+				<img id="spaceBackground" src="images/2025/space/space.png">
 				<img id="cog" src="images/2025/space/cog.png" class="animate spin">
 				<img id="blackhole" src="images/2025/space/blackhole.png" class="animate blackholespin">
-				<div class="hyperspaceCircle"></div>
+				<div id="hyperspaceCircle" class="hidden"></div><!-- This will be copied with *class* hyperspaceCircle instead of id, so the copies can be easily destroyed without losing the original -->
 			</div>
 		</div>
 		<div id="area-hug" style="display: none">
