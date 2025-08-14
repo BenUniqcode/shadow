@@ -244,6 +244,8 @@ var elPartyOverlay = document.getElementById("partyOverlay");
 
 var partyHandle, arrowMoverHandle;
 
+var fadeOutHandle;
+
 var dbg;
 if (elDbg.style.display == "none") {
 	dbg = () => { };
@@ -1174,6 +1176,9 @@ function teleport() {
 		return;
 	}
 	teleportMutex = true;
+	if (fadeOutHandle) {
+		clearTimeout(fadeOutHandle);
+	}
 	// Pick a random location on main
 	// The range of valid centerX values is the total width of the number of images -1 (because it's in the center, so half of the leftmost image
 	// and half of the rightmost image are outside the valid range. 
@@ -1201,7 +1206,7 @@ function teleport() {
 				washingMachine.classList.add("sink");
 			}, 4000);
 		}
-		setTimeout(function() {
+		fadeOutHandle = setTimeout(function() {
 			console.log("Applying fadeOut class");
 			washingMachine.classList.replace("fadeIn", "fadeOut");
 		}, 10000);

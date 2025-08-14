@@ -85,7 +85,7 @@
 			}
 			100% {
 				transform: scale(1);
-				top: 480px;
+				top: 473px;
 			}
 		}
 		#washingMachine.zoomOut {
@@ -100,9 +100,16 @@
 			width: 200px;
 		}
 
+		@keyframes sink {
+			100% {
+				top: 1080px;
+			}
+		}
+
 		#washingMachine.sink {
-			transition: top 5.0s ease-in !important; /* Prevent it being overridden by fadeIn/fadeOut */
-			top: 1080px !important;
+			xtransition: top 5.0s ease-in !important; /* Prevent it being overridden by fadeIn/fadeOut */
+			xtop: 1080px !important;
+			animation: sink 5.0s ease-in forwards;
 		}
 
 		.fadeIn {
@@ -861,7 +868,6 @@
 	</div>
 	<div id="whiteBarBottom" class="bar whiteBar">
 	</div>
-	<!-- <img id="washingMachine" src="images/2025/washingmachine.png" class="fadeOut"> -->
 	<img id="washingMachine" src="images/2025/washing_machine.png" class="fadeOut">
 	</div>
 	<script src="shadowtheatre.js?34675712"></script>
