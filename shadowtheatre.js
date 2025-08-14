@@ -399,39 +399,37 @@ function keydown(e) {
 		rAF(processActions);
 	} else {
 		switch(e.key.toLowerCase()) {
-		case 'x':
+		case 'a':
 			e.preventDefault();
-			console.log("Reversing the polarity");
-			reverseLeftRight = !reverseLeftRight;
-			console.log(reverseLeftRight);
+			if (animationEnabled) {
+				document.querySelectorAll('img.animate').forEach((el) => {
+					el.classList.replace("animate", "canAnimate");
+				});
+				animationEnabled = false;
+			} else {
+				document.querySelectorAll("img.canAnimate").forEach((el) => {
+					el.classList.replace("canAnimate", "animate");
+				});
+				animationEnabled = true;
+			}
 			break;
-		case 's':
+		case 'd':
 			e.preventDefault();
-			scrollSpeed = Math.max(SCROLLSPEED_MIN, --scrollSpeed);
-			showHud("Scroll speed: " + scrollSpeed, 500);
-			break;
-		case 'f':
-			e.preventDefault();
-			scrollSpeed = Math.min(SCROLLSPEED_MAX, ++scrollSpeed);
-			showHud("Scroll speed: " + scrollSpeed, 500);
+			let debugWindow = document.getElementById("debug");
+			if (debugWindow.classList.contains("hidden")) {
+				debugWindow.classList.remove("hidden");
+			} else {
+				debugWindow.classList.add("hidden");
+			}
 			break;
 		case 'e':
 			e.preventDefault();
 			easterEgg();
 			break;
-		case 'z':
-			// Debugging for space and teleportation
+		case 'f':
 			e.preventDefault();
-			if (curArea == "space") {
-				teleport();
-			} else {
-				changeArea("space", 6695);
-			}
-			break;
-		case 'u':
-			// Debugging for undersea
-			e.preventDefault();
-			changeArea("undersea", UNDERSEA_ENTRY_POS);
+			scrollSpeed = Math.min(SCROLLSPEED_MAX, ++scrollSpeed);
+			showHud("Scroll speed: " + scrollSpeed, 500);
 			break;
 		case 'g':
 			e.preventDefault();
@@ -445,18 +443,29 @@ function keydown(e) {
 				}
 			}
 			break;
-		case 'a':
+		case 's':
 			e.preventDefault();
-			if (animationEnabled) {
-				document.querySelectorAll('img.animate').forEach((el) => {
-					el.classList.replace("animate", "canAnimate");
-				});
-				animationEnabled = false;
+			scrollSpeed = Math.max(SCROLLSPEED_MIN, --scrollSpeed);
+			showHud("Scroll speed: " + scrollSpeed, 500);
+			break;
+		case 'u':
+			// Debugging for undersea
+			e.preventDefault();
+			changeArea("undersea", UNDERSEA_ENTRY_POS);
+			break;
+		case 'x':
+			e.preventDefault();
+			console.log("Reversing the polarity");
+			reverseLeftRight = !reverseLeftRight;
+			console.log(reverseLeftRight);
+			break;
+		case 'z':
+			// Debugging for space and teleportation
+			e.preventDefault();
+			if (curArea == "space") {
+				teleport();
 			} else {
-				document.querySelectorAll("img.canAnimate").forEach((el) => {
-					el.classList.replace("canAnimate", "animate");
-				});
-				animationEnabled = true;
+				changeArea("space", 6695);
 			}
 			break;
 		}
