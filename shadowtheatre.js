@@ -1297,7 +1297,7 @@ function processActions(raf = true, forceOutput = false) {
 					el.classList.add("zoom");
 					el.classList.remove("hidden");
 				}
-			}, 2500);
+			}, 3500);
 			setTimeout(function() {
 				// Remove the copies, which have class hyperspaceCircle rather than id hyperspaceCircle 
 				for (let el of circles) { 

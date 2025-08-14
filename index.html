@@ -46,10 +46,10 @@
 			left: 875px;
 			width: 50px;
 			height: 50px;
-			border: 0.01px solid #eee;
+			border: 0.1px solid #ccc;
 			border-radius: 50%;
 			z-index: 30;
-			opacity: 0;
+			transform: scale(0.25);
 		}
 
 		/* Objects that can be continously animated must have the "animate" class, as well as a class to define the type of animation */
@@ -77,13 +77,11 @@
 		}
 		.blackholespin.zoom {
 			/* Now done from JS so that it doesn't interfere with the spin */
-			/* In theory this should work but animation-composition: add doesn't seem to work from here */
-			/*
-			animation: blackholezoom 5s cubic-bezier(1,0,.96,.64) forwards; 
-			animation-composition: add;
-			*/
 		}
 		@keyframes hyperspacezoom {
+			0% {
+				transform: scale(0.25);
+			}
 			100% {
 				transform: scale(50);
 			}
