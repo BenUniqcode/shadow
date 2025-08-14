@@ -68,7 +68,6 @@ const WIDTH = {
 	"giant": 5 * STANDARD_IMAGE_WIDTH,
 	"hell": 1920,
 	"hug": 3407,
-	"hyperspace": SCREEN_WIDTH,
 	"pirate": 5 * STANDARD_IMAGE_WIDTH,
 	"skyworld": 7853,
 	"space": 7680,
@@ -187,9 +186,6 @@ const TRANSITIONS = {
 	],
 	"hug": [
 		[1200, -1, "main", 11000],
-	],
-	"hyperspace": [
-		// No exits
 	],
 	"pirate": [
 		[3400, 1, "main", 2500],
@@ -429,11 +425,6 @@ function keydown(e) {
 			} else {
 				changeArea("space", 6695);
 			}
-			break;
-		case 'h':
-			// Debugging for hyperspace effect
-			e.preventDefault();
-			hyperspace();
 			break;
 		case 'u':
 			// Debugging for undersea
@@ -1213,31 +1204,10 @@ function teleport() {
 		}, 10000);
 		teleportMutex = false;
 	}, TRANSITION_TIME / 2 + 100);
-}
 
-function hyperspace() {
-	// No point in using changeArea() which does a load of unnecessary stuff
-	// But need to set curArea so that when changing away it does the right thing
-	curArea = "hyperspace";
-	let screen = document.getElementById('screen');
-	screen.classList.replace("fadeIn", "fadeOut");
 	setTimeout(function() {
-		document.getElementById('area-space').style.display = "none";
-		let newArea = document.getElementById('area-hyperspace');
-		newArea.style.display = "block";
-		screen.classList.replace("fadeOut", "fadeIn");
-		let circles = document.querySelectorAll(".hyperspaceCircle");
-		for (let el of circles) {
-			el.classList.add("zoom");
-			el.classList.remove("hidden");
-		}
-		setTimeout(function() {
-			for (let el of circles) { 
-				el.classList.add("hidden");
-				el.classList.remove("zoom"); 
-			}
-		}, 1800);
-	}, 250);
+		washingMachine.classList.replace("fadeIn", "fadeOut");
+	}, 10000);
 }
 
 function zoomIntoBlackHole() {
@@ -1258,8 +1228,6 @@ function zoomIntoBlackHole() {
 		fill: "forwards",
 		composite: "add", // add to the rotation effect instead of overriding it
 	});
-	// Hyperspace
-	setTimeout(hyperspace, 3500);
 }
 
 // Respond to inputs. The arg is whether to call requestAnimationFrame - true for keyboard control, false for joystick because it's called from readGamePad
