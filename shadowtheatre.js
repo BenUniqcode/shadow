@@ -1256,7 +1256,7 @@ function processActions(raf = true, forceOutput = false) {
 		}
 		// However, it's somewhere in the middle Y-wise. We want to grab it if we're close *and* at the right X value,
 		// so we don't go shooting past it.
-		if (centerX == BLACKHOLEX && Math.abs(centerY - BLACKHOLEY) < gravityY) {
+		if (centerX == BLACKHOLEX && Math.abs(centerY - BLACKHOLEY) < Math.abs(gravityY)) {
 			centerY = BLACKHOLEY;
 		} else {
 			centerY -= gravityY;
