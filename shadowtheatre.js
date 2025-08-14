@@ -1203,7 +1203,7 @@ function teleport() {
 			washingMachine.classList.replace("fadeIn", "fadeOut");
 		}, 10000);
 		teleportMutex = false;
-	}, TRANSITION_TIME / 2 + 100);
+	}, TRANSITION_TIME / 2);
 
 	setTimeout(function() {
 		washingMachine.classList.replace("fadeIn", "fadeOut");
