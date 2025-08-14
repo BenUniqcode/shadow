@@ -1281,29 +1281,17 @@ function processActions(raf = true, forceOutput = false) {
 				composite: "add", // add to the rotation effect instead of overriding it
 			});
 			// Hyperspace
-			let hyperspaceCircle = document.getElementById('hyperspaceCircle');
-			let slider = document.querySelector('#area-space .xyslider');
-			let circles = [];
-			const HYPERSPACE_CIRCLES = 10;
-			// Don't start from 0 because of how animationDelay is calculated
-			for (let i = 1; i <= HYPERSPACE_CIRCLES; i++) {
-				let el = hyperspaceCircle.cloneNode();
-				el.id = "";
-				slider.insertBefore(el, null);
-				el.style.animationDelay = 2/i + "s";
-				circles.push(el);
-			}
+			let circles = document.querySelectorAll(".hyperspaceCircle");
 			setTimeout(function() {
 				for (let el of circles) {
-					el.classList.add("hyperspaceCircle");
 					el.classList.add("zoom");
 					el.classList.remove("hidden");
 				}
 			}, 3500);
 			setTimeout(function() {
-				// Remove the copies, which have class hyperspaceCircle rather than id hyperspaceCircle 
 				for (let el of circles) { 
-					el.remove(); 
+					el.classList.add("hidden");
+					el.classList.remove("zoom"); 
 				}
 			}, 8000);
 
