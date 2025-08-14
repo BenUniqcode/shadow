@@ -1284,7 +1284,9 @@ function processActions(raf = true, forceOutput = false) {
 			let hyperspaceCircle = document.getElementById('hyperspaceCircle');
 			let slider = document.querySelector('#area-space .xyslider');
 			let circles = [];
-			for (let i = 3; i < 17; i++) {
+			const HYPERSPACE_CIRCLES = 10;
+			// Don't start from 0 because of how animationDelay is calculated
+			for (let i = 1; i <= HYPERSPACE_CIRCLES; i++) {
 				let el = hyperspaceCircle.cloneNode();
 				el.id = "";
 				slider.insertBefore(el, null);
