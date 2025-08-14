@@ -1275,7 +1275,7 @@ function processActions(raf = true, forceOutput = false) {
 				// Exit to a random location on main
 				teleport();
 				processActionsMutex = false;
-			}, 5000);
+			}, 4000);
 			setTimeout(function() {
 				// Reset the black hole
 				blackhole.classList.remove('zoom'); 
