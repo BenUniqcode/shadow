@@ -240,6 +240,7 @@
 
 		/* Undersea */
 
+		/* Normal fish swimming */
 		@keyframes swimCycle {
 			0% {
 				transform: translate(-10px, 0px) scaleX(1);
@@ -257,6 +258,7 @@
 		.animate.swimCycle {
 			animation: swimCycle 5s linear infinite;
 		}
+
 		/* For fish that point the other way - otherwise they'll swim backwards... */
 		@keyframes swimCycleRev {
 			0% {
@@ -275,6 +277,7 @@
 		.animate.swimCycleRev {
 			animation: swimCycleRev 5s linear infinite;
 		}
+
 		/* For larger slower fish */
 		@keyframes swimCycleLongSlow {
 			0% {
@@ -293,6 +296,50 @@
 		.animate.swimCycleLongSlow {
 			animation: swimCycleLongSlow 20s linear infinite;
 		}
+
+		/* Turtle */
+		@keyframes turtle {
+			0% {
+				transform: translate(-10px, 0px) scaleX(1) rotate(-10deg);
+			}
+			10% {
+				transform: translate(190px, 0px) scaleX(1) rotate(5deg);
+			}
+			20% {
+				transform: translate(390px, 0px) scaleX(1) rotate(-10deg);
+			}
+			30% {
+				transform: translate(590px, 0px) scaleX(1) rotate(5deg);
+			}
+			40% {
+				transform: translate(790px, 0px) scaleX(1) rotate(-10deg);
+			}
+			49% {
+				transform: translate(990px, 0px) scaleX(1) rotate(5deg);
+			}
+			50% {
+				transform: translate(1010px, 0px) scaleX(-1) rotate(5deg);
+			}
+			60% {
+				transform: translate(810px, 0px) scaleX(-1) rotate(-10deg);
+			}
+			70% {
+				transform: translate(610px, 0px) scaleX(-1) rotate(5deg);
+			}
+			80% {
+				transform: translate(410px, 0px) scaleX(-1) rotate(-10deg);
+			}
+			90% {
+				transform: translate(210px, 0px) scaleX(-1) rotate(5deg);
+			}
+			99% {
+				transform: translate(10px, 0px) scaleX(-1) rotate(-10deg);
+			}
+		}
+		.animate.turtle {
+			animation: turtle 30s linear infinite;
+		}
+
 		@keyframes moveXY {
 			0% {
 				transform: translate(0px, 10px);
@@ -313,6 +360,7 @@
 		.animate.moveXY {
 			animation: moveXY 10s linear infinite;
 		}
+
 		@keyframes moveAround {
 			0% {
 				transform: translate(0px, 10px) rotate(10deg);
@@ -330,6 +378,37 @@
 				transform: translate(0px, 10px) rotate(10deg);
 			}
 		}
+		.animate.moveAround1 {
+			animation: moveAround 4s ease-in-out infinite;
+		}
+		.animate.moveAround2 {
+			animation: moveAround 6s linear infinite;
+		}
+		.animate.moveAround3 {
+			animation: moveAround 2s linear infinite;
+		}
+
+		@keyframes whale {
+			0% {
+				transform: translate(0px, 0px) rotate(5deg);
+			}
+			20% {
+				transform: translate(40px, -430px) rotate(10deg);
+			}
+			40% {
+				transform: translate(-20px, -450px) rotate(-20deg);
+			}
+			60% {
+				transform: translate(-60px, 0px) rotate(0deg);
+			}
+			100% {
+				transform: translate(0px, 0px) rotate(5deg);
+			}
+		}
+		.animate.whale {
+			animation: whale 15s ease-in-out infinite;
+		}
+
 		@keyframes diagonalDrift {
 			0% {
 				transform: translate(0px, 0px);
@@ -343,16 +422,6 @@
 		}
 		.animate.diagonalDrift {
 			animation: diagonalDrift 12s ease-in-out infinite;
-		}
-
-		.animate.moveAround1 {
-			animation: moveAround 4s ease-in-out infinite;
-		}
-		.animate.moveAround2 {
-			animation: moveAround 6s linear infinite;
-		}
-		.animate.moveAround3 {
-			animation: moveAround 2s linear infinite;
 		}
 
 		#area-undersea .xyslider {
@@ -376,7 +445,7 @@
 			animation-duration: 20s;
 		}
 		#area-undersea #fish2 {
-			top: 500px;
+			top: 400px;
 			animation-delay: 2s;
 			animation-duration: 10s;
 		}
@@ -387,7 +456,7 @@
 			top: 1800px;
 		}
 		#area-undersea #crab {
-			top: 200px;
+			bottom: 5px;
 		}
 		#area-undersea #jellyfishes {
 			top: 1400px;
@@ -428,10 +497,10 @@
 			top: 1500px;
 		}
 		#area-undersea #turtle {
-			top: 75px;
+			top: 50px;
 		}
 		#area-undersea #whale {
-			top: 50px;
+			top: 300px;
 		}
 		#area-undersea #seafloor1 {
 			bottom: 0px;
@@ -663,7 +732,7 @@
 					<img id="fish2" src="images/2025/undersea/A fish 2.png" class="animate swimCycleRev">
 					<img id="jellyfish" src="images/2025/undersea/A jelly fish 1.png" class="animate diagonalDrift">
 					<img id="anglerfish" src="images/2025/undersea/angler fish 1.png" class="animate moveAround3">
-					<img id="crab" src="images/2025/undersea/crab.png" class="animate moveAround1">
+					<img id="crab" src="images/2025/undersea/crab.png" class="animate moveAround3">
 					<img id="jellyfishes" src="images/2025/undersea/jelly fishes.png" class="animate diagonalDrift">
 					<img id="nemo" src="images/2025/undersea/nemo.png" class="animate swimCycleRev">
 					<img id="seahorses" src="images/2025/undersea/sea horses.png" class="animate moveXY">
@@ -674,8 +743,8 @@
 					<img id="moorishidol5" src="images/2025/undersea/moorishidol.png" class="animate swimCycle">
 					<img id="moorishidol6" src="images/2025/undersea/moorishidol.png" class="animate swimCycle">
 					<img id="starfish" src="images/2025/undersea/starfish.png" class="animate moveAround1">
-					<img id="turtle" src="images/2025/undersea/turtle.png" class="animate swimCycleLongSlow">
-					<img id="whale" src="images/2025/undersea/whale.png" class="animate moveAround3">
+					<img id="turtle" src="images/2025/undersea/turtle.png" class="animate turtle">
+					<img id="whale" src="images/2025/undersea/whale.png" class="animate whale">
 
 					<img id="seafloor1" src="images/2025/undersea/sea floor.png">
 					<img id="seafloor2" src="images/2025/undersea/sea floor 2.png">

@@ -97,7 +97,7 @@ const UNDERSEA_ENTRY_POS = WIDTH["undersea"] / 2;
 const UNDERSEA_OBJECT_POS = {
 	"chain": UNDERSEA_ENTRY_POS,
 	"fish1": 800,
-	"fish2": 1000,
+	"fish2": 600,
 	"jellyfish": 4200,
 	"anglerfish": 4000,
 	"crab": 3400,
@@ -111,7 +111,7 @@ const UNDERSEA_OBJECT_POS = {
 	"moorishidol5": 3250,
 	"moorishidol6": 3225,
 	"starfish": 3000,
-	"turtle": 5000,
+	"turtle": 1000,
 	"whale": 4000,
 	"seafloor1": 50,
 	"seafloor2": 600,
