@@ -1256,7 +1256,7 @@ function processActions(raf = true, forceOutput = false) {
 		}
 		// However, it's somewhere in the middle Y-wise. We want to grab it if we're close *and* at the right X value,
 		// so we don't go shooting past it.
-		if (centerX == BLACKHOLEX && centerY > BLACKHOLEY && centerY - gravityY < BLACKHOLEY) {
+		if (centerX == BLACKHOLEX && Math.abs(centerY - BLACKHOLEY) < gravityY) {
 			centerY = BLACKHOLEY;
 		} else {
 			centerY -= gravityY;
@@ -1280,23 +1280,30 @@ function processActions(raf = true, forceOutput = false) {
 				fill: "forwards",
 				composite: "add", // add to the rotation effect instead of overriding it
 			});
+			// Hyperspace
 			let hyperspaceCircle = document.getElementById('hyperspaceCircle');
 			let slider = document.querySelector('#area-space .xyslider');
+			let circles = [];
 			for (let i = 3; i < 17; i++) {
 				let el = hyperspaceCircle.cloneNode();
 				el.id = "";
 				slider.insertBefore(el, null);
-				setTimeout(function() {
-					el.style.transform = "scale(" + 2/i + ")";
+				el.style.animationDelay = 2/i + "s";
+				circles.push(el);
+			}
+			setTimeout(function() {
+				for (let el of circles) {
 					el.classList.add("hyperspaceCircle");
 					el.classList.add("zoom");
 					el.classList.remove("hidden");
-				}, 3400 + 50 * (20-i));
-			}
+				}
+			}, 2500);
 			setTimeout(function() {
 				// Remove the copies, which have class hyperspaceCircle rather than id hyperspaceCircle 
-				document.querySelectorAll(".hyperspaceCircle").forEach((el) => { el.remove(); });
-			}, 6000);
+				for (let el of circles) { 
+					el.remove(); 
+				}
+			}, 8000);
 
 				
 			// Gradually speed up the rotation without restarting the animation, until the zoom class is removed
