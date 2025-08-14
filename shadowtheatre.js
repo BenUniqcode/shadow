@@ -1212,15 +1212,10 @@ function teleport() {
 }
 
 function hyperspace() {
+	document.getElementById('area-space').style.display = 'none';
+	document.getElementById('area-hyperspace').style.display = 'block';
 	let circles = document.querySelectorAll(".hyperspaceCircle");
 	for (let el of circles) {
-		// If we were called from the debug key, adjust the position of the circles so they're on screen
-		if (centerX != BLACKHOLEX) {
-			el.style.left = centerX + "px";
-		}
-		if (centerY != BLACKHOLEY) {
-			el.style.top = centerY + "px";
-		}
 		el.classList.add("zoom");
 		el.classList.remove("hidden");
 	}
@@ -1235,7 +1230,7 @@ function hyperspace() {
 				el.style.top = "";
 			}
 		}
-	}, 8000);
+	}, 2000);
 }
 
 function zoomIntoBlackHole() {

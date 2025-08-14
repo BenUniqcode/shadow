@@ -46,7 +46,7 @@
 			left: 848px;
 			width: 100px;
 			height: 100px;
-			border: 0.01px solid #ddd;
+			border: 0.1px solid #ddd;
 			border-radius: 50%;
 			z-index: 30;
 			transform: scale(0.125);
@@ -87,7 +87,7 @@
 			}
 		}
 		.hyperspaceCircle.zoom {
-			animation: hyperspacezoom 1.5s cubic-bezier(1,0,.96,.64) forwards; 
+			animation: hyperspacezoom 1.5s cubic-bezier(1,0,.96,.64) forwards;
 		}
 
 		@keyframes zoomOut {
@@ -802,12 +802,27 @@
 				<img id="spaceBackground" src="images/2025/space/space.png">
 				<img id="cog" src="images/2025/space/cog.png" class="animate spin">
 				<img id="blackhole" src="images/2025/space/blackhole.png" class="animate blackholespin">
-				<div id="hyperspaceCircle" class="hidden"></div><!-- This will be copied with *class* hyperspaceCircle instead of id, so the copies can be easily destroyed without losing the original -->
-				<div class="hyperspaceCircle hidden" style="animation-delay: 0.1s"></div>
-				<div class="hyperspaceCircle hidden" style="animation-delay: 0.2s"></div>
+			</div>
+		</div>
+		<div id="area-hyperspace" style="display: none">
+			<div class="slider">
+				<div class="hyperspaceCircle hidden" style="animation-delay: 0.66s"></div>
+				<div class="hyperspaceCircle hidden" style="animation-delay: 0.655s"></div>
+				<div class="hyperspaceCircle hidden" style="animation-delay: 0.65s"></div>
+				<div class="hyperspaceCircle hidden" style="animation-delay: 0.64s"></div>
+				<div class="hyperspaceCircle hidden" style="animation-delay: 0.62s"></div>
+				<div class="hyperspaceCircle hidden" style="animation-delay: 0.6s"></div>
+				<div class="hyperspaceCircle hidden" style="animation-delay: 0.57s"></div>
+				<div class="hyperspaceCircle hidden" style="animation-delay: 0.54s"></div>
+				<div class="hyperspaceCircle hidden" style="animation-delay: 0.5s"></div>
+				<div class="hyperspaceCircle hidden" style="animation-delay: 0.45s"></div>
 				<div class="hyperspaceCircle hidden" style="animation-delay: 0.4s"></div>
-				<div class="hyperspaceCircle hidden" style="animation-delay: 0.8s"></div>
-				<div class="hyperspaceCircle hidden" style="animation-delay: 1.0s"></div>
+				<div class="hyperspaceCircle hidden" style="animation-delay: 0.35s"></div>
+				<div class="hyperspaceCircle hidden" style="animation-delay: 0.3s"></div>
+				<div class="hyperspaceCircle hidden" style="animation-delay: 0.26s"></div>
+				<div class="hyperspaceCircle hidden" style="animation-delay: 0.23s"></div>
+				<div class="hyperspaceCircle hidden" style="animation-delay: 0.2s"></div>
+				<div class="hyperspaceCircle hidden" style="animation-delay: 0.15s"></div>
 			</div>
 		</div>
 		<div id="area-hug" style="display: none">
