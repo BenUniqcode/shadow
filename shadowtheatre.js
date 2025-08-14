@@ -596,7 +596,7 @@ function matrixLoop() {
 	let i = 0;
 	ypos.forEach((y, ind) => {
 		let c = text.charAt(i);
-		const x = ind * 35;
+		const x = ind * 25;
 		ctx.fillText(c, x, y);
 		if (y > 100 + Math.random() * 10000) {
 			ypos[ind] = 0;
