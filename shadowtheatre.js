@@ -271,7 +271,7 @@ ctx.fillStyle = '#000';
 ctx.fillRect(0, 0, cw, ch);
 // Set text colours
 ctx.fillStyle = '#0f0';
-ctx.font = '15pt monospace';
+ctx.font = '16pt monospace';
 
 // Flip text horizontally
 ctx.translate(cw, 0);
