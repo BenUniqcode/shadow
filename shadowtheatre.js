@@ -1191,12 +1191,13 @@ function teleport() {
 		washingMachine.classList.add("zoomOut");
 		console.log("Applying fadeIn class");
 		// If the washing machine is on water, it starts sinking after the level appears
+		// sink is not compatible with zoomOut, but that should've finished by now
 		let image = imgbox.querySelector("img");
 		if (image.classList.contains("water")) {
 			setTimeout(function() {
 				console.log("Applying sink class");
-				washingMachine.classList.add("sink");
-			}, 3000);
+				washingMachine.classList.replace("zoomOut", "sink");
+			}, 4000);
 		}
 		setTimeout(function() {
 			console.log("Applying fadeOut class");
