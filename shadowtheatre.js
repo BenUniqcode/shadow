@@ -398,7 +398,7 @@ function keydown(e) {
 		anyInputOn |= isOn[i];
 		rAF(processActions);
 	} else {
-		switch(e.key.toLowerCase()) {
+		switch(e.key) {
 		case 'a':
 			e.preventDefault();
 			if (animationEnabled) {
@@ -459,11 +459,17 @@ function keydown(e) {
 			reverseLeftRight = !reverseLeftRight;
 			console.log(reverseLeftRight);
 			break;
+		case 'Z':
 		case 'z':
 			// Debugging for space and teleportation
+			// Hold SHIFT to force teleporting to a water level
 			e.preventDefault();
 			if (curArea == "space") {
-				teleport();
+				if (e.key == 'Z') {
+					teleport(true);
+				} else {
+					teleport();
+				}
 			} else {
 				changeArea("space", 6695);
 			}
@@ -1180,7 +1186,7 @@ function moveDown() {
 	move();
 }
 
-function teleport() {
+function teleport(forceWater = false) {
 	if (teleportMutex) {
 		return;
 	}
@@ -1192,8 +1198,14 @@ function teleport() {
 	// The range of valid centerX values is the total width of the number of images -1 (because it's in the center, so half of the leftmost image
 	// and half of the rightmost image are outside the valid range. 
 	let images = document.querySelectorAll("#area-main .slider img");
-	let newLoc = Math.floor(Math.random() * (images.length - 1) * STANDARD_IMAGE_WIDTH); 
-	console.log("Random location chosen: " + newLoc);
+	let newLoc;
+	if (forceWater) {
+		newLoc = 960;
+		console.log("Water location chosen: " + newLoc);
+	} else {
+		newLoc = Math.floor(Math.random() * (images.length - 1) * STANDARD_IMAGE_WIDTH); 
+		console.log("Random location chosen: " + newLoc);
+	}
 	changeArea("main", newLoc);
 	setTimeout(function() {
 		// Place the washing machine image in the center of the center imagebox, near the bottom
@@ -1204,16 +1216,14 @@ function teleport() {
 		washingMachine.classList.replace("fadeOut", "fadeIn");
 		washingMachine.classList.add("zoomOut");
 		console.log("Applying fadeIn class");
-		// If the washing machine is on water, it starts sinking after the level appears
-		// sink is not compatible with zoomOut, but that should've finished by now
+		// If the washing machine is on water, it starts sinking after the level appears and zoomOut completes
 		let image = imgbox.querySelector("img");
 		if (image.classList.contains("water")) {
 			setTimeout(function() {
 				console.log("Applying sink class");
-				// I found replace("zoomOut", "sink") did not work reliably
 				washingMachine.classList.remove("zoomOut");
 				washingMachine.classList.add("sink");
-			}, 4000);
+			}, 2000);
 		}
 		fadeOutHandle = setTimeout(function() {
 			console.log("Applying fadeOut class");
