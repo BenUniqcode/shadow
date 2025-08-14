@@ -68,6 +68,7 @@ const WIDTH = {
 	"giant": 5 * STANDARD_IMAGE_WIDTH,
 	"hell": 1920,
 	"hug": 3407,
+	"hyperspace": SCREEN_WIDTH,
 	"pirate": 5 * STANDARD_IMAGE_WIDTH,
 	"skyworld": 7853,
 	"space": 7680,
@@ -186,6 +187,9 @@ const TRANSITIONS = {
 	],
 	"hug": [
 		[1200, -1, "main", 11000],
+	],
+	"hyperspace": [
+		// No exits
 	],
 	"pirate": [
 		[3400, 1, "main", 2500],
@@ -1212,25 +1216,28 @@ function teleport() {
 }
 
 function hyperspace() {
-	document.getElementById('area-space').style.display = 'none';
-	document.getElementById('area-hyperspace').style.display = 'block';
-	let circles = document.querySelectorAll(".hyperspaceCircle");
-	for (let el of circles) {
-		el.classList.add("zoom");
-		el.classList.remove("hidden");
-	}
+	// No point in using changeArea() which does a load of unnecessary stuff
+	// But need to set curArea so that when changing away it does the right thing
+	curArea = "hyperspace";
+	let screen = document.getElementById('screen');
+	screen.classList.replace("fadeIn", "fadeOut");
 	setTimeout(function() {
-		for (let el of circles) { 
-			el.classList.add("hidden");
-			el.classList.remove("zoom"); 
-			if (el.style.left) {
-				el.style.left = "";
-			}
-			if (el.style.top) {
-				el.style.top = "";
-			}
+		document.getElementById('area-space').style.display = "none";
+		let newArea = document.getElementById('area-hyperspace');
+		newArea.style.display = "block";
+		screen.classList.replace("fadeOut", "fadeIn");
+		let circles = document.querySelectorAll(".hyperspaceCircle");
+		for (let el of circles) {
+			el.classList.add("zoom");
+			el.classList.remove("hidden");
 		}
-	}, 2000);
+		setTimeout(function() {
+			for (let el of circles) { 
+				el.classList.add("hidden");
+				el.classList.remove("zoom"); 
+			}
+		}, 1800);
+	}, 250);
 }
 
 function zoomIntoBlackHole() {
@@ -1246,7 +1253,7 @@ function zoomIntoBlackHole() {
 	blackhole.anim = blackhole.animate([
 		{ transform: "scale(1)", }, { transform: "scale(12)", } 
 	], {
-		duration: 5000,
+		duration: 4000,
 		easing: "cubic-bezier(1,0,.96,.64)",
 		fill: "forwards",
 		composite: "add", // add to the rotation effect instead of overriding it
@@ -1293,7 +1300,7 @@ function processActions(raf = true, forceOutput = false) {
 			centerY -= gravityY;
 		}
 		move();
-		if (Math.abs(centerX - BLACKHOLEX) < 2 && Math.abs(centerY - BLACKHOLEY) < 2) {
+		if (centerX == BLACKHOLEX && centerY == BLACKHOLEY) {
 			zoomIntoBlackHole();
 
 			setTimeout(function() {
