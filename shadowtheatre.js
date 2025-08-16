@@ -579,8 +579,10 @@ function matrixLoop() {
 	ctx.font = '18pt monospace';
 
 	let text = "";
-	if (Math.random() < 0.05) {
+	if (Math.random() < 0.2) {
 		text = "QUEXTAL";
+	} else if (Math.random() < 0.2) {
+		text = "SHAMBALA";
 	} else {
 		for (let i = 0; i < 7; i++) { 
 			// Use pages 0 to 36 of UTF16 for a reasonable variety of characters without
@@ -636,7 +638,7 @@ function partyColors(partyTime) {
 		let randomL = Math.floor(Math.random() * 50) + 50; // 50-100%
 		colorAnims.push({ backgroundColor: "hsl(" + randomH + "deg," + randomS + "%," + randomL + "%)" });
 	}
-	document.body.animate(colorAnims, { duration: partyTime });
+	elPartyOverlay.animate(colorAnims, { duration: partyTime });
 }
 
 function discoColors(partyTime, partyPlace) {
@@ -671,26 +673,26 @@ function party() {
 		let transform = "";
 		// Transforms become progressively more likely, and potentially larger, as we proceed
 		if (Math.random() * i > 5) {
-			let randomMoveX = Math.floor(Math.random() * i - i / 2); // From -i/2 to +i/2
-			let randomMoveY = Math.floor(Math.random() * i - i / 2);
+			let randomMoveX = Math.floor(Math.random() * i * 2 - i); // From -i to +i
+			let randomMoveY = Math.floor(Math.random() * i * 2 - i);
 			transform += " translate(" + randomMoveX + "px, " + randomMoveY + "px)";
 		}
 		if (Math.random() * i > 10) {
-			let randomSizeX = Math.random() * i / 4 - i / 8 + 100; // From 100-i/4 to 100+i/4
+			let randomSizeX = Math.random() * i * 2 + 100 - i; // From 100-i to 100+i
 			// Preserve aspect ratio at first, then allow it to squish later
 			let randomSizeY = randomSizeX;
 			if (i > 30) {
-				randomSizeY = Math.random() * i / 4 - i / 8 + 100; // From 100-i/4 to 100+i/4
+				randomSizeY = Math.random() * i * 2 + 100 - i; // From 100-i to 100+i
 			}
 			transform += " scale(" + randomSizeX + "%, " + randomSizeY + "%)";
 		}
 		if (Math.random() * i > 20) {
-			let randomSkewX = Math.random() * i / 5 - i / 10; // From -i/10 to +i/10
-			let randomSkewY = Math.random() * i / 5 - i / 10;
+			let randomSkewX = Math.random() * i / 2 - i / 4; // From -i/2 to +i/2
+			let randomSkewY = Math.random() * i / 2 - i / 4;
 			transform += " skew(" + randomSkewX + "deg, " + randomSkewY + "deg)";
 		}
 		if (Math.random() * i > 30) {
-			let randomAngle = Math.random() * 2 * i - i; // From -i to +i degrees
+			let randomAngle = Math.random() * i - i / 2; // From -i/2 to +i/2 degrees
 			transform += " rotate("  + randomAngle + "deg)";
 		}
 		if (transform.length > 0) {
@@ -729,24 +731,32 @@ function party() {
 	let images = document.querySelectorAll("#area-" + curArea + " .slider img");
 	// If there is only one image, do it
 	// Otherwise, try to only animate the main image that's on the screen, and its neighbours
+	let imagesToAnimate;
 	if (images.length == 1) {
 		console.log("Only one image in this area");
 		images[0].animate(imageAnims, { duration: PARTYTIME });
-	} else {
-		// When there are multiple images in a slider, assume they are all the same size (1351 wide)
-		// The index of the image at the centre of the screen will therefore be floor(centerX / 1351)
-		let centerImagePos = getCenterImagePos();
-		let imagesToAnimate = [centerImagePos];
-		// But do the left neighbour too because they might be on the screen, or creep
-		// onto the screen during the animations
-		if (centerImagePos > 0) {
-			imagesToAnimate.push(centerImagePos - 1);
-			console.log("Also animating the one to the left: " + (centerImagePos - 1));
-		}
-		// Same with the right neighbour
-		if (centerImagePos < images.length - 1) {
-			imagesToAnimate.push(centerImagePos + 1);
-			console.log("Also animating the one to the right: " + (centerImagePos + 1));
+	} else  {
+		if (curArea == "undersea") {
+			// Animate every image - this is inefficient, we should really only do those that are visible,
+			// but you can still move, so others may become visible...
+			imagesToAnimate = [...Array(images.length).keys()]; // Effectively 0 .. images.length
+			console.log(imagesToAnimate);
+		} else {
+			// When there are multiple images in a slider, assume they are all the same size (1351 wide)
+			// The index of the image at the centre of the screen will therefore be floor(centerX / 1351)
+			let centerImagePos = getCenterImagePos();
+			imagesToAnimate = [centerImagePos];
+			// But do the left neighbour too because they might be on the screen, or creep
+			// onto the screen during the animations
+			if (centerImagePos > 0) {
+				imagesToAnimate.push(centerImagePos - 1);
+				console.log("Also animating the one to the left: " + (centerImagePos - 1));
+			}
+			// Same with the right neighbour
+			if (centerImagePos < images.length - 1) {
+				imagesToAnimate.push(centerImagePos + 1);
+				console.log("Also animating the one to the right: " + (centerImagePos + 1));
+			}
 		}
 		// Animate the selected images
 		for (let i = 0; i < imagesToAnimate.length; i++) {
@@ -973,25 +983,32 @@ function easterEgg() {
 	}
 	console.log("Easter Egg triggered");
 	easterEggMutex = true;
-	let matrixTime = 12000;
-	let matrixFadeTime = 3000;
 
+	let matrixTime = 14000; // Total time for Matrix including fading in and out
+	let matrixFadeTime = 2000; // How long it takes to fade in or out, thought it also fades out due to the party overlay becoming opaque
+
+	// The Party Overlay does various things:
+	// * Contains the Matrix canvas
+	// * Animates fades and background colours
+	// * Does the Party effect animations
 	elPartyOverlay.classList.remove("hidden");
-	elPartyOverlay.animate([{ backgroundColor: "black", opacity: 0 }, { backgroundColor: "black", opacity: 1.0 }, { opacity: 0.5 }, { backgroundColor: "white" }], { duration: matrixTime, fill: 'forwards' });
+	// Fade in and out the party overlay - ending at 0.5
+	elPartyOverlay.animate([{ opacity: 0 }, { opacity: 1 }, { opacity: 1 }, { opacity: 0.5 } ], { duration: matrixTime, fill: 'forwards' });
+	// Fade in the Matrix
 	canvas.animate([{ opacity: 0 }, { opacity: 1 }], { duration: matrixFadeTime, fill: 'forwards' });
+	// Enter the Matrix
 	let matrixHandle = setInterval(matrixLoop, 50);
-	setTimeout(function () {
+	setTimeout(function() {
+		// Fade out the Matrix
 		canvas.animate([{ opacity: 1 }, { opacity: 0 }], { duration: matrixFadeTime, fill: 'forwards' });
-	}, matrixTime);
+	}, matrixTime - matrixFadeTime);
 	setTimeout(function () {
 		clearInterval(matrixHandle);
-	}, matrixTime + matrixFadeTime);
-	setTimeout(function () {
 		console.log("Matrix ended - party time!");
 		party();
 	}, matrixTime);
 	setTimeout(function() {
-		console.log("Hiding party overlay and releasing Easter Egg Mutex");
+		console.log("Hiding overlays and releasing Easter Egg Mutex");
 		elPartyOverlay.classList.add("hidden");
 		easterEggMutex = false;
 	}, matrixTime + PARTYTIME);
