@@ -713,7 +713,7 @@
 	<div id="partyOverlay" class="hidden">
 		<canvas id="canv" width="1920" height="760" style="margin-top: 160px"></canvas>
 	</div>
-	<div id="screen" class="fadeOut">
+	<div id="screen" class="fadeIn">
 		<textarea id="keyinput"></textarea><!-- Offscreen; required for keyboard control -->
 		<div id="debug" class="hidden"></div>
 		<div id="arrowDn" class="arrow hidden">
@@ -722,7 +722,7 @@
 		<div id="arrowUp" class="arrow hidden">
 			<img src="images/v3.1/arrow2_transp.png">
 		</div>
-		<div id="area-main">
+		<div id="area-main" style="display:none">
 			<div class="slider">
 				<div class="flexbox">
 					<!-- Main needs each image to have a container, so we can place the washing machine inside it to overlay 
@@ -875,7 +875,7 @@
 				</div>
 			</div>
 		</div>
-		<div id="area-undersea" style="display: none">
+		<div id="area-undersea" xstyle="display: none">
 			<div class="slider xyslider">
 				<div id="undersea-container">
 					<img id="chain" src="images/2025/undersea/chain_and_anchor.png">
@@ -888,12 +888,14 @@
 					<img id="jellyfishes" src="images/2025/undersea/jelly fishes.png" class="animate diagonalDrift">
 					<img id="nemo" src="images/2025/undersea/nemo.png" class="animate nemo">
 					<img id="seahorses" src="images/2025/undersea/sea horses.png" class="animate seahorses">
+					<div style="margin-left: 1600px">
 					<img id="moorishidol1" src="images/2025/undersea/moorishidol.png" class="animate swimCycle">
 					<img id="moorishidol2" src="images/2025/undersea/moorishidol.png" class="animate swimCycle">
 					<img id="moorishidol3" src="images/2025/undersea/moorishidol.png" class="animate swimCycle">
 					<img id="moorishidol4" src="images/2025/undersea/moorishidol.png" class="animate swimCycle">
 					<img id="moorishidol5" src="images/2025/undersea/moorishidol.png" class="animate swimCycle">
 					<img id="moorishidol6" src="images/2025/undersea/moorishidol.png" class="animate swimCycle">
+					</div>
 					<img id="starfish" src="images/2025/undersea/starfish.png" class="animate moveAround1">
 					<img id="turtle" src="images/2025/undersea/turtle.png" class="animate turtle">
 					<img id="whale" src="images/2025/undersea/whale.png" class="animate whale">
@@ -914,7 +916,7 @@
 	</div>
 	<img id="washingMachine" src="images/2025/washing_machine.png" class="fadeOut">
 	</div>
-	<script src="shadowtheatre.js?34675712"></script>
+	<!--  <script src="shadowtheatre.js?34675712"></script> -->
 </body>
 
 </html>
