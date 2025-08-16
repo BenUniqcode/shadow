@@ -157,11 +157,12 @@ const UNDERSEA_OBJECT_WIDTH = {
 // specify an exit in one direction and then try to dynamically create the reverse direction, as it could be "dragged" 
 // by going up and down while moving left or right, ending up with an exit in the wrong place, or to the wrong place. 
 // Better to explicitly state all transitions in all directions.
+const LIGHTHOUSE_CENTERX = 7420; // We need this elsewhere too
 const TRANSITIONS = {
 	"main": [
 		[2500, -1, "pirate", 3400],
 		[7420, -1, "pirate", 5795],
-		[7420, 1, "disco", 675],
+		[LIGHTHOUSE_CENTERX, 1, "disco", 675],
 		[11000, 1, "hug", 1200],
 		[12240, -1, "skyworld", 1240], // NB Mario tube, goes DOWN but to a world that is UP from elsewhere in the map
 		[13850, 1, "giant", 2000],
@@ -170,7 +171,7 @@ const TRANSITIONS = {
 		[23800, -1, "undersea", UNDERSEA_ENTRY_POS], 
 	],
 	"disco": [
-		[675, -1, "main", 7420],
+		[675, -1, "main", LIGHTHOUSE_CENTERX],
 	],
 	"dragon": [
 		[2040, 1, "main", 16680],
@@ -782,29 +783,34 @@ function party() {
 	nextMotivationalMessage = (nextMotivationalMessage + 1) % motivationalMessages.length;
 }
 
+// This gets the "true" or "old" or "absolute" value of centerX - what centerX used to be before XLOOP was a thing. 
+// In other words, what it would be if the images were still in the DOM in their original order.
+function getTrueCenterX() {
+	// If this is not a looped area, it's the normal centerX
+	if (!XLOOP[curArea]) {
+		return centerX;
+	}
+	// Translate the current image closest to the center of the screen, and its center position, into the old-style centerX value
+	let centerImage = getCenterImage();
+	let centerImageNum = getLoopImageNum(curArea, centerImage);
+	let boundingRect = centerImage.getBoundingClientRect(); // This is relative to the viewport
+	let imageCenterXpos = Math.floor(boundingRect.right - STANDARD_IMAGE_WIDTH / 2);
+	// But the image position goes the opposite way than the x position we want, so we actually want screenwidth - centrexpos as the offset
+	let imageCenterXrev = SCREEN_WIDTH - imageCenterXpos;
+	let trueCenterX = (centerImageNum - 1) * STANDARD_IMAGE_WIDTH + imageCenterXrev;
+	// But it needs a fudge because something about the maths isn't quite right
+	trueCenterX -= 250;
+	dbgOut += "<br>Image #" + centerImageNum + "'s centerXpos " + imageCenterXpos + " = Xrev " + imageCenterXrev + " = centerX " + trueCenterX;
+	return trueCenterX;
+}
+
 function calculatePermittedVertical() {
 	let canMove = false;
 	let trans = TRANSITIONS[curArea];
 	permittedVertical[DOWN] = permittedVertical[UP] = 0;
 	// We don't want to change centerX (or use it) for XLOOP levels as it's relative to the current DOM image order, which might have changed
 	// What we care about here is the "old" or "true" centerX value  
-	let trueCenterX;
-	if (XLOOP[curArea]) {
-		// Translate the current image closest to the center of the screen, and its center position, into the old-style centerX value
-		let centerImage = getCenterImage();
-		let centerImageNum = getLoopImageNum(curArea, centerImage);
-		let boundingRect = centerImage.getBoundingClientRect(); // This is relative to the viewport
-		let imageCenterXpos = Math.floor(boundingRect.right - STANDARD_IMAGE_WIDTH / 2);
-		// But the image position goes the opposite way than the x position we want, so we actually want screenwidth - centrexpos as the offset
-		let imageCenterXrev = SCREEN_WIDTH - imageCenterXpos;
-		trueCenterX = (centerImageNum - 1) * STANDARD_IMAGE_WIDTH + imageCenterXrev;
-		// But it needs a fudge because something about the maths isn't quite right
-		trueCenterX -= 250;
-		dbgOut += "<br>Image #" + centerImageNum + "'s centerXpos " + imageCenterXpos + " = Xrev " + imageCenterXrev + " = centerX " + trueCenterX;
-	} else {
-		trueCenterX = centerX;
-	}
-
+	let trueCenterX = getTrueCenterX();
 	let spaceProximityArrow = false;
 	let underseaProximityArrow = false;
 	for (let i = 0; i < trans.length; i++) {
@@ -896,14 +902,19 @@ function changeArea(destArea, destX) {
 	let swapTime = TRANSITION_TIME / 2;
 	let endTime = TRANSITION_TIME;
 	if (destArea == 'disco') {
-		const zoomTime = 1500;
-		// Add top and bottom black bars so that the enlarging image doesn't light up above and below
-		// I'm sure it should be possible to do this with overflow-y: hidden but I couldn't make that work,
-		// the image just disappears...
-		lighthouse.classList.add("zoomToLighthouse");
-		setTimeout(function () {
-			everything.classList.add("fadeOut");
-		}, zoomTime);
+		// As we are going to zoom the whole screen, need to hide the up arrow now or it gets big
+		elArrowUp.classList.add("hidden");
+		const zoomTime = 3000;
+		let trueCenterX = getTrueCenterX();
+		let lighthouseXRelativeToMiddleOfScreen = LIGHTHOUSE_CENTERX - trueCenterX;
+		// This is correct, however by trial and error a better effect is achieved if we are to the left of the lighthouse
+		// by tweaking it. The multiplier here depends on the final scale value - 1.5 works well for scale(5)
+		if (lighthouseXRelativeToMiddleOfScreen > 0) {
+			lighthouseXRelativeToMiddleOfScreen *= 1.5;
+		}
+		let lighthouseXRelativeToLeftOfScreen = lighthouseXRelativeToMiddleOfScreen + HALF_SCREEN_WIDTH;
+		everything.style.transformOrigin = lighthouseXRelativeToLeftOfScreen + "px 120px";
+		everything.classList.add("zoomToLighthouse");
 		swapTime += zoomTime;
 		endTime += zoomTime;
 	} else {
@@ -942,7 +953,7 @@ function changeArea(destArea, destX) {
 			showBars();
 		}
 		if (destArea == "disco") {
-			lighthouse.classList.remove("zoomToLighthouse");
+			everything.classList.remove("zoomToLighthouse");
 			// Start the party now so that the colours fade up
 			// This value determines how rapidly the colours cycle - 30s gives a fairly slow one
 			let partyPlace = document.getElementById("area-disco");
@@ -1211,7 +1222,7 @@ function teleport(forceWater = false) {
 		// Don't set the top in here, CSS needs to manage that for the transition
 		washingMachine.classList.replace("fadeOut", "fadeIn");
 		washingMachine.classList.add("zoomOut");
-		console.log("Applying fadeIn class");
+		console.log("Fading in washing machine");
 		// If the washing machine is on water, it starts sinking after the level appears and zoomOut completes
 		let image = imgbox.querySelector("img");
 		if (image.classList.contains("water")) {
@@ -1222,7 +1233,7 @@ function teleport(forceWater = false) {
 			}, 2000);
 		}
 		fadeOutHandle = setTimeout(function() {
-			console.log("Applying fadeOut class");
+			console.log("Fading out washing machine");
 			washingMachine.classList.replace("fadeIn", "fadeOut");
 		}, 10000);
 		teleportMutex = false;

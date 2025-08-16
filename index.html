@@ -160,11 +160,26 @@
 			transition: opacity 2.0s ease-out;
 		}
 
-		/* This class is applied to the .lighthouse img to zoom into the right part of it */
+		/* This class is applied to #screen to zoom into the lighthouse */
+		/* Previously it was applied to .lighthouse with a fixed transform-origin, but this breaks the image away from its neighbours */
+		/* Instead, we apply it to #screen and set transform-origin's X component in the JS based on centerX */
+		/* This is an animation rather than a transition so we can fade as the zoom finishes.
+		/* When I used transition here, then applied .fadeOut, it just immediately jumps to black */
+		@keyframes zoomToLighthouse {
+			0% {
+				transform: scale(1);
+				opacity: 1;
+			}
+			60% {
+				opacity: 1;
+			}
+			100% {
+				transform: scale(6);
+				opacity: 0;
+			}
+		}
 		.zoomToLighthouse {
-			transform: scale(4);
-			transform-origin: 750px 120px;
-			transition: transform 3s ease-in-out;
+			animation: zoomToLighthouse 3s ease-in forwards;
 		}
 
 		#keyinput {
