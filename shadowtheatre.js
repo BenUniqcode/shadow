@@ -93,7 +93,7 @@ const XLOOP = {
 // Unlike normal levels, these positions are not "centerX", but can be any valid X value within the range, i.e. 0 to WIDTH["undersea"] - 1 - objectWidth
 // (the position is to the top left of the object)
 // I originally had position and width as arrays inside a single object, but I found that they were not getting reset properly. This works better.
-const UNDERSEA_ENTRY_POS = WIDTH["undersea"] / 2;
+const UNDERSEA_ENTRY_POS = 2100;
 const UNDERSEA_OBJECT_POS = {
 	"chain": 3000,
 	"fish1": 800,
@@ -104,15 +104,15 @@ const UNDERSEA_OBJECT_POS = {
 	"jellyfishes": 1400,
 	"nemo": 390,
 	"seahorses": 2680,
-	"moorishidol1": 3700, // We form the shoal by using different animation-delay on each fish
-	"moorishidol2": 3700,
-	"moorishidol3": 3700,
-	"moorishidol4": 3700,
-	"moorishidol5": 3700,
-	"moorishidol6": 3700,
+	"moorishidol1": 3850, // We form the shoal by using different animation-delay on each fish
+	"moorishidol2": 3850,
+	"moorishidol3": 3850,
+	"moorishidol4": 3850,
+	"moorishidol5": 3850,
+	"moorishidol6": 3850,
 	"starfish": 5315,
 	"turtle": 1000,
-	"whale": 4000,
+	"whale": 4050,
 	"seafloor1": 0,
 	"seafloor2": 1400,
 	"seafloor3": 2300,
@@ -1037,30 +1037,9 @@ function moveUnderseaObjects(pixels) {
 		}
 		dbgOut += "<br>" + key + ": " + oldPos + " -> " + newPos + " ";
 		let el = document.getElementById(key);
-		// Because we are really moving objects, not the background, the visible area doesn't change - it's always
-		// half a screen each side of the entry point. But because the position is the left of the object, we must take account
-		// of the object's width when deciding whether to hide it on the left, otherwise it will vanish as soon as its left side touches the
-		// screen edge. 
-		const viewportL = UNDERSEA_ENTRY_POS - HALF_SCREEN_WIDTH - objectWidth;
-		const viewportR = UNDERSEA_ENTRY_POS + HALF_SCREEN_WIDTH;
-		// dbgOut += "<br>Viewport L:" + viewportL + " R:" + viewportR + " / ";
-		if (newPos < viewportL || newPos > viewportR) {
-			if (!el.classList.contains("hidden")) {
-				dbgOut += "HIDE";
-				//el.classList.add("hidden");
-			} else {
-				dbgOut += "hidden";
-			}
-		} else {
-			if (el.classList.contains("hidden")) {
-				dbgOut += "SHOW";
-				//el.classList.remove("hidden");
-			} else {
-				dbgOut += "visible";
-			}
-		}
-		// Remember the left position is relative to the div, which does not move
-		let leftVal = newPos - SCREEN_WIDTH + "px"; // I don't really understand why this is correct, but it is
+		// Remember the left position is relative to the container div, which does not move
+		// Everything is relative to the nominal entry position
+		let leftVal = newPos - UNDERSEA_ENTRY_POS + "px"; 
 		el.style.left = leftVal;
 		dbgOut += " left:" + leftVal;
 		// Update it
