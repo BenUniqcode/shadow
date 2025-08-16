@@ -976,6 +976,7 @@ function easterEgg() {
 	let matrixTime = 12000;
 	let matrixFadeTime = 3000;
 
+	elPartyOverlay.classList.remove("hidden");
 	elPartyOverlay.animate([{ backgroundColor: "black", opacity: 0 }, { backgroundColor: "black", opacity: 1.0 }, { opacity: 0.5 }, { backgroundColor: "white" }], { duration: matrixTime, fill: 'forwards' });
 	canvas.animate([{ opacity: 0 }, { opacity: 1 }], { duration: matrixFadeTime, fill: 'forwards' });
 	let matrixHandle = setInterval(matrixLoop, 50);
@@ -990,7 +991,8 @@ function easterEgg() {
 		party();
 	}, matrixTime);
 	setTimeout(function() {
-		console.log("Releasing Easter Egg Mutex");
+		console.log("Hiding party overlay and releasing Easter Egg Mutex");
+		elPartyOverlay.classList.add("hidden");
 		easterEggMutex = false;
 	}, matrixTime + PARTYTIME);
 }
