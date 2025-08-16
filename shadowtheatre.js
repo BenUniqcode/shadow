@@ -95,15 +95,15 @@ const XLOOP = {
 // I originally had position and width as arrays inside a single object, but I found that they were not getting reset properly. This works better.
 const UNDERSEA_ENTRY_POS = WIDTH["undersea"] / 2;
 const UNDERSEA_OBJECT_POS = {
-	"chain": UNDERSEA_ENTRY_POS,
+	"chain": 3000,
 	"fish1": 800,
 	"fish2": 600,
 	"jellyfish": 4300,
 	"anglerfish": 4150,
-	"crab": 3380,
+	"crab": 5040,
 	"jellyfishes": 1400,
-	"nemo": 5290,
-	"seahorses": 2850,
+	"nemo": 390,
+	"seahorses": 2680,
 	"moorishidol1": 3700, // We form the shoal by using different animation-delay on each fish
 	"moorishidol2": 3700,
 	"moorishidol3": 3700,
@@ -113,17 +113,16 @@ const UNDERSEA_OBJECT_POS = {
 	"starfish": 5315,
 	"turtle": 1000,
 	"whale": 4000,
-	"seafloor1": 50,
-	"seafloor2": 600,
-	"seafloor3": 1500,
-	"seafloor4": 2500,
-	"seafloor5": 3200,
-	"seafloor6": 4100,
-	"seafloor7": 4700,
+	"seafloor1": 0,
+	"seafloor2": 1400,
+	"seafloor3": 2300,
+	"seafloor4": 2950,
+	"seafloor5": 4100,
+	"seafloor6": 4900,
 };
 var underseaObjects = {};
 const UNDERSEA_OBJECT_WIDTH = {
-	"chain": 1297,
+	"chain": 1433,
 	"fish1": 500,
 	"fish2": 227,
 	"jellyfish": 547,
@@ -141,13 +140,12 @@ const UNDERSEA_OBJECT_WIDTH = {
 	"starfish": 228,
 	"turtle": 376,
 	"whale": 752,
-	"seafloor1": 702,
+	"seafloor1": 1600,
 	"seafloor2": 1103,
-	"seafloor3": 1103,
-	"seafloor4": 800,
-	"seafloor5": 1103,
-	"seafloor6": 800,
-	"seafloor7": 1103,
+	"seafloor3": 800,
+	"seafloor4": 1103,
+	"seafloor5": 800,
+	"seafloor6": 1103,
 };
 
 // These are the horizontal positions in each Area from where we can go up (1) or down (-1) to a different Area (or both)
