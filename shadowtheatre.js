@@ -243,6 +243,12 @@ var processActionsMutex = false; // Likewise ensure only one copy of processActi
 var anyInputOn = false; // Is anything being pressed or the joystick being moved?
 var curArea = "main"; // Which area (contiguous left-right set of images) are we in?
 var permittedVertical = []; // Whether we can go up or down (or both) from the current location
+// For "double tap" in the same direction to go faster
+const DOUBLE_TAP_MULTIPLIER = 10;
+const DOUBLE_TAP_TIMEOUT = 500;
+const DOUBLE_TAP_OFF = 999; // Any invalid direction value
+var prevDirection = DOUBLE_TAP_OFF;
+var doubleTapOn = false;
 
 var haveEvents = 'GamepadEvent' in window;
 var haveWebkitEvents = 'WebKitGamepadEvent' in window;
@@ -523,7 +529,7 @@ function getCenterImagePos() {
 function getCenterImage() {
 	let centerImagePos = getCenterImagePos();
 	let images = document.querySelectorAll("#area-" + curArea + " .slider img");
-	console.log("Looking for image pos " + centerImagePos + " out of total " + images.length + " images");
+	// console.log("Looking for image pos " + centerImagePos + " out of total " + images.length + " images");
 	return images[centerImagePos];
 }
 
@@ -1133,6 +1139,7 @@ function move() {
 		}
 	}
 	// Don't set the margins until after the images have been rearranged, to avoid jumping around
+	// undersea does not move the background left and right
 	if (curArea != "undersea") {
 		slider.style.marginLeft = -centerX + HALF_SCREEN_WIDTH + "px";
 	}
@@ -1293,6 +1300,28 @@ function zoomIntoBlackHole() {
 	});
 }
 
+// Double tap in the same direction within a certain time period makes it go faster
+// Call this function just before we are about to move
+// Note it's the input direction, irrespective of reverseLeftRight
+function checkDoubleTap(inputDirection) {
+	// Must have returned to idle between the inputs
+	if (!wasIdle) {
+		return;
+	}
+	if (prevDirection == inputDirection) {
+		console.log("Double Tap!");
+		scrollSpeed *= DOUBLE_TAP_MULTIPLIER;
+		doubleTapOn = true;
+		// Now it's disabled, so it's not additive
+		prevDirection = DOUBLE_TAP_OFF;
+	} else {
+		prevDirection = inputDirection;
+		setTimeout(function() {
+			prevDirection = DOUBLE_TAP_OFF;
+		}, DOUBLE_TAP_TIMEOUT);
+	}
+}
+
 // Respond to inputs. The arg is whether to call requestAnimationFrame - true for keyboard control, false for joystick because it's called from readGamePad
 function processActions(raf = true, forceOutput = false) {
 	if (processActionsMutex) {
@@ -1390,6 +1419,11 @@ function processActions(raf = true, forceOutput = false) {
 
 	if (!anyInputOn) {
 		wasIdle = true;
+		// Cancel double tap if it's on
+		if (doubleTapOn) {
+			scrollSpeed /= DOUBLE_TAP_MULTIPLIER;
+			doubleTapOn = false;
+		}
 	}
 	if (anyInputOn || forceOutput) {
 		dbgOut = "";
@@ -1399,6 +1433,7 @@ function processActions(raf = true, forceOutput = false) {
 
 		// Handle left/right movement
 		if (isOn[LEFT]) {
+			checkDoubleTap(LEFT);
 			// Left (or is it right?)
 			if (reverseLeftRight) {
 				moveRight();
@@ -1409,6 +1444,7 @@ function processActions(raf = true, forceOutput = false) {
 		// This is not an else, so that left and right cancel
 		// out when both are pressed, rather than left dominating
 		if (isOn[RIGHT]) {
+			checkDoubleTap(RIGHT);
 			if (reverseLeftRight) {
 				moveLeft();
 			} else {
@@ -1419,9 +1455,6 @@ function processActions(raf = true, forceOutput = false) {
 			dbgOut += "<br><em>L/R Reversed</em>";
 		}
 
-		// No else here, because we can also exit from space via the DOWN direction, if we are 
-		// at the bottom (and it's in horizontal range)
-		// other areas use up/down for transitions to other areas
 		// Find out if we are near a transition point
 		calculatePermittedVertical();
 		// Are we actually moving up or down?
@@ -1448,10 +1481,12 @@ function processActions(raf = true, forceOutput = false) {
 		} else if (HEIGHT[curArea]) {
 			// XY areas also allow up/down movement within the area. Do this only if no exit was taken.
 			if (isOn[UP]) {
+				checkDoubleTap(UP);
 				moveUp();
 			}
 			// No else here, so that simultaneous up and down cancel instead of down dominating
 			if (isOn[DOWN]) {
+				checkDoubleTap(DOWN);
 				moveDown();
 			}
 		}
