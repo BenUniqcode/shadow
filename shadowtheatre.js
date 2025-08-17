@@ -40,10 +40,10 @@ const KEYMAP = { // Keyboard control mapping to joystick equivalents
 	Digit2: BTN_B,
 };
 const KONAMI_CODE = [UP, UP, DOWN, DOWN, LEFT, RIGHT, LEFT, RIGHT];
-const SPACE_CODE = [UP, UP, DOWN, DOWN, UP, UP];
+const SPACE_CODE = [UP, UP, UP, DOWN, DOWN, DOWN, UP, UP, UP];
 
 // How long the Easter Egg "party" lasts
-const PARTYTIME = 12000;
+const PARTYTIME = 10000;
 
 // Disco - colours evolve every DISCOTIME ms, and a random number of movements will occur upto MAX_MOVEMENTS during that period
 const DISCOTIME = 8000;
@@ -657,7 +657,7 @@ function discoColorsEvolve() {
 	evolveIndex = (evolveIndex + 1) % discoGradientColorNames.length;
 }
 
-// Move the background position around - the higher the number of loops or the lower the partyTime, the more chaotic
+// Move the background position around
 function discoColorsMove() {
 	let numMovements = Math.floor(Math.random() * MAX_MOVEMENTS_PER_DISCOTIME) + 1; // Must not be zero
 	console.log("discoColorsMove: Generating " + numMovements + " movements over the next " + DISCOTIME + " ms");
@@ -753,7 +753,7 @@ function party() {
 		console.log("Only one image in this area");
 		images[0].animate(imageAnims, { duration: PARTYTIME });
 	} else  {
-		if (curArea == "undersea") {
+		if (curArea == "undersea" || curArea == "space") {
 			// Animate every image - this is inefficient, we should really only do those that are visible,
 			// but you can still move, so others may become visible...
 			imagesToAnimate = [...Array(images.length).keys()]; // Effectively 0 .. images.length
@@ -1368,27 +1368,22 @@ function processActions(raf = true, forceOutput = false) {
 	if (wasIdle) {
 		if (isOn[KONAMI_CODE[konamiCodePos]]) {
 			konamiCodePos++;
-			console.log("Konami Pos is " + konamiCodePos);
 			if (konamiCodePos == KONAMI_CODE.length) {
 				// Got the code!
 				easterEgg();
-				console.log("Resetting Konami Pos after success");
 				konamiCodePos = 0;
 			}
 		} else if (konamiCodePos && anyInputOn) {
-			console.log("Resetting Konami Pos due to incorrect entry");
 			konamiCodePos = 0;
 		}
-		if (isOn[SPACE_CODE[spaceCodePos]]) {
+		// Space shortcut code - only if we're not there already
+		if (curArea != "space" && isOn[SPACE_CODE[spaceCodePos]]) {
 			spaceCodePos++;
-			console.log("Space Code Pos is " + spaceCodePos);
 			if (spaceCodePos == SPACE_CODE.length) {
 				changeArea("space", SPACE_ENTRY_POS);
-				console.log("Resetting Space Pos after success");
 				spaceCodePos = 0;
 			}
 		} else if (spaceCodePos && anyInputOn) {
-			console.log("Resetting Space Pos due to incorrect entry");
 			spaceCodePos = 0;
 		}
 	}
@@ -1460,10 +1455,13 @@ function processActions(raf = true, forceOutput = false) {
 				moveDown();
 			}
 		}
-		wasIdle = false;
+		// Only set wasIdle false if this movement was due to a user input, rather than forceOutput
+		// Otherwise gravity prevents idling (and detecting secret codes) in space
+		if (anyInputOn) {
+			wasIdle = false;
+		}
 		// Output the debug messages only if they've changed
 		dbg(dbgOut);
-
 	}
 
 	// If using only keyboard control, we need to loop this function so that holding a key down has the right effect
