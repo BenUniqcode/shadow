@@ -40,7 +40,14 @@ const KEYMAP = { // Keyboard control mapping to joystick equivalents
 	Digit2: BTN_B,
 };
 const KONAMI_CODE = [UP, UP, DOWN, DOWN, LEFT, RIGHT, LEFT, RIGHT, BTN_B, BTN_A];
+// How long the Easter Egg "party" lasts
 const PARTYTIME = 12000;
+
+// Disco - colours evolve every DISCOTIME ms, and a random number of movements will occur upto MAX_MOVEMENTS during that period
+const DISCOTIME = 8000;
+const MAX_MOVEMENTS_PER_DISCOTIME = 20;
+var lastDiscoAnim; // Need to save this between runs of discoMove() to avoid sudden jumps
+
 // Location and gravity strength of Black Hole
 const BLACKHOLEX = 960; // centerX value
 const BLACKHOLEY = 600; // centerY value
@@ -241,7 +248,7 @@ var elArrowDn = document.getElementById("arrowDn");
 var elArrowUp = document.getElementById("arrowUp");
 var elPartyOverlay = document.getElementById("partyOverlay");
 
-var partyHandle, arrowMoverHandle;
+var partyHandle, arrowMoverHandle, discoMoveHandle, discoEvolveHandle;
 
 var fadeOutHandle;
 
@@ -612,24 +619,7 @@ function matrixLoop() {
 	});
 }
 
-// In disco mode, the down arrow is kinda annoying stuck in one place, so let's move it around
-function arrowMover() {
-	elArrowDn.style.bottom = (10 + Math.floor(Math.random() * 80)) + "vh";
-	elArrowDn.style.left = (10 + Math.floor(Math.random() * 80)) + "vw";
-}
-
-// Alternate evolving one or the other colour of the gradient
-function discoColorsEvolve() {
-	let randomH = Math.floor(Math.random() * 360);
-	let randomS = Math.floor(Math.random() * 20) + 80; // 80-100% saturation
-	let randomL = Math.floor(Math.random() * 50) + 20; // 20-70%
-
-	let nextColor = 'hsl(' + randomH + 'deg, ' + randomS + '%, ' + randomL + '%)';
-	// Apply the new color, update the DOM.
-	document.getElementById("area-disco").style.setProperty(discoGradientColorNames[evolveIndex], nextColor);
-	evolveIndex = (evolveIndex + 1) % discoGradientColorNames.length;
-}
-
+// Colours for the Easter Egg
 function partyColors(partyTime) {
 	console.log("partyColors");
 	let colorAnims = [];
@@ -642,22 +632,42 @@ function partyColors(partyTime) {
 	elPartyOverlay.animate(colorAnims, { duration: partyTime });
 }
 
-function discoColors(partyTime, partyPlace) {
-	console.log("discoColors");
-	let colorAnims = [];
-	for (let i = 0; i < 50; i++) {
-		let randomX = Math.floor(Math.random() * 100); // in %
-		let randomY = Math.floor(Math.random() * 100); // in %
-		if (partyPlace == document.body) {
-			let randomH = Math.floor(Math.random() * 360);
-			let randomS = Math.floor(Math.random() * 20) + 80; // 80-100% saturation
-			let randomL = Math.floor(Math.random() * 50) + 50; // 50-100%
-			colorAnims.push({ backgroundColor: "hsl(" + randomH + "," + randomS + "," + randomL + ")" });
-		} else {
-			colorAnims.push({ backgroundPosition: randomX + "% " + randomY + "%" });
-		}
+// In disco mode, the down arrow is kinda annoying stuck in one place, so let's move it around
+function arrowMover() {
+	elArrowDn.style.top = (10 + Math.floor(Math.random() * 80)) + "%"; // 10-90%
+	elArrowDn.style.left = (10 + Math.floor(Math.random() * 80)) + "%";
+}
+
+// Alternate evolving one or the other colour of the gradient
+function discoColorsEvolve() {
+	let randomH = Math.floor(Math.random() * 360);
+	let randomS = Math.floor(Math.random() * 20) + 80; // 80-100% saturation
+	let randomL = Math.floor(Math.random() * 50) + 20; // 20-70%
+
+	let nextColor = 'hsl(' + randomH + 'deg, ' + randomS + '%, ' + randomL + '%)';
+	// Apply the new color, update the DOM.
+	console.log("discoColorsEvolve: Setting " + discoGradientColorNames[evolveIndex] + " to " + nextColor);
+	document.getElementById("area-disco").style.setProperty(discoGradientColorNames[evolveIndex], nextColor);
+	evolveIndex = (evolveIndex + 1) % discoGradientColorNames.length;
+}
+
+// Move the background position around - the higher the number of loops or the lower the partyTime, the more chaotic
+function discoColorsMove() {
+	let numMovements = Math.floor(Math.random() * MAX_MOVEMENTS_PER_DISCOTIME) + 1; // Must not be zero
+	console.log("discoColorsMove: Generating " + numMovements + " movements over the next " + DISCOTIME + " ms");
+	let anims = [];
+	if (lastDiscoAnim) {
+		// Start from where we ended up last time, to avoid sudden jumps
+		anims.push(lastDiscoAnim);
 	}
-	partyPlace.animate(colorAnims, { duration: partyTime });
+	for (let i = 0; i < numMovements; i++) {
+		let randomX = Math.floor(Math.random() * 100); // %
+		let randomY = Math.floor(Math.random() * 100); // %
+		anims.push({ backgroundPosition: randomX + "% " + randomY + "%" });
+	}
+	lastDiscoAnim = anims[anims.length - 1]; // Save it for use next time
+	console.log(anims);
+	document.getElementById("area-disco").animate(anims, { duration: DISCOTIME, fill: "forwards" });
 }
 
 function party() {
@@ -926,7 +936,6 @@ function changeArea(destArea, destX) {
 	washingMachine.classList.remove("zoomOut");
 	washingMachine.classList.remove("sink");
 
-	// everything.animate([{ opacity: 1 }, { opacity: 0 }, { opacity: 1 }], { duration: TRANSITION_TIME, follow: "forwards" });
 	// Halfway through the transition, swap over the images, scroll to the right place, and calculate the new exits
 	setTimeout(function () {
 		elCurArea.style.display = "none";
@@ -954,28 +963,42 @@ function changeArea(destArea, destX) {
 		}
 		if (destArea == "disco") {
 			everything.classList.remove("zoomToLighthouse");
-			// Start the party now so that the colours fade up
-			// This value determines how rapidly the colours cycle - 30s gives a fairly slow one
-			let partyPlace = document.getElementById("area-disco");
-			discoColors(PARTYTIME, partyPlace);
+			everything.style.transformOrigin = "";
+			// Start the disco
+			// The number of movements during each DISCOTIME ms will be random with an upper limit of MAX_MOVEMENTS_PER_DISCOTIME
+			// Pick two random starting colours
 			discoColorsEvolve();
-			setInterval(discoColorsEvolve, 6000);
-			partyHandle = setInterval(function () {
-				discoColors(PARTYTIME, partyPlace);
-			}, PARTYTIME);
+			discoColorsEvolve();
+			// Start moving
+			discoColorsMove();
+			// Move every DISCOTIME
+			discoMoveHandle = setInterval(function () {
+				discoColorsMove();
+			}, DISCOTIME);
+			// Evolve the colours halfway through each set of movements
+			setTimeout(function() {
+				discoColorsEvolve();
+				discoEvolveHandle = setInterval(function() {
+					discoColorsEvolve();
+				}, DISCOTIME);
+			}, DISCOTIME/2);
 			elArrowDn.classList.add("moving");
 			arrowMoverHandle = setInterval(function () {
 				arrowMover();
 			}, 30000);
 		} else {
 			// Stop any ongoing party
-			if (partyHandle) {
-				clearInterval(partyHandle);
+			if (discoMoveHandle) {
+				clearInterval(discoMoveHandle);
 				clearInterval(arrowMoverHandle);
+				// This one is started later so it might not have been started
+				if (discoEvolveHandle) {
+					clearInterval(discoEvolveHandle);
+				}
 				elArrowDn.classList.remove("moving");
-				elArrowDn.style.bottom = "220px";
-				elArrowDn.style.left = "50vw";
-				showBars();
+				// Revert to default position
+				elArrowDn.style.top = "";
+				elArrowDn.style.left = "";
 			}
 		}
 	}, swapTime);

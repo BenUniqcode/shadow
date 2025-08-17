@@ -291,11 +291,11 @@
 			background: radial-gradient(circle at center,
 					var(--disco-gradient-color-0),
 					var(--disco-gradient-color-1));
-			background-size: 200% 200%;
+			background-size: 400% 400%;
 			transition:
 				--disco-gradient-color-0 2s linear,
 				--disco-gradient-color-1 2s linear;
-
+			opacity: 0.9;
 		}
 
 		/* Undersea */
@@ -694,6 +694,7 @@
 			position: fixed;
 			width: 50px;
 			height: 50px;
+			left: 935px; /* 960 (half screen width) minus 25 (half width of arrow) */
 			z-index: 10;
 			animation-name: arrowpulse;
 			animation-timing-function: ease-out;
@@ -704,16 +705,14 @@
 
 		#arrowUp {
 			top: 170px;
-			left: calc(50vw - 25px); /* Image is 50px wide */
 		}
 
 		#arrowDn {
 			top: 850px;
-			left: calc(50vw - 25px); /* Image is 50px wide */
 		}
 		#arrowDn.moving {
 			/* In Disco mode it moves around - animate that */
-			transition: bottom 30s ease-in-out, left 30s ease-in-out;
+			transition: top 30s ease-in-out, left 30s ease-in-out;
 		}
 		/* We use the same image for both arrows, and rotate it for the down one */
 		#arrowDn img {
@@ -822,7 +821,7 @@
 			<!-- No slider in here, we want it to be the full projection height so it does funky colours on the trees and controls too -->
 			<div class="discospace">
 				<!-- Nothing here, it's done in JS -->
-				<!-- discospace instead of slider ensures no movement, but right height -->
+				<!-- discospace instead of slider ensures no movement, but right height - required because area-disco is twice the size so that we can move it around in order to get the center of the radial gradient to move around -->
 			</div>
 		</div>
 		<div id="area-giant" style="display: none">
