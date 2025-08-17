@@ -39,7 +39,9 @@ const KEYMAP = { // Keyboard control mapping to joystick equivalents
 	Digit1: BTN_A,
 	Digit2: BTN_B,
 };
-const KONAMI_CODE = [UP, UP, DOWN, DOWN, LEFT, RIGHT, LEFT, RIGHT, BTN_B, BTN_A];
+const KONAMI_CODE = [UP, UP, DOWN, DOWN, LEFT, RIGHT, LEFT, RIGHT];
+const SPACE_CODE = [UP, UP, DOWN, DOWN, UP, UP];
+
 // How long the Easter Egg "party" lasts
 const PARTYTIME = 12000;
 
@@ -55,6 +57,10 @@ const BLACKHOLE_GRAVITY = 10 ** 3;
 // Size of washing machine
 const WASHING_MACHINE_WIDTH = 189;
 const WASHING_MACHINE_HEIGHT = 237;
+
+// Where we enter certain levels that have multiple ways of getting in
+const UNDERSEA_ENTRY_POS = 2100;
+const SPACE_ENTRY_POS = 6695;
 
 // How close do we need to be to the edge of an XY area that has an exit, to see the arrow, and then to actually take the exit
 const XY_ARROW_PROXIMITY = 150;
@@ -100,7 +106,6 @@ const XLOOP = {
 // Unlike normal levels, these positions are not "centerX", but can be any valid X value within the range, i.e. 0 to WIDTH["undersea"] - 1 - objectWidth
 // (the position is to the top left of the object)
 // I originally had position and width as arrays inside a single object, but I found that they were not getting reset properly. This works better.
-const UNDERSEA_ENTRY_POS = 2100;
 const UNDERSEA_OBJECT_POS = {
 	"chain": 3000,
 	"fish1": 800,
@@ -200,10 +205,10 @@ const TRANSITIONS = {
 	"skyworld": [
 		[1240, -1, "main", 12240], // Goes back DOWN to main even though we came DOWN from there
 		[6700, -1, "main", 18200],
-		[6700, 1, "space", 6695],
+		[6700, 1, "space", SPACE_ENTRY_POS],
 	],
 	"space": [
-		[6695, -1, "skyworld", 6700],
+		[SPACE_ENTRY_POS, -1, "skyworld", 6700],
 		// Space can also be exited via Black Hole
 	],
 	"undersea": [
@@ -222,7 +227,8 @@ var centerY = HALF_SCREEN_HEIGHT;  // Only matters for xy areas, and will be set
 var scrollSpeedLimiter = false; // Is set to true when the scroll speed changes, which blocks further changes for a while, to reduce the speed at which it was changing
 var raftimer;
 var hudFader;
-var konamiPos = 0; // Current position in the Konami code
+var konamiCodePos = 0; // Current position in the Konami code
+var spaceCodePos = 0; // Current position in the Space shortcut code
 var wasIdle = true; // Whether no inputs were read on the last run through - for Konami discretisation
 var gravityEnabled = true; // Whether gravity is enabled in space
 var animationEnabled = true; // Whether animations such as spinning cogs and moving creatures are enabled
@@ -477,7 +483,7 @@ function keydown(e) {
 					teleport();
 				}
 			} else {
-				changeArea("space", 6695);
+				changeArea("space", SPACE_ENTRY_POS);
 			}
 			break;
 		}
@@ -1360,19 +1366,30 @@ function processActions(raf = true, forceOutput = false) {
 	// Keep track of progress through Konami. To ensure that only discrete movements advance the pattern,
 	// we only step to the next one when entering the correct state from a "nothing pressed" state
 	if (wasIdle) {
-		if (isOn[KONAMI_CODE[konamiPos]]) {
-			console.log("Konami Pos is " + konamiPos);
-			if (konamiPos == 9) {
+		if (isOn[KONAMI_CODE[konamiCodePos]]) {
+			konamiCodePos++;
+			console.log("Konami Pos is " + konamiCodePos);
+			if (konamiCodePos == KONAMI_CODE.length) {
 				// Got the code!
 				easterEgg();
 				console.log("Resetting Konami Pos after success");
-				konamiPos = 0;
-			} else {
-				konamiPos++;
+				konamiCodePos = 0;
 			}
-		} else if (konamiPos && anyInputOn) {
+		} else if (konamiCodePos && anyInputOn) {
 			console.log("Resetting Konami Pos due to incorrect entry");
-			konamiPos = 0;
+			konamiCodePos = 0;
+		}
+		if (isOn[SPACE_CODE[spaceCodePos]]) {
+			spaceCodePos++;
+			console.log("Space Code Pos is " + spaceCodePos);
+			if (spaceCodePos == SPACE_CODE.length) {
+				changeArea("space", SPACE_ENTRY_POS);
+				console.log("Resetting Space Pos after success");
+				spaceCodePos = 0;
+			}
+		} else if (spaceCodePos && anyInputOn) {
+			console.log("Resetting Space Pos due to incorrect entry");
+			spaceCodePos = 0;
 		}
 	}
 
