@@ -23,20 +23,46 @@
 			width: 1920px;
 		}
 
-		#cog {
-			position: absolute;
-			z-index: 20;
-			/* Must be positioned from top left in order to stay in the same place relative to background. bottom/right makes it stay
-			   in one place relative to the screen */
-			top: 1480px;
-			left: 5350px;
-		}
+		/* Space objects */
 
 		#blackhole {
 			position: absolute;
 			z-index: 20;
-			top: -50px;
-			left: 200px;
+			top: -47px;
+			left: 197px;
+		}
+
+		#cog1 {
+			position: absolute;
+			z-index: 20;
+			/* Must be positioned from top left in order to stay in the same place relative to background. bottom/right makes it stay
+			   in one place relative to the screen, because we animate top and left to move around */
+			top: 1450px;
+			left: 5355px;
+		}
+
+		#cog2 {
+			position: absolute;
+			top: 1121px;
+			left: 5604px;
+		}
+
+		#cog3 {
+			position: absolute;
+			top: 1195px;
+			left: 5992px;
+		}
+
+		#cog4 {
+			position: absolute;
+			top: 1306px;
+			left: 5755px;
+		}
+
+		#kaleidoscope {
+			position: absolute;
+			top: 1475px;
+			left: 3700px;
 		}
 
 		/* Objects that can be continously animated must have the "animate" class, as well as a class to define the type of animation */
@@ -49,6 +75,11 @@
 		.animate.spin {
 			animation: spin 4s linear infinite;
 		}
+
+		#kaleidoscope.animate.spin {
+			animation-direction: reverse;
+		}
+
 		@keyframes blackholespin {
 			100% {
 				transform: rotate(-360deg);
@@ -873,8 +904,12 @@
 		<div id="area-space" style="display: none">
 			<div class="slider xyslider">
 				<img id="spaceBackground" src="images/2025/space/space.png">
-				<img id="cog" src="images/2025/space/cog.png" class="animate spin">
 				<img id="blackhole" src="images/2025/space/blackhole.png" class="animate blackholespin">
+				<img id="cog1" src="images/2025/space/cog1.png" class="animate spin">
+				<img id="cog2" src="images/2025/space/cog2.png" class="animate spin">
+				<img id="cog3" src="images/2025/space/cog3.png" class="animate spin">
+				<img id="cog4" src="images/2025/space/cog4.png" class="animate spin">
+				<img id="kaleidoscope" src="images/2025/space/kaleidoscope.png" class="animate spin">
 			</div>
 		</div>
 		<div id="area-hyperspace" style="display: none">
