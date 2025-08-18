@@ -348,7 +348,7 @@
 		/* Undersea */
 
 		/* Normal fish swimming */
-		@keyframes swimCycle {
+		@keyframes shoal {
 			0% {
 				transform: translate(0px, 0px) scaleX(1);
 				z-index: 5; /* In front of chain */
@@ -364,12 +364,31 @@
 				transform: translate(0px, 0px) scaleX(-1);
 			}
 		}
-		.animate.swimCycle {
-			animation: swimCycle 12s linear infinite;
+		.animate.shoal {
+			animation: shoal 12s linear infinite;
+		}
+
+		/* For larger slower fish */
+		@keyframes fish1 {
+			0% {
+				transform: translate(-10px, 0px) scaleX(1);
+			}
+			49% {
+				transform: translate(-1510px, 0px) scaleX(1);
+			}
+			50% {
+				transform: translate(-1490px, 0px) scaleX(-1);
+			}
+			99% {
+				transform: translate(10px, 0px) scaleX(-1);
+			}
+		}
+		.animate.fish1 {
+			animation: fish1 20s linear infinite;
 		}
 
 		/* For fish that point the other way - otherwise they'll swim backwards... */
-		@keyframes swimCycleRev {
+		@keyframes fish2 {
 			0% {
 				transform: translate(-10px, 0px) scaleX(1);
 			}
@@ -383,8 +402,8 @@
 				transform: translate(10px, 0px) scaleX(-1);
 			}
 		}
-		.animate.swimCycleRev {
-			animation: swimCycleRev 5s linear infinite;
+		.animate.fish2 {
+			animation: fish2 5s linear infinite;
 		}
 		@keyframes nemo {
 			0% {
@@ -402,25 +421,6 @@
 		}
 		.animate.nemo {
 			animation: nemo 15s ease-out infinite;
-		}
-
-		/* For larger slower fish */
-		@keyframes swimCycleLongSlow {
-			0% {
-				transform: translate(-10px, 0px) scaleX(1);
-			}
-			49% {
-				transform: translate(-1510px, 0px) scaleX(1);
-			}
-			50% {
-				transform: translate(-1490px, 0px) scaleX(-1);
-			}
-			99% {
-				transform: translate(10px, 0px) scaleX(-1);
-			}
-		}
-		.animate.swimCycleLongSlow {
-			animation: swimCycleLongSlow 20s linear infinite;
 		}
 
 		/* Turtle */
@@ -964,20 +964,20 @@
 				<div id="undersea-container">
 					<img id="chain" src="images/2025/undersea/chain_and_anchor.png">
 
-					<img id="fish1" src="images/2025/undersea/A fish 1.png" class="animate swimCycleLongSlow">
-					<img id="fish2" src="images/2025/undersea/A fish 2.png" class="animate swimCycleRev">
+					<img id="fish1" src="images/2025/undersea/A fish 1.png" class="animate fish1">
+					<img id="fish2" src="images/2025/undersea/A fish 2.png" class="animate fish2">
 					<img id="jellyfish" src="images/2025/undersea/A jelly fish 1.png" class="animate diagonalDrift">
 					<img id="anglerfish" src="images/2025/undersea/angler fish 1.png" class="animate moveAround3">
 					<img id="crab" src="images/2025/undersea/crab.png" class="animate crab">
 					<img id="jellyfishes" src="images/2025/undersea/jelly fishes.png" class="animate diagonalDrift">
 					<img id="nemo" src="images/2025/undersea/nemo.png" class="animate nemo">
 					<img id="seahorses" src="images/2025/undersea/sea horses.png" class="animate seahorses">
-					<img id="moorishidol1" src="images/2025/undersea/moorishidol.png" class="animate swimCycle">
-					<img id="moorishidol2" src="images/2025/undersea/moorishidol.png" class="animate swimCycle">
-					<img id="moorishidol3" src="images/2025/undersea/moorishidol.png" class="animate swimCycle">
-					<img id="moorishidol4" src="images/2025/undersea/moorishidol.png" class="animate swimCycle">
-					<img id="moorishidol5" src="images/2025/undersea/moorishidol.png" class="animate swimCycle">
-					<img id="moorishidol6" src="images/2025/undersea/moorishidol.png" class="animate swimCycle">
+					<img id="moorishidol1" src="images/2025/undersea/moorishidol.png" class="animate shoal">
+					<img id="moorishidol2" src="images/2025/undersea/moorishidol.png" class="animate shoal">
+					<img id="moorishidol3" src="images/2025/undersea/moorishidol.png" class="animate shoal">
+					<img id="moorishidol4" src="images/2025/undersea/moorishidol.png" class="animate shoal">
+					<img id="moorishidol5" src="images/2025/undersea/moorishidol.png" class="animate shoal">
+					<img id="moorishidol6" src="images/2025/undersea/moorishidol.png" class="animate shoal">
 					<img id="starfish" src="images/2025/undersea/starfish.png" class="animate moveAround1">
 					<img id="turtle" src="images/2025/undersea/turtle.png" class="animate turtle">
 					<img id="whale" src="images/2025/undersea/whale.png" class="animate whale">
