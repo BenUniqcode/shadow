@@ -1,9 +1,8 @@
 /*
- * Shadow Theatre Joystick Controller
- * Written 2023-2024 by Ben Wheeler <ben@uniqcode.com>
+ * Shadow Theatre scenery controller
+ * Written 2023-2025 by Ben Wheeler <ben@uniqcode.com>
  * with some hints from
- * Gamepad API Test
- * Written in 2013 by Ted Mielczarek <ted@mielczarek.org>
+ * Gamepad API Test written in 2013 by Ted Mielczarek <ted@mielczarek.org>
  */
 
 // Screen size
