@@ -103,8 +103,7 @@ const XLOOP = {
 // These will be loaded into a mutable array on entry to this area
 // These will change mod the area width as we "move" left and right.
 // Unlike normal levels, these positions are not "centerX", but can be any valid X value within the range, i.e. 0 to WIDTH["undersea"] - 1 - objectWidth
-// (the position is to the top left of the object)
-// I originally had position and width as arrays inside a single object, but I found that they were not getting reset properly. This works better.
+// I originally used the width in the calculations but there's no need, just make sure to choose these values so that images don't get cut off on the right
 const UNDERSEA_OBJECT_POS = {
 	"chain": 3000,
 	"fish1": 800,
@@ -131,33 +130,17 @@ const UNDERSEA_OBJECT_POS = {
 	"seafloor5": 4100,
 	"seafloor6": 4900,
 };
-var underseaObjects = {};
-const UNDERSEA_OBJECT_WIDTH = {
-	"chain": 1433,
-	"fish1": 500,
-	"fish2": 227,
-	"jellyfish": 547,
-	"anglerfish": 710,
-	"crab": 178,
-	"jellyfishes": 1017,
-	"nemo": 202,
-	"seahorses": 170,
-	"moorishidol1": 139,
-	"moorishidol2": 139,
-	"moorishidol3": 139,
-	"moorishidol4": 139,
-	"moorishidol5": 139,
-	"moorishidol6": 139,
-	"starfish": 228,
-	"turtle": 376,
-	"whale": 752,
-	"seafloor1": 1600,
-	"seafloor2": 1103,
-	"seafloor3": 800,
-	"seafloor4": 1103,
-	"seafloor5": 800,
-	"seafloor6": 1103,
+// The moorish idols all have the same X pos and use animation-delay to spread out - this produces a more pleasing animation, and ensures the shoal stays together
+// But it means when animations are disabled they all bunch up. So we apply this adjustment in that case.
+const UNDERSEA_OBJECT_POS_NOANIM_ADJUST = {
+	"moorishidol1": -250,
+	"moorishidol2": -190,
+	"moorishidol3": -170,
+	"moorishidol4": -110,
+	"moorishidol5": -80,
+	"moorishidol6": 0,
 };
+var underseaObjects = {};
 
 // These are the horizontal positions in each Area from where we can go up (1) or down (-1) to a different Area (or both)
 // If our position is within a certain distance of such a place, the arrow will appear and going up/down is allowed.
@@ -423,11 +406,19 @@ function keydown(e) {
 					el.classList.replace("animate", "canAnimate");
 				});
 				animationEnabled = false;
+				if (curArea == "undersea") {
+					// Recalculate the object positions to take account of the animation status change
+					moveUnderseaObjects(0);
+				}
 			} else {
 				document.querySelectorAll("img.canAnimate").forEach((el) => {
 					el.classList.replace("canAnimate", "animate");
 				});
 				animationEnabled = true;
+				if (curArea == "undersea") {
+					// Recalculate the object positions to take account of the animation status change
+					moveUnderseaObjects(0);
+				}
 			}
 			break;
 		case 'd':
@@ -681,6 +672,7 @@ function discoColorsMove() {
 	document.getElementById("area-disco").animate(anims, { duration: DISCOTIME, fill: "forwards" });
 }
 
+// The "party" part of the Easter Egg
 function party() {
 	inputsBlocked = true;
 	setTimeout(function () {
@@ -754,6 +746,7 @@ function party() {
 	// If there is only one image, do it
 	// Otherwise, try to only animate the main image that's on the screen, and its neighbours
 	let imagesToAnimate;
+	let animationWasEnabled = animationEnabled;
 	if (images.length == 1) {
 		console.log("Only one image in this area");
 		images[0].animate(imageAnims, { duration: PARTYTIME });
@@ -763,6 +756,14 @@ function party() {
 			// but you can still move, so others may become visible...
 			imagesToAnimate = [...Array(images.length).keys()]; // Effectively 0 .. images.length
 			console.log(imagesToAnimate);
+			// If things are already moving on this level, stop them until the party's over - this allows
+			// adjusting things like the shoal of fish
+			if (animationEnabled) {
+				animationEnabled = false;
+				if (curArea == "undersea") {
+					moveUnderseaObjects(0);
+				}
+			}
 		} else {
 			// When there are multiple images in a slider, assume they are all the same size (1351 wide)
 			// The index of the image at the centre of the screen will therefore be floor(centerX / 1351)
@@ -802,6 +803,15 @@ function party() {
 		}, 3000);
 	}
 	nextMotivationalMessage = (nextMotivationalMessage + 1) % motivationalMessages.length;
+	// When the party's over, re-enable normal animations if they were disabled
+	setTimeout(function() {
+		if (animationWasEnabled && !animationEnabled) {
+			animationEnabled = true;
+			if (curArea == "undersea") {
+				moveUnderseaObjects(0);
+			}
+		}
+	}, PARTYTIME);
 }
 
 // This gets the "true" or "old" or "absolute" value of centerX - what centerX used to be before XLOOP was a thing. 
@@ -1087,7 +1097,6 @@ function populateUnderseaObjects() {
 function moveUnderseaObjects(pixels) {
 	for (var key in underseaObjectPos) {
 		const oldPos = underseaObjectPos[key];
-		const objectWidth = UNDERSEA_OBJECT_WIDTH[key];
 		let newPos = oldPos;
 		if (pixels > 0) {
 			newPos = (newPos + pixels) % WIDTH["undersea"]; // right wrap
@@ -1098,14 +1107,20 @@ function moveUnderseaObjects(pixels) {
 			}
 		}
 		dbgOut += "<br>" + key + ": " + oldPos + " -> " + newPos + " ";
+		// Update the internal object pos prior to any noanim adjustment, so that it remains correct
+		// when animation is started and stopped
+		underseaObjectPos[key] = newPos;
+		// Now update the object's on-screen position
 		let el = document.getElementById(key);
 		// Remember the left position is relative to the container div, which does not move
 		// Everything is relative to the nominal entry position
-		let leftVal = newPos - UNDERSEA_ENTRY_POS + "px"; 
-		el.style.left = leftVal;
+		let leftVal = newPos - UNDERSEA_ENTRY_POS
+		// The moorish idols use animation-delay to spread out, so if animations are disabled, they need adjusting
+		if (!animationEnabled && UNDERSEA_OBJECT_POS_NOANIM_ADJUST[key]) {
+			leftVal += UNDERSEA_OBJECT_POS_NOANIM_ADJUST[key];
+		}
+		el.style.left = leftVal + "px";
 		dbgOut += " left:" + leftVal;
-		// Update it
-		underseaObjectPos[key] = newPos;
 	}
 }
 
