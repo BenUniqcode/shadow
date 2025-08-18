@@ -39,30 +39,51 @@
 			   in one place relative to the screen, because we animate top and left to move around */
 			top: 1450px;
 			left: 5355px;
+			animation-duration: 7s;
 		}
 
 		#cog2 {
 			position: absolute;
 			top: 1121px;
 			left: 5604px;
+			animation-duration: 5s;
 		}
 
 		#cog3 {
 			position: absolute;
 			top: 1195px;
 			left: 5992px;
+			animation-duration: 5s;
 		}
 
 		#cog4 {
 			position: absolute;
 			top: 1306px;
 			left: 5755px;
+			animation-direction: reverse;
+			animation-duration: 8s;
+		}
+
+		#cog5 {
+			position: absolute;
+			top: 1659px;
+			left: 5887px;
+			animation-duration: 4s;
+		}
+
+		#cog6 {
+			position: absolute;
+			top: 1788px;
+			left: 6212px;
+			animation-duration: 3s;
 		}
 
 		#kaleidoscope {
 			position: absolute;
 			top: 1475px;
 			left: 3700px;
+			animation-direction: reverse;
+			animation-duration: 5s;
 		}
 
 		/* Objects that can be continously animated must have the "animate" class, as well as a class to define the type of animation */
@@ -74,10 +95,6 @@
 		}
 		.animate.spin {
 			animation: spin 4s linear infinite;
-		}
-
-		#kaleidoscope.animate.spin {
-			animation-direction: reverse;
 		}
 
 		@keyframes blackholespin {
@@ -909,6 +926,8 @@
 				<img id="cog2" src="images/2025/space/cog2.png" class="animate spin">
 				<img id="cog3" src="images/2025/space/cog3.png" class="animate spin">
 				<img id="cog4" src="images/2025/space/cog4.png" class="animate spin">
+				<img id="cog5" src="images/2025/space/cog5.png" class="animate spin">
+				<img id="cog6" src="images/2025/space/cog6.png" class="animate spin">
 				<img id="kaleidoscope" src="images/2025/space/kaleidoscope.png" class="animate spin">
 			</div>
 		</div>
