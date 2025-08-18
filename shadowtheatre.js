@@ -46,7 +46,7 @@ const PARTYTIME = 10000;
 
 // Disco - colours evolve every DISCOTIME ms, and a random number of movements will occur upto MAX_MOVEMENTS during that period
 const DISCOTIME = 8000;
-const MAX_MOVEMENTS_PER_DISCOTIME = 20;
+const MAX_MOVEMENTS_PER_DISCOTIME = 10;
 var lastDiscoAnim; // Need to save this between runs of discoMove() to avoid sudden jumps
 
 // Location and gravity strength of Black Hole
