@@ -227,7 +227,7 @@ var anyInputOn = false; // Is anything being pressed or the joystick being moved
 var curArea = "main"; // Which area (contiguous left-right set of images) are we in?
 var permittedVertical = []; // Whether we can go up or down (or both) from the current location
 // For "double tap" in the same direction to go faster
-const DOUBLE_TAP_MULTIPLIER = 10;
+const DOUBLE_TAP_MULTIPLIER = 4;
 const DOUBLE_TAP_TIMEOUT = 500;
 const DOUBLE_TAP_OFF = 999; // Any invalid direction value
 var prevDirection = DOUBLE_TAP_OFF;
