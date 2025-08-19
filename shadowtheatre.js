@@ -41,6 +41,7 @@ const KEYMAP = { // Keyboard control mapping to joystick equivalents
 const KONAMI_CODE = [UP, UP, DOWN, DOWN, LEFT, RIGHT, LEFT, RIGHT];
 const SPACE_CODE = [UP, UP, UP, DOWN, DOWN, DOWN, UP, UP, UP];
 
+const MATRIX_COLUMN_WIDTH = 40;
 // How long the Easter Egg "party" lasts
 const PARTYTIME = 10000;
 
@@ -265,13 +266,13 @@ const canvas = document.getElementById('canv');
 const ctx = canvas.getContext('2d');
 const cw = canvas.width;
 const ch = canvas.height;
-const cols = Math.floor(cw / 20) + 1;
+const cols = Math.floor(cw / MATRIX_COLUMN_WIDTH) + 1;
 const ypos = Array(cols).fill(0);
 ctx.fillStyle = '#000';
 ctx.fillRect(0, 0, cw, ch);
 // Set text colours
 ctx.fillStyle = '#0f0';
-ctx.font = '16pt monospace';
+ctx.font = '24pt 24to Mono';
 
 // Flip text horizontally
 ctx.translate(cw, 0);
@@ -283,7 +284,7 @@ const motivationalMessages = [
 	"REMAIN CALM",
 	["PLEASE RELAX WHILE WE PROBE YOUR BRAIN...", "ERROR: BRAIN NOT FOUND"],
 	"DON'T PANIC!!!",
-	["NORMALITY WILL RESUME SHORTLY...", "...MAYBE"],
+	["NORMALITY WILL RESUME SHORTLY...", "...ERROR: NORMALITY NOT FOUND"],
 	"EVERYTHING IS FINE.",
 	["IT'S SUPPOSED TO DO THAT...", "...I THINK..."],
 	"OH NO, WHAT HAVE YOU DONE?!?!",
@@ -586,19 +587,19 @@ function matrixLoop() {
 	ctx.fillStyle = '#0001';
 	ctx.fillRect(0, 0, cw, ch);
 	ctx.fillStyle = '#0c0';
-	ctx.font = '18pt Noto Mono';
+	ctx.font = '24pt Noto Mono';
 
 	let text = "";
-	if (Math.random() < 0.2) {
+	if (Math.random() < 0.1) {
 		text = "QUEXTAL";
-	} else if (Math.random() < 0.2) {
+	} else if (Math.random() < 0.1) {
 		text = "SHAMBALA";
 	} else {
-		for (let i = 0; i < 7; i++) { 
+		for (let i = 0; i < 8; i++) { 
 			// Use pages 0 to 36 of UTF16 for a reasonable variety of characters without
 			// ending up dominated by Chinese
-			let page = Math.random() * 36;
-			let cnum = Math.random() * 128 + 128 * page;
+			let page = Math.floor(Math.random() * 36);
+			let cnum = Math.floor(Math.random() * 128) + 128 * page;
 			text += String.fromCharCode(cnum);
 		}
 	}
@@ -606,14 +607,14 @@ function matrixLoop() {
 	let i = 0;
 	ypos.forEach((y, ind) => {
 		let c = text.charAt(i);
-		const x = ind * 25;
+		const x = ind * MATRIX_COLUMN_WIDTH;
 		ctx.fillText(c, x, y);
 		if (y > 100 + Math.random() * 10000) {
 			ypos[ind] = 0;
 		} else {
-			ypos[ind] = y + 20;
+			ypos[ind] = y + 30;
 		}
-		if (i < 7) {
+		if (i < text.length - 1) {
 			i++;
 		} else {
 			i = 0;
@@ -1046,25 +1047,29 @@ function easterEgg() {
 	// * Contains the Matrix canvas
 	// * Animates fades and background colours
 	// * Does the Party effect animations
-	elPartyOverlay.classList.remove("hidden");
-	// Fade in and out the party overlay - ending at 0.5
-	elPartyOverlay.animate([{ opacity: 0 }, { opacity: 1 }, { opacity: 1 }, { opacity: 0.5 } ], { duration: matrixTime, fill: 'forwards' });
 	// Fade in the Matrix
+	elPartyOverlay.animate([{ opacity: 0 }, { opacity: 1 }], {duration: matrixFadeTime, fill: 'forwards'});
+	canvas.classList.remove("hidden");
 	canvas.animate([{ opacity: 0 }, { opacity: 1 }], { duration: matrixFadeTime, fill: 'forwards' });
 	// Enter the Matrix
-	let matrixHandle = setInterval(matrixLoop, 50);
+	let matrixHandle = setInterval(matrixLoop, 100);
 	setTimeout(function() {
 		// Fade out the Matrix
 		canvas.animate([{ opacity: 1 }, { opacity: 0 }], { duration: matrixFadeTime, fill: 'forwards' });
+		//elPartyOverlay.classList.remove("hidden");
+		// Fade in and out the party overlay
+		elPartyOverlay.animate([{ opacity: 1 }, { opacity: 0.5 }, { opacity: 0.5 }, { opacity: 0 } ], { duration: PARTYTIME, fill: 'forwards' });
 	}, matrixTime - matrixFadeTime);
 	setTimeout(function () {
 		clearInterval(matrixHandle);
+		canvas.style.opacity = 0;
+		canvas.classList.add("hidden");
 		console.log("Matrix ended - party time!");
 		party();
 	}, matrixTime);
 	setTimeout(function() {
 		console.log("Hiding overlays and releasing Easter Egg Mutex");
-		elPartyOverlay.classList.add("hidden");
+		//elPartyOverlay.classList.add("hidden");
 		easterEggMutex = false;
 	}, matrixTime + PARTYTIME);
 }
