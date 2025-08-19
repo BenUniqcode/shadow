@@ -586,7 +586,7 @@ function matrixLoop() {
 	ctx.fillStyle = '#0001';
 	ctx.fillRect(0, 0, cw, ch);
 	ctx.fillStyle = '#0c0';
-	ctx.font = '18pt monospace';
+	ctx.font = '18pt Noto Mono';
 
 	let text = "";
 	if (Math.random() < 0.2) {
