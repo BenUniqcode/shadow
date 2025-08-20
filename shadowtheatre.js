@@ -40,6 +40,7 @@ const KEYMAP = { // Keyboard control mapping to joystick equivalents
 };
 const KONAMI_CODE = [UP, UP, DOWN, DOWN, LEFT, RIGHT, LEFT, RIGHT];
 const SPACE_CODE = [UP, UP, UP, DOWN, DOWN, DOWN, UP, UP, UP];
+const UNDERSEA_CODE = [DOWN, DOWN, DOWN, UP, UP, UP, DOWN, DOWN, DOWN];
 
 const MATRIX_COLUMN_WIDTH = 40;
 // How long the Easter Egg "party" lasts
@@ -212,6 +213,7 @@ var raftimer;
 var hudFader;
 var konamiCodePos = 0; // Current position in the Konami code
 var spaceCodePos = 0; // Current position in the Space shortcut code
+var underseaCodePos = 0; // Current position in the Undersea shortcut code
 var wasIdle = true; // Whether no inputs were read on the last run through - for Konami discretisation
 var gravityEnabled = true; // Whether gravity is enabled in space
 var animationEnabled = true; // Whether animations such as spinning cogs and moving creatures are enabled
@@ -1419,7 +1421,10 @@ function processActions(raf = true, forceOutput = false) {
 			if (konamiCodePos == KONAMI_CODE.length) {
 				// Got the code!
 				easterEgg();
+				// Reset all codes so they don't overlap
 				konamiCodePos = 0;
+				spaceCodePos = 0;
+				underseaCodePos = 0;
 			}
 		} else if (konamiCodePos && anyInputOn) {
 			konamiCodePos = 0;
@@ -1429,11 +1434,26 @@ function processActions(raf = true, forceOutput = false) {
 			spaceCodePos++;
 			if (spaceCodePos == SPACE_CODE.length) {
 				changeArea("space", SPACE_ENTRY_POS);
+				konamiCodePos = 0;
 				spaceCodePos = 0;
+				underseaCodePos = 0;
 			}
 		} else if (spaceCodePos && anyInputOn) {
 			spaceCodePos = 0;
 		}
+		// Undersea code likewise
+		if (curArea != "undersea" && isOn[UNDERSEA_CODE[underseaCodePos]]) {
+			underseaCodePos++;
+			if (underseaCodePos == UNDERSEA_CODE.length) {
+				changeArea("undersea", UNDERSEA_ENTRY_POS);
+				konamiCodePos = 0;
+				spaceCodePos = 0;
+				underseaCodePos = 0;
+			}
+		} else if (underseaCodePos && anyInputOn) {
+			underseaCodePos = 0;
+		}
+		
 	}
 
 	if (!anyInputOn) {
