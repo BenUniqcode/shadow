@@ -656,9 +656,10 @@ function discoColorsEvolve() {
 	let randomL = Math.floor(Math.random() * 50) + 20; // 20-70%
 
 	let nextColor = 'hsl(' + randomH + 'deg, ' + randomS + '%, ' + randomL + '%)';
-	// Apply the new color, update the DOM.
+	// Apply the new color, update the CSS variables in the root element.
 	console.log("discoColorsEvolve: Setting " + discoGradientColorNames[evolveIndex] + " to " + nextColor);
 	document.getElementById("area-disco").style.setProperty(discoGradientColorNames[evolveIndex], nextColor);
+	document.getElementById("lighthouseoverlay").style.setProperty(discoGradientColorNames[evolveIndex], nextColor);
 	evolveIndex = (evolveIndex + 1) % discoGradientColorNames.length;
 }
 
@@ -678,6 +679,7 @@ function discoColorsMove() {
 	}
 	lastDiscoAnim = anims[anims.length - 1]; // Save it for use next time
 	console.log(anims);
+	document.getElementById("lighthouseoverlay").animate(anims, { duration: DISCOTIME, fill: "forwards" });
 	document.getElementById("area-disco").animate(anims, { duration: DISCOTIME, fill: "forwards" });
 }
 
@@ -938,25 +940,38 @@ function changeArea(destArea, destX) {
 	// The exception is going from the lighthouse into the disco, which I felt would be clearer
 	// what's going on if we zoom in to the top of it...
 	let everything = document.getElementById("everything");
+	let screen = document.getElementById("screen"); // Need to zoom #screen, not #everything
 	let lighthouse = document.querySelector(".lighthouse"); // Had to use a class here because we need IDs for the numbering
+	let lighthouseoverlay = document.getElementById("lighthouseoverlay");
 	let swapTime = TRANSITION_TIME / 2;
 	let endTime = TRANSITION_TIME;
 	if (destArea == 'disco') {
 		// As we are going to zoom the whole screen, need to hide the up arrow now or it gets big
 		elArrowUp.classList.add("hidden");
+		// Pick starting colours for the disco and apply them to the overlay
+		discoColorsEvolve();
+		discoColorsEvolve();
+		// Start colour movements
+		discoColorsMove();
+		// Fade in the overlay
+		lighthouseoverlay.classList.replace("fadeOut", "fadeIn");
 		const zoomTime = 3000;
 		let trueCenterX = getTrueCenterX();
-		let lighthouseXRelativeToMiddleOfScreen = LIGHTHOUSE_CENTERX - trueCenterX;
+		let lighthouseXRelativeToMiddleOfScreen = LIGHTHOUSE_CENTERX - trueCenterX + 50; // Fudge factor!
 		// This is correct, however by trial and error a better effect is achieved if we are to the left of the lighthouse
 		// by tweaking it. The multiplier here depends on the final scale value - 1.5 works well for scale(5)
 		if (lighthouseXRelativeToMiddleOfScreen > 0) {
-			lighthouseXRelativeToMiddleOfScreen *= 1.5;
+			lighthouseXRelativeToMiddleOfScreen *= 1.1;
 		}
 		let lighthouseXRelativeToLeftOfScreen = lighthouseXRelativeToMiddleOfScreen + HALF_SCREEN_WIDTH;
-		everything.style.transformOrigin = lighthouseXRelativeToLeftOfScreen + "px 120px";
-		everything.classList.add("zoomToLighthouse");
+		screen.style.transformOrigin = lighthouseXRelativeToLeftOfScreen + "px 140px";
+		screen.classList.add("zoomToLighthouse");
 		swapTime += zoomTime;
 		endTime += zoomTime;
+		// Delayed fadeout
+		// setTimeout(function () {
+		// 	everything.classList.add("fadeOut");
+		// }, zoomTime - TRANSITION_TIME / 2);
 	} else {
 		everything.classList.add("fadeOut");
 	}
@@ -992,15 +1007,11 @@ function changeArea(destArea, destX) {
 			showBars();
 		}
 		if (destArea == "disco") {
-			everything.classList.remove("zoomToLighthouse");
-			everything.style.transformOrigin = "";
+			screen.classList.remove("zoomToLighthouse");
+			screen.style.transformOrigin = "";
 			// Start the disco
 			// The number of movements during each DISCOTIME ms will be random with an upper limit of MAX_MOVEMENTS_PER_DISCOTIME
-			// Pick two random starting colours
-			discoColorsEvolve();
-			discoColorsEvolve();
 			// Start moving
-			discoColorsMove();
 			// Move every DISCOTIME
 			discoMoveHandle = setInterval(function () {
 				discoColorsMove();
@@ -1029,6 +1040,10 @@ function changeArea(destArea, destX) {
 				// Revert to default position
 				elArrowDn.style.top = "";
 				elArrowDn.style.left = "";
+				// Fade out the overlay after a delay
+				setTimeout(function () {
+					lighthouseoverlay.classList.replace("fadeIn", "fadeOut");
+				}, swapTime);
 			}
 		}
 	}, swapTime);
