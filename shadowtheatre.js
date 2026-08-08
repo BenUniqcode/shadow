@@ -42,6 +42,7 @@ const KONAMI_CODE = [UP, UP, DOWN, DOWN, LEFT, RIGHT, LEFT, RIGHT];
 const SPACE_CODE = [UP, UP, UP, DOWN, DOWN, DOWN, UP, UP, UP];
 const UNDERSEA_CODE = [DOWN, DOWN, DOWN, UP, UP, UP, DOWN, DOWN, DOWN];
 
+const MATRIX_FONT = '32px Noto Mono';
 const MATRIX_COLUMN_WIDTH = 40;
 // How long the Easter Egg "party" lasts
 const PARTYTIME = 10000;
@@ -264,7 +265,7 @@ var rAF = window.requestAnimationFrame;
 
 // Matrix init
 // from https://dev.to/gnsp/making-the-matrix-effect-in-javascript-din
-const canvas = document.getElementById('canv');
+const canvas = document.getElementById('matrix');
 const ctx = canvas.getContext('2d');
 const cw = canvas.width;
 const ch = canvas.height;
@@ -274,7 +275,7 @@ ctx.fillStyle = '#000';
 ctx.fillRect(0, 0, cw, ch);
 // Set text colours
 ctx.fillStyle = '#0f0';
-ctx.font = '24pt 24to Mono';
+ctx.font = MATRIX_FONT;
 
 // Flip text horizontally
 ctx.translate(cw, 0);
@@ -589,7 +590,7 @@ function matrixLoop() {
 	ctx.fillStyle = '#0001';
 	ctx.fillRect(0, 0, cw, ch);
 	ctx.fillStyle = '#0c0';
-	ctx.font = '24pt Noto Mono';
+	ctx.font = MATRIX_FONT;
 
 	let text = "";
 	if (Math.random() < 0.1) {
@@ -600,7 +601,11 @@ function matrixLoop() {
 		for (let i = 0; i < 8; i++) { 
 			// Use pages 0 to 36 of UTF16 for a reasonable variety of characters without
 			// ending up dominated by Chinese
-			let page = Math.floor(Math.random() * 36);
+			// But avoid pages which don't exist in the font and trigger a fallback search
+			let page = 6;
+			while (page == 6 || page == 9 || page == 10 || page == 20 || page == 33) {
+				page = Math.floor(Math.random() * 36);
+			}
 			let cnum = Math.floor(Math.random() * 128) + 128 * page;
 			text += String.fromCharCode(cnum);
 		}
