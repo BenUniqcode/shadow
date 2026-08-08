@@ -203,7 +203,8 @@ const TRANSITIONS = {
 };
 // scrollPos must be within +/- this amount of the specific point to allow transitioning
 const TRANSITION_RANGE = 400;
-const TRANSITION_TIME = 1000;
+// How long the transition from one area to another takes. The old area will fade out for half this time, the new one fades in for the other half.
+const TRANSITION_TIME = 800;
 
 var isOn = []; // Map of button input number to true/false
 var scrollSpeed = 2;
@@ -936,7 +937,7 @@ function changeArea(destArea, destX) {
 	// (including the arrows because they change too) while the changeover happens.
 	// The exception is going from the lighthouse into the disco, which I felt would be clearer
 	// what's going on if we zoom in to the top of it...
-	let everything = document.getElementById("screen");
+	let everything = document.getElementById("everything");
 	let lighthouse = document.querySelector(".lighthouse"); // Had to use a class here because we need IDs for the numbering
 	let swapTime = TRANSITION_TIME / 2;
 	let endTime = TRANSITION_TIME;
