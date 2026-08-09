@@ -148,7 +148,7 @@ var underseaObjects = {};
 
 // Everything that has a zoom, we need to know the position in multiple places
 const LIGHTHOUSE_CENTERX = 7485; // We need this elsewhere too
-const SHOPS_CENTERX = 26362;
+const SHOPS_CENTERX = 26354;
 const MILLINER_CENTERX = 1000;
 const CANDYLAND_CENTERX = 3000;
 
@@ -1016,7 +1016,7 @@ function changeArea(destArea, destX) {
 		// No fadeout because it's a seamless transition
 	} else if (curArea == "main" && destArea == "shops") {
 		const zoomTime = 3000;
-		zoomIn(screen, SHOPS_CENTERX, 720, true);
+		zoomIn(screen, SHOPS_CENTERX, 717, true);
 		swapTime += zoomTime;
 		endTime += zoomTime;
 		// No fadeout because it's a seamless transition
