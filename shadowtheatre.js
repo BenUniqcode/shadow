@@ -204,6 +204,7 @@ const TRANSITIONS = {
 // scrollPos must be within +/- this amount of the specific point to allow transitioning
 const TRANSITION_RANGE = 400;
 // How long the transition from one area to another takes. The old area will fade out for half this time, the new one fades in for the other half.
+// If changing this, also change the times of .fadeIn and .fadeOut transitions in the CSS. 
 const TRANSITION_TIME = 800;
 
 var isOn = []; // Map of button input number to true/false
