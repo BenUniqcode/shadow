@@ -1014,7 +1014,7 @@ function changeArea(destArea, destX) {
 		swapTime += zoomTime;
 		endTime += zoomTime;
 		// No fadeout because it's a seamless transition
-	} else if (destArea == "shops") {
+	} else if (curArea == "main" && destArea == "shops") {
 		const zoomTime = 3000;
 		zoomIn(screen, SHOPS_CENTERX, 720, true);
 		swapTime += zoomTime;
