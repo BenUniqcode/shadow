@@ -78,7 +78,7 @@ const STANDARD_IMAGE_WIDTH = 1351;
 
 // Total widths of each Area
 const WIDTH = {
-	"main": 21 * STANDARD_IMAGE_WIDTH,
+	"main": 24 * STANDARD_IMAGE_WIDTH, // 2 more than the number of images, to allow for XLOOP copying
 	"dragon": 3 * STANDARD_IMAGE_WIDTH,
 	"giant": 5 * STANDARD_IMAGE_WIDTH,
 	"hell": 1920,
