@@ -243,11 +243,11 @@ var controller;
 
 var dbgOut = "";
 var elDbg = document.getElementById("debug");
-var elArrowDn = document.getElementById("arrowDn");
-var elArrowUp = document.getElementById("arrowUp");
+var arrowsDn = document.querySelectorAll(".arrow-dn");
+var arrowsUp = document.querySelectorAll(".arrow-up");
 var elPartyOverlay = document.getElementById("partyOverlay");
 
-var partyHandle, arrowMoverHandle, discoMoveHandle, discoEvolveHandle;
+var partyHandle, discoMoveHandle, discoEvolveHandle;
 
 var fadeOutHandle;
 
@@ -643,12 +643,6 @@ function partyColors(partyTime) {
 	elPartyOverlay.animate(colorAnims, { duration: partyTime });
 }
 
-// In disco mode, the down arrow is kinda annoying stuck in one place, so let's move it around
-function arrowMover() {
-	elArrowDn.style.top = (10 + Math.floor(Math.random() * 80)) + "%"; // 10-90%
-	elArrowDn.style.left = (10 + Math.floor(Math.random() * 80)) + "%";
-}
-
 // Alternate evolving one or the other colour of the gradient
 function discoColorsEvolve() {
 	let randomH = Math.floor(Math.random() * 360);
@@ -868,7 +862,7 @@ function calculatePermittedVertical() {
 					// So we make the exit take effect within 2px of the bottom, but show the arrow for 25px
 					let proximityToBottom = HEIGHT["space"] - HALF_SCREEN_HEIGHT - centerY;
 					if (proximityToBottom <= XY_ARROW_PROXIMITY) {
-						elArrowDn.classList.remove("hidden");
+						arrowsDn.forEach((el) => { el.style.opacity = 1 });
 						spaceProximityArrow = true; // Prevent it from being rehidden if the movement is not actually allowed yet
 						if (proximityToBottom >= XY_EXIT_PROXIMITY) {
 							dbgOut += "<br>Exit " + i + " vertical proximity is within arrow range but not exit range";
@@ -880,7 +874,7 @@ function calculatePermittedVertical() {
 					}
 				} else {
 					dbgOut += "<br>Exit " + i + " in range - can go DOWN to " + destArea + ":" + destX;
-					elArrowDn.classList.remove("hidden");
+					arrowsDn.forEach((el) => { el.style.opacity = 1 });
 					permittedVertical[DOWN] = [destArea, destX];
 				}
 			} else if (direction > 0) {
@@ -888,7 +882,7 @@ function calculatePermittedVertical() {
 					// Similar to space, but the exit is at the top
 					let proximityToTop = centerY - HALF_SCREEN_HEIGHT;
 					if (proximityToTop <= XY_ARROW_PROXIMITY) {
-						elArrowUp.classList.remove("hidden");
+						arrowsUp.forEach((el) => { el.style.opacity = 1 });
 						underseaProximityArrow = true; // Prevent it from being rehidden if the movement is not actually allowed yet
 						if (proximityToTop > XY_EXIT_PROXIMITY) {
 							dbgOut += "<br>Exit " + i + " vertical proximity is within arrow range but not exit range";
@@ -900,7 +894,7 @@ function calculatePermittedVertical() {
 					}
 				} else {
 					dbgOut += "<br>Exit " + i + " in range - can go UP to " + destArea + ":" + destX;
-					elArrowUp.classList.remove("hidden");
+					arrowsUp.forEach((el) => { el.style.opacity = 1 });
 					permittedVertical[UP] = [destArea, destX];
 				}
 			} else {
@@ -910,10 +904,10 @@ function calculatePermittedVertical() {
 	}
 	// Hide the arrows that do not apply
 	if (!permittedVertical[DOWN] && !spaceProximityArrow) {
-		elArrowDn.classList.add("hidden");
+		arrowsDn.forEach((el) => { el.style.opacity = 0 });
 	}
 	if (!permittedVertical[UP] && !underseaProximityArrow) {
-		elArrowUp.classList.add("hidden");
+		arrowsUp.forEach((el) => { el.style.opacity = 0 });
 	}
 }
 
@@ -946,8 +940,6 @@ function changeArea(destArea, destX) {
 	let swapTime = TRANSITION_TIME / 2;
 	let endTime = TRANSITION_TIME;
 	if (destArea == 'disco') {
-		// As we are going to zoom the whole screen, need to hide the up arrow now or it gets big
-		elArrowUp.classList.add("hidden");
 		// Pick starting colours for the disco and apply them to the overlay
 		discoColorsEvolve();
 		discoColorsEvolve();
@@ -1023,23 +1015,14 @@ function changeArea(destArea, destX) {
 					discoColorsEvolve();
 				}, DISCOTIME);
 			}, DISCOTIME/2);
-			elArrowDn.classList.add("moving");
-			arrowMoverHandle = setInterval(function () {
-				arrowMover();
-			}, 30000);
 		} else {
 			// Stop any ongoing party
 			if (discoMoveHandle) {
 				clearInterval(discoMoveHandle);
-				clearInterval(arrowMoverHandle);
 				// This one is started later so it might not have been started
 				if (discoEvolveHandle) {
 					clearInterval(discoEvolveHandle);
 				}
-				elArrowDn.classList.remove("moving");
-				// Revert to default position
-				elArrowDn.style.top = "";
-				elArrowDn.style.left = "";
 				// Fade out the overlay after a delay
 				setTimeout(function () {
 					lighthouseoverlay.classList.replace("fadeIn", "fadeOut");
