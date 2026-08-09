@@ -947,14 +947,18 @@ function calculatePermittedVertical() {
 function zoomIn(el, targetX, targetY, toShops=false) {
 	let trueCenterX = getTrueCenterX();
 	let targetXRelativeToMiddleOfScreen = targetX - trueCenterX; 
-	let targetXRelativeToLeftOfScreen = targetXRelativeToMiddleOfScreen + HALF_SCREEN_WIDTH;
-	// Hide all arrows first
-	el.style.transformOrigin = targetXRelativeToLeftOfScreen + "px " + targetY + "px";
 	if (toShops) {
+		// Because there's less of a zoom, we need to fudge the transform origin
+		targetXRelativeToMiddleOfScreen *= 1.5;
+		let targetXRelativeToLeftOfScreen = targetXRelativeToMiddleOfScreen + HALF_SCREEN_WIDTH + 35;
+		el.style.transformOrigin = targetXRelativeToLeftOfScreen + "px " + targetY + "px";
 		// Use special zoom and deblur (the latter needs to go on a different element)
 		el.classList.add("zoomInShops");
 		document.querySelector("#area-main .distant-shops").classList.add("deBlur");
 	} else {
+		// Big zoom, no fudge factor required
+		let targetXRelativeToLeftOfScreen = targetXRelativeToMiddleOfScreen + HALF_SCREEN_WIDTH;
+		el.style.transformOrigin = targetXRelativeToLeftOfScreen + "px " + targetY + "px";
 		el.classList.add("zoomIn");
 	}
 }
@@ -1012,7 +1016,7 @@ function changeArea(destArea, destX) {
 		// No fadeout because it's a seamless transition
 	} else if (destArea == "shops") {
 		const zoomTime = 3000;
-		zoomIn(screen, SHOPS_CENTERX, 740, true);
+		zoomIn(screen, SHOPS_CENTERX, 720, true);
 		swapTime += zoomTime;
 		endTime += zoomTime;
 		// No fadeout because it's a seamless transition
