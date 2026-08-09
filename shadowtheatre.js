@@ -243,6 +243,7 @@ var controller;
 
 var dbgOut = "";
 var elDbg = document.getElementById("debug");
+var arrowsAll = document.querySelectorAll(".arrows");
 var arrowsDn = document.querySelectorAll(".arrow-dn");
 var arrowsUp = document.querySelectorAll(".arrow-up");
 var elPartyOverlay = document.getElementById("partyOverlay");
@@ -927,6 +928,19 @@ function changeArea(destArea, destX) {
 			rotateLoopImagesRight(destArea); // Obviously in some circumstances it would be quicker to go left by 1-i, but fuggit
 		}
 	}
+	// Hide the arrows during the transition
+	arrowsAll.forEach((el) => { el.classList.add("hidden") });
+
+	if (destArea == "hell" || destArea == "disco") {
+		// Full screen
+		hideBars();		
+		// Can't go sideways
+		document.querySelectorAll(".arrows-sideways").forEach((el) => { el.style.opacity = 0; });
+	} else {
+		showBars();
+		// Can go sideways
+		document.querySelectorAll(".arrows-sideways").forEach((el) => { el.style.opacity = 1; });
+	}
 
 	// I tried to do something fancier with the images overlaid, but it's problematic because they don't line up - you can
 	// see the jump when we scroll to the right place on the new image. So it's easier to just fade everything on the screen to black 
@@ -993,14 +1007,7 @@ function changeArea(destArea, destX) {
 		move();
 		calculatePermittedVertical();
 		everything.classList.replace("fadeOut", "fadeIn");
-		if (destArea == "hell" || destArea == "disco") {
-			hideBars();
-		} else {
-			showBars();
-		}
 		if (destArea == "disco") {
-			// Can't go sideways
-			document.querySelectorAll(".arrows-sideways").forEach((el) => { el.style.opacity = 0; });
 			screen.classList.remove("zoomToLighthouse");
 			screen.style.transformOrigin = "";
 			// Start the disco
@@ -1029,14 +1036,14 @@ function changeArea(destArea, destX) {
 				setTimeout(function () {
 					lighthouseoverlay.classList.replace("fadeIn", "fadeOut");
 				}, swapTime);
-				// Can go sideways
-				document.querySelectorAll(".arrows-sideways").forEach((el) => { el.style.opacity = 1; });
 			}
 		}
 	}, swapTime);
 	// Re-enable inputs and run rAF once the transition is complete
 	setTimeout(function () {
 		inputsBlocked = false;
+		// Unhide the arrows
+		arrowsAll.forEach((el) => { el.classList.remove("hidden") });
 		processActions(false, true);
 	}, endTime);
 }
