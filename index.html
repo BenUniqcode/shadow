@@ -308,12 +308,12 @@
 			background-color: #333;
 		}
 
-		#hud {
+		#hud, .temp-hud {
 			position: fixed;
 			top: 475px;
-			left: calc(50% - 300px);
+			left: calc(50% - 340px); /* Half of width plus padding-left */
 			width: 600px;
-			padding: 25px 40px;
+			padding: 30px 40px 20px 40px;
 			border: 2px solid #aaa;
 			border-radius: 15px;
 			background-color: #ddd;
@@ -767,6 +767,7 @@
 			top: calc(50vh + 320px);
 			z-index: 10;
 			text-align: center;
+			font-size: 14px;
 		}
 		#arrowsL {
 			left: 50px;
@@ -775,7 +776,7 @@
 			left: 935px;
 		}
 		#arrowsR {
-			left: 1845px;
+			left: 1820px;
 		}
 	</style>
 </head>
@@ -791,12 +792,6 @@
 		<div id="screen">
 			<textarea id="keyinput"></textarea><!-- Offscreen; required for keyboard control -->
 			<div id="debug" class="hidden"></div>
-			<!-- <div id="arrowDn" class="arrow hidden">
-				<img src="images/v3.1/arrow2_transp.png">
-			</div>
-			<div id="arrowUp" class="arrow hidden">
-				<img src="images/v3.1/arrow2_transp.png">
-			</div> -->
 			<div id="arrowsL" class="arrows">
 				<div class="arrow-up">⬆️</div>
 				<div class="arrows-sideways"><span class="arrow-l">⬅️</span><span class="arrow-r">➡️</span></div>

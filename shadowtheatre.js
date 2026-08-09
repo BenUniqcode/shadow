@@ -679,11 +679,23 @@ function discoColorsMove() {
 	document.getElementById("area-disco").animate(anims, { duration: DISCOTIME, fill: "forwards" });
 }
 
+function blockInputs() {
+	inputsBlocked = true;
+	// Hide the arrows while inputs are blocked
+	arrowsAll.forEach((el) => { el.classList.add("hidden") });
+}
+
+function unblockInputs() {
+	inputsBlocked = false;
+	// Hide the arrows while inputs are blocked
+	arrowsAll.forEach((el) => { el.classList.remove("hidden") });
+}
+
 // The "party" part of the Easter Egg
 function party() {
-	inputsBlocked = true;
+	blockInputs();
 	setTimeout(function () {
-		inputsBlocked = false;
+		unblockInputs();
 	}, PARTYTIME);
 	partyColors(PARTYTIME);
 	let imageAnims = [];
@@ -914,7 +926,7 @@ function calculatePermittedVertical() {
 }
 
 function changeArea(destArea, destX) {
-	inputsBlocked = true;
+	blockInputs();
 	let elCurArea = document.getElementById("area-" + curArea);
 	let elNewArea = document.getElementById("area-" + destArea);
 	// Set location to the new area and pos
@@ -929,9 +941,6 @@ function changeArea(destArea, destX) {
 			rotateLoopImagesRight(destArea); // Obviously in some circumstances it would be quicker to go left by 1-i, but fuggit
 		}
 	}
-	// Hide the arrows during the transition
-	arrowsAll.forEach((el) => { el.classList.add("hidden") });
-
 	if (destArea == "hell" || destArea == "disco") {
 		// Full screen
 		hideBars();		
@@ -990,8 +999,8 @@ function changeArea(destArea, destX) {
 
 	// Halfway through the transition, swap over the images, scroll to the right place, and calculate the new exits
 	setTimeout(function () {
-		elCurArea.style.display = "none";
-		elNewArea.style.display = "block";
+		elCurArea.classList.add("hidden");
+		elNewArea.classList.remove("hidden");
 		curArea = destArea;
 		centerX = destX;
 		if (destArea == "space") {
@@ -1042,9 +1051,7 @@ function changeArea(destArea, destX) {
 	}, swapTime);
 	// Re-enable inputs and run rAF once the transition is complete
 	setTimeout(function () {
-		inputsBlocked = false;
-		// Unhide the arrows
-		arrowsAll.forEach((el) => { el.classList.remove("hidden") });
+		unblockInputs();
 		processActions(false, true);
 	}, endTime);
 }
