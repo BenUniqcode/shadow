@@ -205,7 +205,7 @@ const TRANSITIONS = {
 		// Space can also be exited via Black Hole
 	],
 	"undersea": [
-		[UNDERSEA_ENTRY_POS, 1, "main", 23800], // Exit at the same position as entry
+		[UNDERSEA_ENTRY_POS, 1, "main", 23800 + 3 * 1351], // Exit at the same position as entry
 	],
 	"milliner": [
 		[675, -1, "main", MILLINER_CENTERX],
@@ -260,6 +260,7 @@ var elDbg = document.getElementById("debug");
 var arrowsAll = document.querySelectorAll(".arrows");
 var arrowsDn = document.querySelectorAll(".arrow-dn");
 var arrowsUp = document.querySelectorAll(".arrow-up");
+var arrowsSideways = document.querySelectorAll(".arrows-sideways");
 var elPartyOverlay = document.getElementById("partyOverlay");
 
 var partyHandle, discoMoveHandle, discoEvolveHandle;
@@ -929,12 +930,13 @@ function calculatePermittedVertical() {
 			}
 		}
 	}
-	// Hide the arrows that do not apply
-	if (!permittedVertical[DOWN] && !spaceProximityArrow) {
-		arrowsDn.forEach((el) => { el.style.opacity = 0 });
+	// Hide the arrows that do not apply - in space/undersea, up and down arrows are additionally handled by moveUp/moveDown, so mustn't be hidden here, they default to half
+	let opacity = (curArea == "space" || curArea == "undersea") ? 0.5 : 0;
+	if (!permittedVertical[DOWN]) {
+		arrowsDn.forEach((el) => { el.style.opacity = opacity });
 	}
-	if (!permittedVertical[UP] && !underseaProximityArrow) {
-		arrowsUp.forEach((el) => { el.style.opacity = 0 });
+	if (!permittedVertical[UP]) {
+		arrowsUp.forEach((el) => { el.style.opacity = opacity });
 	}
 }
 
@@ -1032,9 +1034,17 @@ function changeArea(destArea, destX) {
 		if (destArea == "space") {
 			// Space is 2D. As we're coming in from the bottom, we need to start at the bottom of the image.
 			centerY = HEIGHT["space"] - HALF_SCREEN_HEIGHT;
+			// Start with all arrows 0.5 opacity
+			arrowsUp.forEach((el) => { el.style.opacity = 0.5 }); // Will be overridden by calculatePermittedVertical because that runs after move
+			arrowsDn.forEach((el) => { el.style.opacity = 0.5 }); // Will be overridden by calculatePermittedVertical because that runs after move
+			arrowsSideways.forEach((el) => { el.style.opacity = 0.5 }); // Will be overridden by calculatePermittedVertical because that runs after move
 		} else if (destArea == "undersea") {
 			// Also 2D but we come in from the top
 			centerY = HALF_SCREEN_HEIGHT;
+			// Start with all arrows 0.5 opacity
+			arrowsUp.forEach((el) => { el.style.opacity = 0.5 }); // Will be overridden by calculatePermittedVertical because that runs after move
+			arrowsDn.forEach((el) => { el.style.opacity = 0.5 }); // Will be overridden by calculatePermittedVertical because that runs after move
+			arrowsSideways.forEach((el) => { el.style.opacity = 0.5 }); // Will be overridden by calculatePermittedVertical because that runs after move
 			populateUnderseaObjects(); // Make sure all objects start in their initial locations
 			moveUnderseaObjects(0); // Draw them in their right places
 		} else {
@@ -1280,9 +1290,15 @@ function moveUp() {
 	}
 	// Up
 	centerY -= scrollSpeed;
+	// If the down arrows were hidden in space/undersea because we had reached the bottom, show them again as we've now moved up
+	if ((curArea == "space" || curArea == "undersea") && arrowsDn[0].style.opacity == 0) {
+		arrowsDn.forEach((el) => { el.style.opacity = 0.5 }); // Will be overridden by calculatePermittedVertical because that runs after move
+	}
 	let minScroll = HALF_SCREEN_HEIGHT;
 	if (centerY < minScroll) {
 		centerY = minScroll;
+		// Hide the up arrows
+		arrowsUp.forEach((el) => { el.style.opacity = 0 });
 	}
 	move();
 }
@@ -1295,9 +1311,15 @@ function moveDown() {
 	}
 	// Down
 	centerY += scrollSpeed;
+	// If the up arrows were hidden in space/undersea because we had reached the top, show them again as we've now moved down
+	if ((curArea == "space" || curArea == "undersea") && arrowsUp[0].style.opacity == 0) {
+		arrowsUp.forEach((el) => { el.style.opacity = 0.5 }); // Will be overridden by calculatePermittedVertical because that runs after move
+	}
 	let maxScroll = HEIGHT[curArea] - HALF_SCREEN_HEIGHT;
 	if (centerY > maxScroll) {
 		centerY = maxScroll;
+		// Hide the down arrows
+		arrowsDn.forEach((el) => { el.style.opacity = 0 });
 	}
 	move();
 }
