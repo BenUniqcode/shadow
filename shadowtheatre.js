@@ -999,6 +999,8 @@ function changeArea(destArea, destX) {
 			showBars();
 		}
 		if (destArea == "disco") {
+			// Can't go sideways
+			document.querySelectorAll(".arrows-sideways").forEach((el) => { el.style.opacity = 0; });
 			screen.classList.remove("zoomToLighthouse");
 			screen.style.transformOrigin = "";
 			// Start the disco
@@ -1027,6 +1029,8 @@ function changeArea(destArea, destX) {
 				setTimeout(function () {
 					lighthouseoverlay.classList.replace("fadeIn", "fadeOut");
 				}, swapTime);
+				// Can go sideways
+				document.querySelectorAll(".arrows-sideways").forEach((el) => { el.style.opacity = 1; });
 			}
 		}
 	}, swapTime);
