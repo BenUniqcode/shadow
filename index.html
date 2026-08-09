@@ -258,6 +258,32 @@
 		.zoomIn {
 			animation: zoomIn 3s cubic-bezier(0.32, 0, 0.67, 0) forwards; /* Cubic ease-in */
 		}
+		/* Special stuff for shops - less zoom, add deBlur*/
+		@keyframes zoomInShops {
+			0% {
+				transform: scale(1);
+			}
+			100% {
+				transform: scale(4);
+			}
+		}
+		.zoomInShops {
+			animation: zoomInShops 3s cubic-bezier(0.32, 0, 0.67, 0) forwards; /* Cubic ease-in */
+		}
+		@keyframes deBlur {
+			0% {
+				filter: grayscale(100%) blur(3px);
+			}
+			100% {
+				filter: grayscale(0%) blur(0px);
+			}
+		}
+		#area-main .distant-shops {
+			filter: grayscale(100%) blur(3px);
+		}
+		.deBlur {
+			animation: deBlur 1.5s cubic-bezier(0.32, 0, 0.67, 0) forwards; /* Cubic ease-in */
+		}
 
 		#keyinput {
 			width: 1px;
@@ -857,32 +883,25 @@
 							<img id="main13" src="images/2025/main/13.png" alt="">
 						</div>
 						<div class="imgbox">
-							<img id="main14" src="images/2026/shops/1.png" alt="">
+							<img id="main14" src="images/2025/main/14.png" alt="">
 						</div>
 						<div class="imgbox">
-							<img id="main15" src="images/2026/shops/2.png" alt="">
+							<img id="main15" src="images/2025/main/15.png" alt="">
 						</div>
 						<div class="imgbox">
-							<img id="main16" src="images/2026/shops/3.png" alt="">
-						</div>
-
-						<div class="imgbox">
-							<img id="main17" src="images/2025/main/14.png" alt="">
+							<img id="main16" src="images/2025/main/16.png" alt="">
 						</div>
 						<div class="imgbox">
-							<img id="main18" src="images/2025/main/15.png" alt="">
+							<img id="main17" src="images/2025/main/17.png" alt="">
 						</div>
 						<div class="imgbox">
-							<img id="main19" src="images/2025/main/16.png" alt="">
+							<img id="main18" src="images/2025/main/18.png" alt="" class="water">
 						</div>
 						<div class="imgbox">
-							<img id="main20" src="images/2025/main/17.png" alt="">
+							<img id="main19" src="images/2025/main/19.png" alt="" class="water">
 						</div>
 						<div class="imgbox">
-							<img id="main21" src="images/2025/main/18.png" alt="" class="water">
-						</div>
-						<div class="imgbox">
-							<img id="main22" src="images/2025/main/19.png" alt="" class="water">
+							<img id="main20" src="images/2026/shops/all_distant.png" alt="" class="distant-shops">
 						</div>
 					</div>
 				</div>
@@ -1011,6 +1030,21 @@
 				</div>
 			</div>
 			<div id="area-hell" class="hidden">
+			</div>
+			<div id="area-shops" class="hidden">
+				<div class="slider">
+					<div class="flexbox">
+						<div class="imgbox">
+							<img id="shops1" src="images/2026/shops/1.png" alt="">
+						</div>
+						<div class="imgbox">
+							<img id="shops2" src="images/2026/shops/2.png" alt="">
+						</div>
+						<div class="imgbox">
+							<img id="shops3" src="images/2026/shops/3.png" alt="">
+						</div>
+					</div>
+				</div>
 			</div>
 			<div id="area-milliner" class="hidden">
 				<div class="temp-hud">Milliner</div>

@@ -78,13 +78,14 @@ const STANDARD_IMAGE_WIDTH = 1351;
 
 // Total widths of each Area
 const WIDTH = {
-	"main": 24 * STANDARD_IMAGE_WIDTH, // 2 more than the number of images, to allow for XLOOP copying
+	"main": (document.querySelectorAll("#area-main .imgbox").length + 2) * STANDARD_IMAGE_WIDTH, // 2 more than the number of images, to allow for XLOOP copying
 	"dragon": 3 * STANDARD_IMAGE_WIDTH,
 	"giant": 5 * STANDARD_IMAGE_WIDTH,
 	"hell": 1920,
 	"hug": 3407,
 	"pirate": 5 * STANDARD_IMAGE_WIDTH,
 	"skyworld": 7853,
+	"shops": 3 * STANDARD_IMAGE_WIDTH,
 	"space": 7680,
 	"undersea": 5760, // It's really only 1920 wide but pretends to be wider by moving objects around. 
 	// To avoid blipping in and out of existence, we need at least the width of the widest object to be offscreen. Seems to work best if it's a whole number of screens
@@ -147,8 +148,9 @@ var underseaObjects = {};
 
 // Everything that has a zoom, we need to know the position in multiple places
 const LIGHTHOUSE_CENTERX = 7485; // We need this elsewhere too
-const MILLINER_CENTERX = 18659;
-const CANDYLAND_CENTERX = 20589;
+const SHOPS_CENTERX = 26362;
+const MILLINER_CENTERX = 1000;
+const CANDYLAND_CENTERX = 3000;
 
 // These are the horizontal positions in each Area from where we can go up (1) or down (-1) to a different Area (or both)
 // If our position is within a certain distance of such a place, the arrow will appear and going up/down is allowed.
@@ -168,12 +170,9 @@ const TRANSITIONS = {
 		[12240, -1, "skyworld", 1240], // NB Mario tube, goes DOWN but to a world that is UP from elsewhere in the map
 		[13850, 1, "giant", 2000],
 		[16680, -1, "dragon", 2040],
-		// Temp shops
-		[MILLINER_CENTERX, 1, "milliner", 675],
-		[CANDYLAND_CENTERX, 1, "candyland", 675],
-		// Temp add for shops
-		[18200 + 3 * 1351, 1, "skyworld", 6700],
-		[23800 + 3 * 1351, -1, "undersea", UNDERSEA_ENTRY_POS], 
+		[18200, "skyworld", 6700],
+		[23800, -1, "undersea", UNDERSEA_ENTRY_POS], 
+		[SHOPS_CENTERX, 1, "shops", 2020],
 	],
 	"disco": [
 		[675, -1, "main", LIGHTHOUSE_CENTERX],
@@ -207,11 +206,16 @@ const TRANSITIONS = {
 	"undersea": [
 		[UNDERSEA_ENTRY_POS, 1, "main", 23800 + 3 * 1351], // Exit at the same position as entry
 	],
+	"shops": [
+		[MILLINER_CENTERX, 1, "milliner", 675],
+		[CANDYLAND_CENTERX, 1, "candyland", 675],
+		[2020, -1, "main", SHOPS_CENTERX],
+	],
 	"milliner": [
-		[675, -1, "main", MILLINER_CENTERX],
+		[675, -1, "shops", MILLINER_CENTERX],
 	],
 	"candyland": [
-		[675, -1, "main", CANDYLAND_CENTERX],
+		[675, -1, "shops", CANDYLAND_CENTERX],
 	],
 };
 // scrollPos must be within +/- this amount of the specific point to allow transitioning
@@ -940,13 +944,19 @@ function calculatePermittedVertical() {
 	}
 }
 
-function zoomIn(el, targetX, targetY) {
+function zoomIn(el, targetX, targetY, toShops=false) {
 	let trueCenterX = getTrueCenterX();
 	let targetXRelativeToMiddleOfScreen = targetX - trueCenterX; 
 	let targetXRelativeToLeftOfScreen = targetXRelativeToMiddleOfScreen + HALF_SCREEN_WIDTH;
 	// Hide all arrows first
 	el.style.transformOrigin = targetXRelativeToLeftOfScreen + "px " + targetY + "px";
-	el.classList.add("zoomIn");
+	if (toShops) {
+		// Use special zoom and deblur (the latter needs to go on a different element)
+		el.classList.add("zoomInShops");
+		document.querySelector("#area-main .distant-shops").classList.add("deBlur");
+	} else {
+		el.classList.add("zoomIn");
+	}
 }
 
 function changeArea(destArea, destX) {
@@ -997,6 +1007,12 @@ function changeArea(destArea, destX) {
 		lighthouseoverlay.classList.replace("fadeOut", "fadeIn");
 		const zoomTime = 3000;
 		zoomIn(screen, LIGHTHOUSE_CENTERX, 140);
+		swapTime += zoomTime;
+		endTime += zoomTime;
+		// No fadeout because it's a seamless transition
+	} else if (destArea == "shops") {
+		const zoomTime = 3000;
+		zoomIn(screen, SHOPS_CENTERX, 740, true);
 		swapTime += zoomTime;
 		endTime += zoomTime;
 		// No fadeout because it's a seamless transition
@@ -1055,7 +1071,12 @@ function changeArea(destArea, destX) {
 		calculatePermittedVertical();
 		everything.classList.replace("fadeOut", "fadeIn");
 		// Remove the zoom if used
-		if (screen.classList.contains("zoomIn")) {
+		if (screen.classList.contains("zoomInShops")) {
+			screen.classList.remove("zoomInShops"); 
+			screen.style.transformOrigin = "";
+			// Remove the deblur as well
+			document.querySelector("#area-main .distant-shops").classList.remove("deBlur");
+		} else if (screen.classList.contains("zoomIn")) {
 			screen.classList.remove("zoomIn"); // Would be good to have a transition here, it causes a jump
 			screen.style.transformOrigin = "";
 		}
