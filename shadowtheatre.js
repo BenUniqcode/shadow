@@ -257,10 +257,10 @@ var controller;
 
 var dbgOut = "";
 var elDbg = document.getElementById("debug");
-var arrowsAll = document.querySelectorAll(".arrows");
 var arrowsDn = document.querySelectorAll(".arrow-dn");
 var arrowsUp = document.querySelectorAll(".arrow-up");
 var arrowsSideways = document.querySelectorAll(".arrows-sideways");
+var arrowsAll = document.querySelectorAll(".arrows");
 var elPartyOverlay = document.getElementById("partyOverlay");
 
 var partyHandle, discoMoveHandle, discoEvolveHandle;
@@ -944,6 +944,7 @@ function zoomIn(el, targetX, targetY) {
 	let trueCenterX = getTrueCenterX();
 	let targetXRelativeToMiddleOfScreen = targetX - trueCenterX; 
 	let targetXRelativeToLeftOfScreen = targetXRelativeToMiddleOfScreen + HALF_SCREEN_WIDTH;
+	// Hide all arrows first
 	el.style.transformOrigin = targetXRelativeToLeftOfScreen + "px " + targetY + "px";
 	el.classList.add("zoomIn");
 }
@@ -968,11 +969,11 @@ function changeArea(destArea, destX) {
 		// Full screen
 		hideBars();		
 		// Can't go sideways
-		document.querySelectorAll(".arrows-sideways").forEach((el) => { el.style.opacity = 0; });
+		arrowsSideways.forEach((el) => { el.style.opacity = 0; });
 	} else {
 		showBars();
 		// Can go sideways
-		document.querySelectorAll(".arrows-sideways").forEach((el) => { el.style.opacity = 1; });
+		arrowsSideways.forEach((el) => { el.style.opacity = 1; });
 	}
 
 	// I tried to do something fancier with the images overlaid, but it's problematic because they don't line up - you can
