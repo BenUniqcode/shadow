@@ -163,9 +163,13 @@ const TRANSITIONS = {
 		[11000, 1, "hug", 1200],
 		[12240, -1, "skyworld", 1240], // NB Mario tube, goes DOWN but to a world that is UP from elsewhere in the map
 		[13850, 1, "giant", 2000],
-		[16680, -1, "dragon", 2040],
-		[18200, 1, "skyworld", 6700],
-		[23800, -1, "undersea", UNDERSEA_ENTRY_POS], 
+		// Temp shops
+		[18654, 1, "milliner", 675],
+		[20544, 1, "candyland", 675],
+		// Temp add for shops
+		[16680 + 3 * 1351, -1, "dragon", 2040],
+		[18200 + 3 * 1351, 1, "skyworld", 6700],
+		[23800 + 3 * 1351, -1, "undersea", UNDERSEA_ENTRY_POS], 
 	],
 	"disco": [
 		[675, -1, "main", LIGHTHOUSE_CENTERX],
@@ -189,7 +193,7 @@ const TRANSITIONS = {
 	],
 	"skyworld": [
 		[1240, -1, "main", 12240], // Goes back DOWN to main even though we came DOWN from there
-		[6700, -1, "main", 18200],
+		[6700, -1, "main", 18200 + 3 * 1351],
 		[6700, 1, "space", SPACE_ENTRY_POS],
 	],
 	"space": [
@@ -199,7 +203,12 @@ const TRANSITIONS = {
 	"undersea": [
 		[UNDERSEA_ENTRY_POS, 1, "main", 23800], // Exit at the same position as entry
 	],
-
+	"milliner": [
+		[675, -1, "main", 18654],
+	],
+	"candyland": [
+		[675, -1, "main", 20544],
+	],
 };
 // scrollPos must be within +/- this amount of the specific point to allow transitioning
 const TRANSITION_RANGE = 400;
