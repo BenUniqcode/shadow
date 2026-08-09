@@ -7,7 +7,6 @@
 	<style type="text/css">
 		:root {
 			--screen-height: 760px; /* This is the height of the part of the projection that actually fits on the screen. The projection as a whole is 1080px high but only the middle part is on the screen. */
-			--top-margin: calc((100vh - var(--screen-height)) / 2);
 		}
 		body {
 			font-family: sans-serif;
@@ -25,7 +24,7 @@
 
 		#screen {
 			z-index: 0;
-			width: 100vw;
+			width: 1920px;
 			background-color: white;
 		}
 
@@ -33,7 +32,7 @@
 			font-family: "Noto Mono", monospace, sans-serif;
 			font-size: 32px;
 			position: absolute; 
-			top: var(--top-margin);
+			top: 160px;
 			left: 0px;
 			opacity: 0; 
 			z-index: 9;
@@ -154,7 +153,7 @@
 			position: absolute;
 			z-index: 20;
 			top: 473px;
-			left: calc(50vw - 94px);
+			left: 866px;
 			width: 200px;
 		}
 
@@ -243,21 +242,21 @@
 			padding-top: 28px;
 		}
 
-		/* This class is applied to #screen to zoom into the lighthouse */
+		/* This class is applied to #screen to zoom into the lighthouse or shops */
 		/* Previously it was applied to .lighthouse with a fixed transform-origin, but this breaks the image away from its neighbours */
 		/* Instead, we apply it to #screen and set transform-origin's X component in the JS based on centerX */
 		/* This is an animation rather than a transition so we can fade as the zoom finishes.
 		/* When I used transition here, then applied .fadeOut, it just immediately jumps to black */
-		@keyframes zoomToLighthouse {
+		@keyframes zoomIn {
 			0% {
 				transform: scale(1);
 			}
 			100% {
-				transform: scale(50);
+				transform: scale(40);
 			}
 		}
-		.zoomToLighthouse {
-			animation: zoomToLighthouse 3s cubic-bezier(0.32, 0, 0.67, 0) forwards;
+		.zoomIn {
+			animation: zoomIn 3s cubic-bezier(0.32, 0, 0.67, 0) forwards; /* Cubic ease-in */
 		}
 
 		#keyinput {
@@ -276,7 +275,7 @@
 			/* Crop any excess (mainly for 2D areas) */
 			height: var(--screen-height);
 			overflow: hidden;
-			margin-top: var(--top-margin);
+			margin-top: 160px;
 		}
 		
 		.discospace {
@@ -311,7 +310,7 @@
 		#hud, .temp-hud {
 			position: fixed;
 			top: 475px;
-			left: calc(50% - 340px); /* Half of width plus padding-left */
+			left: 620px; /* 1920/2 - 600/2 - 40 (padding-left) */
 			width: 600px;
 			padding: 30px 40px 20px 40px;
 			border: 2px solid #aaa;
@@ -640,7 +639,7 @@
 		}
 
 		#undersea-container {
-			width: 100vw; /* It pretends to be wider, but this is the visible width */
+			width: 1920px; /* It pretends to be wider, but this is the visible width */
 			height: 2280px; /* Taller than the screen so that the colour gradually changes as we go down */
 			overflow: hidden;
 			background: linear-gradient(
@@ -764,7 +763,7 @@
 			position: fixed;
 			width: 50px;
 			height: 50px;
-			top: calc(50vh + 320px);
+			top: 860px;
 			z-index: 10;
 			text-align: center;
 			font-size: 14px;
@@ -787,7 +786,7 @@
 		</div>
 		<div id="hud"></div>
 		<div id="partyOverlay">
-			<canvas id="matrix" width="1920" height="760" class="hidden" style="width: 100vw; height: var(--screen-height);"></canvas><!-- Specifying width and height here is necessary, doing it from CSS doesn't work -->
+			<canvas id="matrix" width="1920" height="760" class="hidden"></canvas><!-- Specifying width and height here is necessary, doing it from CSS doesn't work -->
 		</div>
 		<div id="screen">
 			<textarea id="keyinput"></textarea><!-- Offscreen; required for keyboard control -->

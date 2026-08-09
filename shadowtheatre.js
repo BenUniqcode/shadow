@@ -145,6 +145,11 @@ const UNDERSEA_OBJECT_POS_NOANIM_ADJUST = {
 };
 var underseaObjects = {};
 
+// Everything that has a zoom, we need to know the position in multiple places
+const LIGHTHOUSE_CENTERX = 7485; // We need this elsewhere too
+const MILLINER_CENTERX = 18659;
+const CANDYLAND_CENTERX = 20589;
+
 // These are the horizontal positions in each Area from where we can go up (1) or down (-1) to a different Area (or both)
 // If our position is within a certain distance of such a place, the arrow will appear and going up/down is allowed.
 // Format: {fromArea: [exitPosition, direction, leadsToArea, entryPosition], ...}
@@ -154,7 +159,6 @@ var underseaObjects = {};
 // specify an exit in one direction and then try to dynamically create the reverse direction, as it could be "dragged" 
 // by going up and down while moving left or right, ending up with an exit in the wrong place, or to the wrong place. 
 // Better to explicitly state all transitions in all directions.
-const LIGHTHOUSE_CENTERX = 7420; // We need this elsewhere too
 const TRANSITIONS = {
 	"main": [
 		[2500, -1, "pirate", 3400],
@@ -163,11 +167,11 @@ const TRANSITIONS = {
 		[11000, 1, "hug", 1200],
 		[12240, -1, "skyworld", 1240], // NB Mario tube, goes DOWN but to a world that is UP from elsewhere in the map
 		[13850, 1, "giant", 2000],
+		[16680, -1, "dragon", 2040],
 		// Temp shops
-		[18654, 1, "milliner", 675],
-		[20544, 1, "candyland", 675],
+		[MILLINER_CENTERX, 1, "milliner", 675],
+		[CANDYLAND_CENTERX, 1, "candyland", 675],
 		// Temp add for shops
-		[16680 + 3 * 1351, -1, "dragon", 2040],
 		[18200 + 3 * 1351, 1, "skyworld", 6700],
 		[23800 + 3 * 1351, -1, "undersea", UNDERSEA_ENTRY_POS], 
 	],
@@ -204,10 +208,10 @@ const TRANSITIONS = {
 		[UNDERSEA_ENTRY_POS, 1, "main", 23800], // Exit at the same position as entry
 	],
 	"milliner": [
-		[675, -1, "main", 18654],
+		[675, -1, "main", MILLINER_CENTERX],
 	],
 	"candyland": [
-		[675, -1, "main", 20544],
+		[675, -1, "main", CANDYLAND_CENTERX],
 	],
 };
 // scrollPos must be within +/- this amount of the specific point to allow transitioning
@@ -934,6 +938,14 @@ function calculatePermittedVertical() {
 	}
 }
 
+function zoomIn(el, targetX, targetY) {
+	let trueCenterX = getTrueCenterX();
+	let targetXRelativeToMiddleOfScreen = targetX - trueCenterX; 
+	let targetXRelativeToLeftOfScreen = targetXRelativeToMiddleOfScreen + HALF_SCREEN_WIDTH;
+	el.style.transformOrigin = targetXRelativeToLeftOfScreen + "px " + targetY + "px";
+	el.classList.add("zoomIn");
+}
+
 function changeArea(destArea, destX) {
 	blockInputs();
 	let elCurArea = document.getElementById("area-" + curArea);
@@ -970,7 +982,7 @@ function changeArea(destArea, destX) {
 	let screen = document.getElementById("screen"); // Need to zoom #screen, not #everything
 	let lighthouse = document.querySelector(".lighthouse"); // Had to use a class here because we need IDs for the numbering
 	let lighthouseoverlay = document.getElementById("lighthouseoverlay");
-	let swapTime = TRANSITION_TIME / 2;
+	let swapTime = TRANSITION_TIME / 2; // Not const as they can be added to
 	let endTime = TRANSITION_TIME;
 	if (destArea == 'disco') {
 		// Pick starting colours for the disco and apply them to the overlay
@@ -981,22 +993,27 @@ function changeArea(destArea, destX) {
 		// Fade in the overlay
 		lighthouseoverlay.classList.replace("fadeOut", "fadeIn");
 		const zoomTime = 3000;
-		let trueCenterX = getTrueCenterX();
-		let lighthouseXRelativeToMiddleOfScreen = LIGHTHOUSE_CENTERX - trueCenterX + 50; // Fudge factor!
-		// This is correct, however by trial and error a better effect is achieved if we are to the left of the lighthouse
-		// by tweaking it. The multiplier here depends on the final scale value - 1.5 works well for scale(5)
-		if (lighthouseXRelativeToMiddleOfScreen > 0) {
-			lighthouseXRelativeToMiddleOfScreen *= 1.1;
-		}
-		let lighthouseXRelativeToLeftOfScreen = lighthouseXRelativeToMiddleOfScreen + HALF_SCREEN_WIDTH;
-		screen.style.transformOrigin = lighthouseXRelativeToLeftOfScreen + "px 140px";
-		screen.classList.add("zoomToLighthouse");
+		zoomIn(screen, LIGHTHOUSE_CENTERX, 140);
+		swapTime += zoomTime;
+		endTime += zoomTime;
+		// No fadeout because it's a seamless transition
+	} else if (destArea == "milliner") {
+		const zoomTime = 3000;
+		zoomIn(screen, MILLINER_CENTERX, 450);
 		swapTime += zoomTime;
 		endTime += zoomTime;
 		// Delayed fadeout
-		// setTimeout(function () {
-		// 	everything.classList.add("fadeOut");
-		// }, zoomTime - TRANSITION_TIME / 2);
+		setTimeout(function () {
+			everything.classList.add("fadeOut");
+		}, zoomTime - TRANSITION_TIME);
+	} else if (destArea == "candyland") {
+		const zoomTime = 3000;
+		zoomIn(screen, CANDYLAND_CENTERX, 450);
+		swapTime += zoomTime;
+		endTime += zoomTime;
+		setTimeout(function () {
+			everything.classList.add("fadeOut");
+		}, zoomTime - TRANSITION_TIME);
 	} else {
 		everything.classList.add("fadeOut");
 	}
@@ -1026,9 +1043,12 @@ function changeArea(destArea, destX) {
 		move();
 		calculatePermittedVertical();
 		everything.classList.replace("fadeOut", "fadeIn");
-		if (destArea == "disco") {
-			screen.classList.remove("zoomToLighthouse");
+		// Remove the zoom if used
+		if (screen.classList.contains("zoomIn")) {
+			screen.classList.remove("zoomIn"); // Would be good to have a transition here, it causes a jump
 			screen.style.transformOrigin = "";
+		}
+		if (destArea == "disco") {
 			// Start the disco
 			// The number of movements during each DISCOTIME ms will be random with an upper limit of MAX_MOVEMENTS_PER_DISCOTIME
 			// Start moving
