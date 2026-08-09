@@ -1002,7 +1002,7 @@ function changeArea(destArea, destX) {
 		// No fadeout because it's a seamless transition
 	} else if (destArea == "milliner") {
 		const zoomTime = 3000;
-		zoomIn(screen, MILLINER_CENTERX, 450);
+		zoomIn(screen, MILLINER_CENTERX, 510);
 		swapTime += zoomTime;
 		endTime += zoomTime;
 		// Delayed fadeout
@@ -1011,7 +1011,7 @@ function changeArea(destArea, destX) {
 		}, zoomTime - TRANSITION_TIME);
 	} else if (destArea == "candyland") {
 		const zoomTime = 3000;
-		zoomIn(screen, CANDYLAND_CENTERX, 450);
+		zoomIn(screen, CANDYLAND_CENTERX, 510);
 		swapTime += zoomTime;
 		endTime += zoomTime;
 		setTimeout(function () {
