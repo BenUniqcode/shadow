@@ -149,7 +149,7 @@ var underseaObjects = {};
 // Everything that has a zoom, we need to know the position in multiple places
 const LIGHTHOUSE_CENTERX = 7485; // We need this elsewhere too
 const SHOPS_CENTERX = 26354;
-const MILLINER_CENTERX = 1000;
+const MILLINER_CENTERX = 1040;
 const CANDYLAND_CENTERX = 3000;
 
 // These are the horizontal positions in each Area from where we can go up (1) or down (-1) to a different Area (or both)
