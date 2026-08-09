@@ -1,0 +1,2 @@
+Space doesn't show up and down arrows (except within range of exit) - it probably should.
+Maybe we should distinguish between movements within current area and movements to a new area by using a different arrow colour.
