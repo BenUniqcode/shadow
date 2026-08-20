@@ -148,7 +148,7 @@ var underseaObjects = {};
 
 // Everything that has a zoom, we need to know the position in multiple places
 const LIGHTHOUSE_CENTERX = 7485;
-const SHOPS_CENTERX = 20000;
+const SHOPS_CENTERX = 20950;
 const MILLINER_CENTERX = 1040;
 const CANDYLAND_CENTERX = 3000;
 
@@ -224,9 +224,12 @@ const TRANSITION_RANGE = 400;
 // If changing this, also change the times of .fadeIn and .fadeOut transitions in the CSS. 
 const TRANSITION_TIME = 800;
 
+// Where to start on main
+const START_CENTERX = 20950;
+
 var isOn = []; // Map of button input number to true/false
 var scrollSpeed = 2;
-var centerX = HALF_SCREEN_WIDTH;
+var centerX = START_CENTERX;
 var centerY = HALF_SCREEN_HEIGHT;  // Only matters for xy areas, and will be set on entry to such an area
 var scrollSpeedLimiter = false; // Is set to true when the scroll speed changes, which blocks further changes for a while, to reduce the speed at which it was changing
 var raftimer;
@@ -1690,5 +1693,5 @@ document.getElementById("keyinput").focus();
 
 // As we have preloaded the "end" image to the left of the start image for wrapping purposes,
 // jump to the start position (and fade in)
-changeArea("main", 1000);
+changeArea("main", START_CENTERX);
 
