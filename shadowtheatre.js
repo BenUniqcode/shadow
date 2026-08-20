@@ -61,7 +61,7 @@ const WASHING_MACHINE_WIDTH = 189;
 const WASHING_MACHINE_HEIGHT = 237;
 
 // Where we enter certain levels that have multiple ways of getting in
-const UNDERSEA_ENTRY_POS = 2100;
+const UNDERSEA_ENTRY_POS = 2150;
 const SPACE_ENTRY_POS = 6695;
 
 // How close do we need to be to the edge of an XY area that has an exit, to see the arrow, and then to actually take the exit
@@ -147,8 +147,8 @@ const UNDERSEA_OBJECT_POS_NOANIM_ADJUST = {
 var underseaObjects = {};
 
 // Everything that has a zoom, we need to know the position in multiple places
-const LIGHTHOUSE_CENTERX = 7485; // We need this elsewhere too
-const SHOPS_CENTERX = 26354;
+const LIGHTHOUSE_CENTERX = 7485;
+const SHOPS_CENTERX = 20000;
 const MILLINER_CENTERX = 1040;
 const CANDYLAND_CENTERX = 3000;
 
@@ -170,9 +170,9 @@ const TRANSITIONS = {
 		[12240, -1, "skyworld", 1240], // NB Mario tube, goes DOWN but to a world that is UP from elsewhere in the map
 		[13850, 1, "giant", 2000],
 		[16680, -1, "dragon", 2040],
-		[18200, "skyworld", 6700],
-		[23800, -1, "undersea", UNDERSEA_ENTRY_POS], 
+		[18200, 1, "skyworld", 6700],
 		[SHOPS_CENTERX, 1, "shops", 2020],
+		[25200, -1, "undersea", UNDERSEA_ENTRY_POS], 
 	],
 	"disco": [
 		[675, -1, "main", LIGHTHOUSE_CENTERX],
@@ -196,7 +196,7 @@ const TRANSITIONS = {
 	],
 	"skyworld": [
 		[1240, -1, "main", 12240], // Goes back DOWN to main even though we came DOWN from there
-		[6700, -1, "main", 18200 + 3 * 1351],
+		[6700, -1, "main", 18200],
 		[6700, 1, "space", SPACE_ENTRY_POS],
 	],
 	"space": [
@@ -204,7 +204,7 @@ const TRANSITIONS = {
 		// Space can also be exited via Black Hole
 	],
 	"undersea": [
-		[UNDERSEA_ENTRY_POS, 1, "main", 23800 + 3 * 1351], // Exit at the same position as entry
+		[UNDERSEA_ENTRY_POS, 1, "main", 25200], // Exit at the same position as entry
 	],
 	"shops": [
 		[MILLINER_CENTERX, 1, "milliner", 675],
@@ -930,16 +930,18 @@ function calculatePermittedVertical() {
 					permittedVertical[UP] = [destArea, destX];
 				}
 			} else {
-				console.log("Invalid direction value");
+				console.log("Invalid direction value " + direction);
 			}
 		}
 	}
 	// Hide the arrows that do not apply - in space/undersea, up and down arrows are additionally handled by moveUp/moveDown, so mustn't be hidden here, they default to half
 	let opacity = (curArea == "space" || curArea == "undersea") ? 0.5 : 0;
-	if (!permittedVertical[DOWN]) {
+	let maxScroll = HEIGHT[curArea] - HALF_SCREEN_HEIGHT;
+	if (!permittedVertical[DOWN] && (opacity == 0 || centerY < maxScroll)) {
 		arrowsDn.forEach((el) => { el.style.opacity = opacity });
 	}
-	if (!permittedVertical[UP]) {
+	let minScroll = HALF_SCREEN_HEIGHT;
+	if (!permittedVertical[UP] && (opacity == 0 || Math.floor(centerY) > minScroll)) {
 		arrowsUp.forEach((el) => { el.style.opacity = opacity });
 	}
 }
