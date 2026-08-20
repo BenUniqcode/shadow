@@ -274,7 +274,9 @@ var dbgOut = "";
 var elDbg = document.getElementById("debug");
 var arrowsDn = document.querySelectorAll(".arrow-dn");
 var arrowsUp = document.querySelectorAll(".arrow-up");
-var arrowsSideways = document.querySelectorAll(".arrows-sideways");
+var arrowsLeft = document.querySelectorAll(".arrow-l");
+var arrowsRight = document.querySelectorAll(".arrow-r");
+var arrowsSideways = document.querySelectorAll(".arrow-l, .arrow-r");
 var arrowsAll = document.querySelectorAll(".arrows");
 var elPartyOverlay = document.getElementById("partyOverlay");
 
@@ -1081,16 +1083,18 @@ function changeArea(destArea, destX) {
 			// Space is 2D. As we're coming in from the bottom, we need to start at the bottom of the image.
 			centerY = HEIGHT["space"] - HALF_SCREEN_HEIGHT;
 			// Start with all arrows 0.5 opacity
-			arrowsUp.forEach((el) => { el.style.opacity = 0.5 }); // Will be overridden by calculatePermittedVertical because that runs after move
-			arrowsDn.forEach((el) => { el.style.opacity = 0.5 }); // Will be overridden by calculatePermittedVertical because that runs after move
-			arrowsSideways.forEach((el) => { el.style.opacity = 0.5 }); // Will be overridden by calculatePermittedVertical because that runs after move
+			// Will be overridden by calculatePermittedVertical because that runs after move
+			arrowsUp.forEach((el) => { el.style.opacity = 0.5 }); 
+			arrowsDn.forEach((el) => { el.style.opacity = 0.5 });
+			arrowsSideways.forEach((el) => { el.style.opacity = 0.5 }); 
 		} else if (destArea == "undersea") {
 			// Also 2D but we come in from the top
 			centerY = HALF_SCREEN_HEIGHT;
 			// Start with all arrows 0.5 opacity
-			arrowsUp.forEach((el) => { el.style.opacity = 0.5 }); // Will be overridden by calculatePermittedVertical because that runs after move
-			arrowsDn.forEach((el) => { el.style.opacity = 0.5 }); // Will be overridden by calculatePermittedVertical because that runs after move
-			arrowsSideways.forEach((el) => { el.style.opacity = 0.5 }); // Will be overridden by calculatePermittedVertical because that runs after move
+			// Will be overridden by calculatePermittedVertical because that runs after move
+ 			arrowsUp.forEach((el) => { el.style.opacity = 0.5 }); 
+			arrowsDn.forEach((el) => { el.style.opacity = 0.5 }); 
+			arrowsSideways.forEach((el) => { el.style.opacity = 0.5 }); 
 			populateUnderseaObjects(); // Make sure all objects start in their initial locations
 			moveUnderseaObjects(0); // Draw them in their right places
 		} else {
@@ -1322,6 +1326,10 @@ function moveLeft() {
 		return;
 	}
 	centerX -= scrollSpeed;
+	// If the Right arrows were hidden because we'd reached the right edge, unhide them now that we've moved left
+	if (arrowsRight[0].style.opacity == 0) {
+		arrowsRight.forEach((el) => { el.style.opacity = 1 });
+	}
 	// Special handling for undersea - still do centerX because that's needed for the exits, but don't use it for movement -
 	// each object must be moved individually so that they wrap around correctly with no jumps
 	if (curArea == "undersea") {
@@ -1335,6 +1343,8 @@ function moveLeft() {
 	} else if (!XLOOP[curArea] && centerX < HALF_SCREEN_WIDTH) {
 		// Stop at the left edge
 		centerX = HALF_SCREEN_WIDTH; 
+		// Hide the left arrows
+		arrowsLeft.forEach((el) => { el.style.opacity = 0 });
 	}
 	move();
 }
@@ -1352,6 +1362,10 @@ function moveRight() {
 	}
 	// Right
 	centerX += scrollSpeed;
+	// If the Left arrows were hidden because we'd reached the left edge, unhide them now that we've moved right
+	if (arrowsLeft[0].style.opacity == 0) {
+		arrowsLeft.forEach((el) => { el.style.opacity = 1 });
+	}
 	// Special handling for undersea
 	if (curArea == "undersea") {
 		// Wrap around if we hit the right edge. For this area, that's the full width.
@@ -1364,6 +1378,8 @@ function moveRight() {
 	} else if (!XLOOP[curArea] && centerX > WIDTH[curArea] - HALF_SCREEN_WIDTH - 1) {
 		// Stop at the right edge
 		centerX = WIDTH[curArea] - HALF_SCREEN_WIDTH - 1;
+		// Hide the right arrows
+		arrowsRight.forEach((el) => { el.style.opacity = 0 });
 	}
 	move();
 }
