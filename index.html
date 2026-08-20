@@ -281,11 +281,20 @@
 			left: 0;
 			z-index: 1;
 		}
+		#area-milliner .help {
+			position: absolute;
+			top: 190px;
+			left: 900px;
+			color: black;
+			font-family: cursive;
+			font-size: 54px;
+			z-index: 2;
+		}
 		#area-milliner .hat {
 			position: absolute;
-			top: 200px;
+			top: 250px;
 			left: -500px;
-			z-index: 2;
+			z-index: 3;
 			transition: left 0.5s ease-in-out;
 		}
 		#area-milliner .hat.selected {
@@ -294,7 +303,7 @@
 		}
 		/* Adjust the sombrero because it's a different size than the others */
 		#area-milliner .hat.sombrero {
-			top: 240px;
+			top: 290px;
 		}
 		#area-milliner .hat.sombrero.selected {
 			left: 990px;
@@ -1046,6 +1055,7 @@
 				</div>
 			</div>
 			<div id="area-milliner" class="hidden">
+				<div class="help">⬅️ Choose a hat ➡️</div>
 				<img id="hatshop" src="images/2026/hats/hat shop_resized.png" alt="" class="background">
 				<img id="hat1" src="images/2026/hats/bowler hat 2.png" alt="" class="hat">
 				<img id="hat2" src="images/2026/hats/bowler hat.png" alt="" class="hat">

@@ -979,6 +979,13 @@ function zoomIn(el, targetX, targetY, toShops=false) {
 
 function changeArea(destArea, destX) {
 	blockInputs();
+	// On exit from Milliner, deselect hat, so you don't get 2 selected next time you enter
+	if (curArea == "milliner") {
+		let selectedHat = document.querySelector("#area-milliner .hat.selected");
+		if (selectedHat) {
+			selectedHat.classList.remove("selected");
+		}
+	}
 	let elCurArea = document.getElementById("area-" + curArea);
 	let elNewArea = document.getElementById("area-" + destArea);
 	// Set location to the new area and pos
