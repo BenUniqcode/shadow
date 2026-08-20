@@ -274,6 +274,32 @@
 			animation: deBlur 1.5s cubic-bezier(0.32, 0, 0.67, 0) forwards; /* Cubic ease-in */
 		}
 
+		/* Hat shop */
+		#area-milliner .background {
+			position: relative;
+			top: 160px;
+			left: 0;
+			z-index: 1;
+		}
+		#area-milliner .hat {
+			position: absolute;
+			top: 200px;
+			left: -500px;
+			z-index: 2;
+			transition: left 0.5s ease-in-out;
+		}
+		#area-milliner .hat.selected {
+			left: 1040px;
+			transition: left 0.5s ease-in-out;
+		}
+		/* Adjust the sombrero because it's a different size than the others */
+		#area-milliner .hat.sombrero {
+			top: 240px;
+		}
+		#area-milliner .hat.sombrero.selected {
+			left: 990px;
+		}
+
 		#keyinput {
 			width: 1px;
 			height: 1px;
@@ -1020,7 +1046,22 @@
 				</div>
 			</div>
 			<div id="area-milliner" class="hidden">
-				<div class="temp-hud">Milliner</div>
+				<img id="hatshop" src="images/2026/hats/hat shop_resized.png" alt="" class="background">
+				<img id="hat1" src="images/2026/hats/bowler hat 2.png" alt="" class="hat">
+				<img id="hat2" src="images/2026/hats/bowler hat.png" alt="" class="hat">
+				<img id="hat3" src="images/2026/hats/chefs hat.png" alt="" class="hat">
+				<img id="hat4" src="images/2026/hats/cloth hat.png" alt="" class="hat">
+				<img id="hat5" src="images/2026/hats/felt trilby hat.png" alt="" class="hat">
+				<img id="hat6" src="images/2026/hats/fire hat.png" alt="" class="hat">
+				<img id="hat7" src="images/2026/hats/jesters hat.png" alt="" class="hat">
+				<img id="hat8" src="images/2026/hats/pirate hat 3.png" alt="" class="hat">
+				<img id="hat9" src="images/2026/hats/rasberry beret.png" alt="" class="hat">
+				<img id="hat10" src="images/2026/hats/santa hat.png" alt="" class="hat">
+				<img id="hat11" src="images/2026/hats/sombrero.png" alt="" class="hat sombrero">
+				<img id="hat12" src="images/2026/hats/top hat.png" alt="" class="hat">
+				<img id="hat13" src="images/2026/hats/twat cap.png" alt="" class="hat">
+				<img id="hat14" src="images/2026/hats/witch.png" alt="" class="hat">
+				<img id="hat15" src="images/2026/hats/wobbly brim hat.png" alt="" class="hat">			
 			</div>
 			<div id="area-candyland" class="hidden">
 				<div class="temp-hud">Candyland</div>

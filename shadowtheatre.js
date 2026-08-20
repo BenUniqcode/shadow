@@ -83,6 +83,7 @@ const WIDTH = {
 	"giant": 5 * STANDARD_IMAGE_WIDTH,
 	"hell": 1920,
 	"hug": 3407,
+	"milliner": STANDARD_IMAGE_WIDTH,
 	"pirate": 5 * STANDARD_IMAGE_WIDTH,
 	"skyworld": 7853,
 	"shops": 3 * STANDARD_IMAGE_WIDTH,
@@ -207,15 +208,15 @@ const TRANSITIONS = {
 		[UNDERSEA_ENTRY_POS, 1, "main", 25200], // Exit at the same position as entry
 	],
 	"shops": [
-		[MILLINER_CENTERX, 1, "milliner", 675],
-		[CANDYLAND_CENTERX, 1, "candyland", 675],
+		[MILLINER_CENTERX, 1, "milliner", HALF_SCREEN_WIDTH],
+		[CANDYLAND_CENTERX, 1, "candyland", HALF_SCREEN_WIDTH],
 		[2020, -1, "main", SHOPS_CENTERX],
 	],
 	"milliner": [
-		[675, -1, "shops", MILLINER_CENTERX],
+		[HALF_SCREEN_WIDTH, -1, "shops", MILLINER_CENTERX],
 	],
 	"candyland": [
-		[675, -1, "shops", CANDYLAND_CENTERX],
+		[HALF_SCREEN_WIDTH, -1, "shops", CANDYLAND_CENTERX],
 	],
 };
 // scrollPos must be within +/- this amount of the specific point to allow transitioning
@@ -224,8 +225,14 @@ const TRANSITION_RANGE = 400;
 // If changing this, also change the times of .fadeIn and .fadeOut transitions in the CSS. 
 const TRANSITION_TIME = 800;
 
-// Where to start on main
-const START_CENTERX = 20950;
+// Where to start
+// const START_AREA = "main";
+// const START_CENTERX = 20950;
+const START_AREA = "milliner";
+const START_CENTERX = HALF_SCREEN_WIDTH;
+
+// Number of hats in the Milliner's
+const NUM_HATS = document.querySelectorAll("#area-milliner .hat").length;
 
 var isOn = []; // Map of button input number to true/false
 var scrollSpeed = 2;
@@ -269,6 +276,8 @@ var arrowsUp = document.querySelectorAll(".arrow-up");
 var arrowsSideways = document.querySelectorAll(".arrows-sideways");
 var arrowsAll = document.querySelectorAll(".arrows");
 var elPartyOverlay = document.getElementById("partyOverlay");
+
+var selectedHat; // Will pick one at random on the way in to the Milliner
 
 var partyHandle, discoMoveHandle, discoEvolveHandle;
 
@@ -1034,6 +1043,9 @@ function changeArea(destArea, destX) {
 		setTimeout(function () {
 			everything.classList.add("fadeOut");
 		}, zoomTime - TRANSITION_TIME);
+		// Choose a random hat to start with
+		selectedHat = Math.floor(Math.random() * NUM_HATS) + 1; // They're numbered from 1 .. NUM_HATS
+		changeHats();
 	} else if (destArea == "candyland") {
 		const zoomTime = 3000;
 		zoomIn(screen, CANDYLAND_CENTERX, 510);
@@ -1224,6 +1236,32 @@ function moveUnderseaObjects(pixels) {
 	}
 }
 
+// Select the current hat in the Milliner's
+function changeHats(whichWay)
+{
+	// Block inputs for a while otherwise we skip through lots of hats 
+	blockInputs();
+	setTimeout(function () {
+		unblockInputs();
+	}, 500);
+	var oldHatEl = document.querySelector("#area-milliner #hat" + selectedHat);
+	if (whichWay < 0) {
+		selectedHat--;
+		if (selectedHat < 1) {
+			selectedHat = NUM_HATS;
+		}
+	} else {
+		selectedHat++;
+		if (selectedHat > NUM_HATS) {
+			selectedHat = 1;
+		}
+	}
+	console.log("Changing to hat " + selectedHat);
+	var newHatEl = document.querySelector("#area-milliner #hat" + selectedHat);
+	oldHatEl.classList.remove("selected");
+	newHatEl.classList.add("selected");
+}
+
 function move() {
 	// Not all areas have a slider; if not, it's a full-screen level with no left/right movement allowed
 	let slider = document.querySelector("#area-" + curArea + " .slider");
@@ -1265,7 +1303,12 @@ function move() {
 }
 
 function moveLeft() {
-	// Not all areas have a slider; if not, it's a full-screen level with no left/right movement allowed
+	// In the hat shop, left and right cycle through hats
+	if (curArea == "milliner") {
+		changeHats(-1);
+		return;
+	}
+	// Not all areas have a slider; if not, it's a full-screen level with no left/right movement allowed. 
 	let slider = document.querySelector("#area-" + curArea + " .slider");
 	if (!slider) {
 		return;
@@ -1289,6 +1332,11 @@ function moveLeft() {
 }
 
 function moveRight() {
+	// In the hat shop, left and right cycle through hats
+	if (curArea == "milliner") {
+		changeHats(1);
+		return;
+	}
 	// Not all areas have a slider; if not, it's a full-screen level with no left/right movement allowed
 	let slider = document.querySelector("#area-" + curArea + " .slider");
 	if (!slider) {
@@ -1693,5 +1741,5 @@ document.getElementById("keyinput").focus();
 
 // As we have preloaded the "end" image to the left of the start image for wrapping purposes,
 // jump to the start position (and fade in)
-changeArea("main", START_CENTERX);
+changeArea(START_AREA, START_CENTERX);
 
