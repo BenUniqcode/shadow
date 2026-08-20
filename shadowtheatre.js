@@ -79,6 +79,7 @@ const STANDARD_IMAGE_WIDTH = 1351;
 // Total widths of each Area
 const WIDTH = {
 	"main": (document.querySelectorAll("#area-main .imgbox").length + 2) * STANDARD_IMAGE_WIDTH, // 2 more than the number of images, to allow for XLOOP copying
+	"candyland": 5585,
 	"dragon": 3 * STANDARD_IMAGE_WIDTH,
 	"giant": 5 * STANDARD_IMAGE_WIDTH,
 	"hell": 1920,
@@ -216,7 +217,7 @@ const TRANSITIONS = {
 		[HALF_SCREEN_WIDTH, -1, "shops", MILLINER_CENTERX],
 	],
 	"candyland": [
-		[HALF_SCREEN_WIDTH, -1, "shops", CANDYLAND_CENTERX],
+		[HALF_SCREEN_WIDTH, 1, "shops", CANDYLAND_CENTERX], // Up to exit because it's going through a door, even though it was also up to enter.
 	],
 };
 // scrollPos must be within +/- this amount of the specific point to allow transitioning
@@ -226,10 +227,10 @@ const TRANSITION_RANGE = 400;
 const TRANSITION_TIME = 800;
 
 // Where to start
-// const START_AREA = "main";
-// const START_CENTERX = 20950;
-const START_AREA = "milliner";
-const START_CENTERX = HALF_SCREEN_WIDTH;
+const START_AREA = "main";
+const START_CENTERX = 20950;
+// const START_AREA = "candyland";
+// const START_CENTERX = HALF_SCREEN_WIDTH;
 
 // Number of hats in the Milliner's
 const NUM_HATS = document.querySelectorAll("#area-milliner .hat").length;

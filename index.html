@@ -231,7 +231,7 @@
 			padding-top: 28px;
 		}
 
-		/* This class is applied to #screen to zoom into the lighthouse or shops */
+		/* Zoom classes applied to #screen to zoom into the lighthouse or row of shops */
 		/* Previously it was applied to .lighthouse with a fixed transform-origin, but this breaks the image away from its neighbours */
 		/* Instead, we apply it to #screen and set transform-origin's X component in the JS based on centerX */
 		/* This is an animation rather than a transition so we can fade as the zoom finishes.
@@ -308,6 +308,17 @@
 		#area-milliner .hat.sombrero.selected {
 			left: 990px;
 		}
+
+		/* Candyland */
+
+		#area-candyland .humbug {
+			position: absolute;
+			top: 400px;
+			left: 2400px;
+			z-index: 8;
+		}
+
+		/* Misc */
 
 		#keyinput {
 			width: 1px;
@@ -1074,7 +1085,10 @@
 				<img id="hat15" src="images/2026/hats/wobbly brim hat.png" alt="" class="hat">			
 			</div>
 			<div id="area-candyland" class="hidden">
-				<div class="temp-hud">Candyland</div>
+				<div class="slider xyslider"><!-- Using xyslider here is the easiest way to get it to behave right, even though there's no y movement -->
+					<img src="images/2026/candyland/candyland_all.png" alt="">
+					<img src="images/2026/candyland/humbug.png" alt="" class="humbug animate spin">
+				</div>
 			</div>
 		</div>
 		<div id="whiteBarBottom" class="bar whiteBar">
