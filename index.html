@@ -257,7 +257,8 @@
 			}
 		}
 		.zoomInShops {
-			animation: zoomInShops 3s cubic-bezier(0.32, 0, 0.67, 0) forwards; /* Cubic ease-in */
+			transform: scale(3);
+			transition: transform 3s cubic-bezier(0.32, 0, 0.67, 0); /* Cubic ease-in */
 		}
 		@keyframes deBlur {
 			0% {
@@ -269,9 +270,11 @@
 		}
 		#area-main .distant-shops {
 			filter: grayscale(100%) blur(3px);
+			transition: filter 2.5s cubic-bezier(0.32, 0, 0.67, 0); /* Cubic ease-in */			
 		}
-		.deBlur {
-			animation: deBlur 1.5s cubic-bezier(0.32, 0, 0.67, 0) forwards; /* Cubic ease-in */
+		#area-main .distant-shops.deBlur {
+			filter: grayscale(0%) blur(0px);
+			transition: filter 2.5s cubic-bezier(0.32, 0, 0.67, 0); 
 		}
 
 		/* Hat shop */
