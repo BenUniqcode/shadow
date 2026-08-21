@@ -352,6 +352,11 @@
 			overflow: hidden;
 			margin-top: 160px;
 		}
+
+		/* Remove smoothscroll class before making sudden changes to margin, e.g. during image reordering for looping, or area transition */
+		.slider.smoothscroll {
+			transition: margin 0.05s linear;
+		}
 		
 		.discospace {
 			height: 100vh; /* Full projection height so it lights trees and controls too */
@@ -887,7 +892,7 @@
 				<div class="arrow-dn">⬇️</div>
 			</div>
 			<div id="area-main">
-				<div class="slider">
+				<div class="slider smoothscroll">
 					<div class="flexbox">
 						<!-- Main needs each image to have a container, so we can place the washing machine inside it to overlay 
 							it and have it scroll with the image -->
@@ -961,7 +966,7 @@
 				</div>
 			</div>
 			<div id="area-pirate" class="hidden">
-				<div class="slider">
+				<div class="slider smoothscroll">
 					<div class="flexbox">
 						<img src="images/v3.1/pirate/1.png">
 						<img src="images/v3.1/pirate/2.png">
@@ -979,7 +984,7 @@
 				</div>
 			</div>
 			<div id="area-giant" class="hidden">
-				<div class="slider">
+				<div class="slider smoothscroll">
 					<div class="flexbox">
 						<img src="images/v3.1/giant/1.png">
 						<img src="images/v3.1/giant/2.png">
@@ -990,7 +995,7 @@
 				</div>
 			</div>
 			<div id="area-dragon" class="hidden">
-				<div class="slider">
+				<div class="slider smoothscroll">
 					<div class="flexbox">
 						<img src="images/v3.1/dragon/1.png">
 						<img src="images/v3.1/dragon/2.png">
@@ -1006,12 +1011,12 @@
 				</video>
 			</div>
 			<div id="area-skyworld" class="hidden">
-				<div class="slider">
+				<div class="slider smoothscroll">
 					<img src="images/v3.1/skyworld/cropped.png">
 				</div>
 			</div>
 			<div id="area-space" class="hidden">
-				<div class="slider xyslider">
+				<div class="slider smoothscroll xyslider">
 					<img id="spaceBackground" src="images/2025/space/space.png">
 					<img id="blackhole" src="images/2025/space/blackhole.png" class="animate blackholespin">
 					<img id="cog1" src="images/2025/space/cog1.png" class="animate spin">
@@ -1024,14 +1029,14 @@
 				</div>
 			</div>
 			<div id="area-hug" class="hidden">
-				<div class="slider">
+				<div class="slider smoothscroll">
 					<div class="flexbox">
 						<img src="images/v3.1/hug/cropped.png">
 					</div>
 				</div>
 			</div>
 			<div id="area-undersea" class="hidden">
-				<div class="slider xyslider">
+				<div class="slider smoothscroll xyslider">
 					<div id="undersea-container">
 						<img id="chain" src="images/2025/undersea/chain_and_anchor.png">
 
@@ -1065,7 +1070,7 @@
 			<div id="area-hell" class="hidden">
 			</div>
 			<div id="area-shops" class="hidden">
-				<div class="slider">
+				<div class="slider smoothscroll">
 					<div class="flexbox">
 						<div class="imgbox">
 							<img id="shops1" src="images/2026/shops/1.png" alt="">
@@ -1099,7 +1104,7 @@
 				<img id="hat15" src="images/2026/hats/wobbly brim hat.png" alt="" class="hat">			
 			</div>
 			<div id="area-candyland" class="hidden">
-				<div class="slider xyslider"><!-- Using xyslider here is the easiest way to get it to behave right, even though there's no y movement -->
+				<div class="slider smoothscroll xyslider"><!-- Using xyslider here is the easiest way to get it to behave right, even though there's no y movement -->
 					<img src="images/2026/candyland/candyland_all.png" alt="">
 					<img src="images/2026/candyland/humbug.png" alt="" class="humbug animate spin">
 				</div>

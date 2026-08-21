@@ -1212,18 +1212,22 @@ function easterEgg() {
 
 function rotateLoopImagesRight(area) {
 	// Move the rightmost image to the left (thus doing a right-shift with wrap), and change centerX accordingly
+	let slider = document.querySelector("#area-" + area + " .slider");
 	let container = document.querySelector("#area-" + area + " .slider .flexbox");
 	let imageboxes = container.querySelectorAll(".imgbox");
 	container.insertBefore(imageboxes[imageboxes.length - 1], imageboxes[0]);
 	centerX += STANDARD_IMAGE_WIDTH;
+	slider.style.marginLeft = -centerX + HALF_SCREEN_WIDTH + "px"
 }
 
 function rotateLoopImagesLeft(area) {
 	// Move the leftmost image to the right (thus doing a left-shift with wrap) and change centerX accordingly
+	let slider = document.querySelector("#area-" + area + " .slider");
 	let container = document.querySelector("#area-" + area + " .slider .flexbox");
 	let imageboxes = container.querySelectorAll(".imgbox");
 	container.insertBefore(imageboxes[0], null); // null means insert at the end
 	centerX -= STANDARD_IMAGE_WIDTH;
+	slider.style.marginLeft = -centerX + HALF_SCREEN_WIDTH + "px"
 }
 
 function populateUnderseaObjects() {
@@ -1297,6 +1301,7 @@ function move() {
 	if (!slider) {
 		return;
 	}
+	let smoothScrollRemoved = false;
 	if (XLOOP[curArea]) {
 		// If we are in a forever scrolling area, ensure at least two images are present to the left and right of the currently-centred one.
 		// (It may not yet be actually centred on the screen, but it's the one that *will* be when we set the margin, because centerX points to it)
@@ -1304,6 +1309,11 @@ function move() {
 		let container = document.querySelector("#area-" + curArea + " .slider .flexbox");
 		let images = container.querySelectorAll("img");
 		let centerImagePos = getCenterImagePos();
+		if (centerImagePos < 2 || centerImagePos > images.length - 3) {
+			// Remove transition on margin before making sudden changes, to avoid unwanted effects
+			slider.classList.remove("smoothscroll");
+			smoothScrollRemoved = true;
+		}
 		while (centerImagePos < 2) {
 			console.log("Rotate right to ensure 2 images on left");
 			rotateLoopImagesRight(curArea);
@@ -1317,6 +1327,12 @@ function move() {
 			centerImagePos = getCenterImagePos();
 			images = container.querySelectorAll("img");
 			console.log("Centre Image is now position " + centerImagePos + " and is image number " + getLoopImageNum(curArea, images[centerImagePos]));
+		}
+		// Add transition back
+		if (smoothScrollRemoved) {
+			setTimeout(function () {
+				slider.classList.add("smoothscroll");
+			}, 100);
 		}
 	}
 	// Don't set the margins until after the images have been rearranged, to avoid jumping around
