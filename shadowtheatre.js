@@ -90,7 +90,7 @@ const WIDTH = {
 	"shops": 3 * STANDARD_IMAGE_WIDTH,
 	"space": 7680,
 	"undersea": 5760, // It's really only 1920 wide but pretends to be wider by moving objects around. 
-	// To avoid blipping in and out of existence, we need at least the width of the widest object to be offscreen. Seems to work best if it's a whole number of screens
+	"white": SCREEN_WIDTH,
 };
 
 // Heights of areas with XY movement
@@ -219,6 +219,7 @@ const TRANSITIONS = {
 	"candyland": [
 		[HALF_SCREEN_WIDTH, 1, "shops", CANDYLAND_CENTERX], // Up to exit because it's going through a door, even though it was also up to enter.
 	],
+	"white": [],
 };
 // scrollPos must be within +/- this amount of the specific point to allow transitioning
 const TRANSITION_RANGE = 400;
@@ -500,6 +501,11 @@ function keydown(e) {
 			// Debugging for undersea
 			e.preventDefault();
 			changeArea("undersea", UNDERSEA_ENTRY_POS);
+			break;
+		case 'w':
+			// Plain white screen
+			e.preventDefault();
+			changeArea("white", 960);
 			break;
 		case 'x':
 			e.preventDefault();
@@ -1003,7 +1009,7 @@ function changeArea(destArea, destX) {
 			rotateLoopImagesRight(destArea); // Obviously in some circumstances it would be quicker to go left by 1-i, but fuggit
 		}
 	}
-	if (destArea == "hell" || destArea == "disco") {
+	if (destArea == "hell" || destArea == "disco" || destArea == "white") {
 		// Full screen
 		hideBars();		
 		// Can't go sideways
