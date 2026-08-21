@@ -1044,6 +1044,8 @@ function changeArea(destArea, destX) {
 		swapTime += zoomTime;
 		endTime += zoomTime;
 		// No fadeout because it's a seamless transition
+	} else if (curArea == "shops" && destArea == "main") {
+		// No fadeout because it's a seamless transition
 	} else if (destArea == "milliner") {
 		const zoomTime = 3000;
 		zoomIn(screen, MILLINER_CENTERX, 510);
@@ -1103,15 +1105,24 @@ function changeArea(destArea, destX) {
 		move();
 		calculatePermittedVertical();
 		everything.classList.replace("fadeOut", "fadeIn");
-		// Remove the zoom if used
+		// Remove the zoom if used - it must be removed here because it applies to the whole screen
 		if (screen.classList.contains("zoomInShops")) {
 			screen.classList.remove("zoomInShops"); 
 			screen.style.transformOrigin = "";
-			// Remove the deblur as well
-			document.querySelector("#area-main .distant-shops").classList.remove("deBlur");
+			// Don't remove the deblur as well - that stays in place until we exit back to the main level
+			// document.querySelector("#area-main .distant-shops").classList.remove("deBlur");
 		} else if (screen.classList.contains("zoomIn")) {
 			screen.classList.remove("zoomIn"); // Would be good to have a transition here, it causes a jump
 			screen.style.transformOrigin = "";
+		}
+		if (destArea == "main" && document.querySelector("#area-main .distant-shops").classList.contains("deBlur")) {
+			// Start zoomed in, and zoom back out
+			screen.classList.add("zoomOutShops");
+			setTimeout(function () {
+				screen.classList.remove("zoomOutShops");
+			}, 2000);
+			// Start re-blurring the shops
+			document.querySelector("#area-main .distant-shops").classList.remove("deBlur");
 		}
 		if (destArea == "disco") {
 			// Start the disco

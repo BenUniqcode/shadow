@@ -257,7 +257,19 @@
 			}
 		}
 		.zoomInShops {
-			animation: zoomInShops 3s cubic-bezier(0.32, 0, 0.67, 0) forwards; /* Cubic ease-in */
+			animation: zoomInShops 3s cubic-bezier(0.32, 0, 0.67, 0) forwards;
+		}
+		@keyframes zoomOutShops {
+			0% {
+				transform: scale(3);
+			}
+			100% {
+				transform: scale(1);
+			}
+		}
+		.zoomOutShops {
+			animation: zoomOutShops 1.5s cubic-bezier(0.32, 0, 0.67, 0) backwards;
+			transform-origin: 960px 720px;
 		}
 		@keyframes deBlur {
 			0% {
@@ -267,9 +279,9 @@
 				filter: grayscale(0%) blur(0px);
 			}
 		}
-		#area-main .distant-shops {
+		#area-main .distant-shops:not(.deBlur) {
 			filter: grayscale(100%) blur(3px);
-			transition: filter 2.5s cubic-bezier(0.32, 0, 0.67, 0); /* Cubic ease-in */			
+			transition: filter 1.5s cubic-bezier(0.32, 0, 0.67, 0); /* Cubic ease-in */			
 		}
 		#area-main .distant-shops.deBlur {
 			filter: grayscale(0%) blur(0px);
